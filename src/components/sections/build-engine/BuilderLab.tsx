@@ -15,7 +15,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useLabMachine, selectCurrentGate } from '../../../hooks/useLabMachine';
 import { scenarioMeta, lensTransforms, systemLenses } from '../../../data/build-engine/scenarios';
 import { composedLensTransforms } from '../../../data/build-engine/composer';
-import { SystemCanvas } from './SystemCanvas';
+import { SystemBoard } from './SystemBoard';
 import {
   IdeaInput,
   UnderstandingBanner,
@@ -191,20 +191,23 @@ export const BuilderLabSection: React.FC = () => {
 
               {/* Stage */}
               <div className="relative">
-                <SystemCanvas
-                  nodes={state.nodes}
-                  edges={state.edges}
-                  activeEdgeIds={state.activeEdgeIds}
-                  lensEmphasis={new Set(lensDef?.emphasize ?? [])}
-                  lensAnnotations={lensDef?.annotations ?? {}}
-                  decisionHighlights={state.decisionHighlights}
-                  selectedNodeId={state.selectedNodeId}
-                  starvedIds={state.starvedIds}
-                  simState={state.simState}
-                  variant={state.layoutVariant}
-                  onVariantChange={actions.setLayoutVariant}
-                  onSelectNode={actions.selectNode}
-                />
+              {state.system && (
+                <div style={{ padding: 12 }} className="sm:p-4">
+                  <SystemBoard
+                    system={state.system}
+                    nodes={state.nodes}
+                    edges={state.edges}
+                    activeEdgeIds={state.activeEdgeIds}
+                    lensEmphasis={new Set(lensDef?.emphasize ?? [])}
+                    decisionHighlights={state.decisionHighlights}
+                    selectedNodeId={state.selectedNodeId}
+                    starvedIds={state.starvedIds}
+                    simState={state.simState}
+                    onSelectNode={actions.selectNode}
+                    onRemoveNode={actions.removeNode}
+                  />
+                </div>
+              )}
 
                 {/* Lens dock — top-left */}
                 <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-110px)]" title={lensMeta?.question}>
