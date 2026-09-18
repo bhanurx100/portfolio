@@ -66,6 +66,18 @@ function PortfolioMain() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // ⌘K / Ctrl+K opens (or closes) the command palette — matches the header + hero affordances.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleOpenCaseStudy = (slug: string) => {
     setSelectedCaseStudySlug(slug);
   };
