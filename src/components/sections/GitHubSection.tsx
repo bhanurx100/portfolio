@@ -1,5 +1,4 @@
 import React from 'react';
-import { Github, ExternalLink, ArrowRight } from 'lucide-react';
 import { personalInfo } from '../../data/portfolio-data';
 import { useTheme } from '../../context/ThemeContext';
 import { GitHubContributionGraph } from './GitHubContributionGraph';
@@ -29,20 +28,18 @@ export const GitHubSection: React.FC = () => {
 
             <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)' }}>
               Real contribution activity and repositories for{' '}
-              <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>@{personalInfo.githubUsername}</span>
+              <a
+                href={personalInfo.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+                style={{ fontWeight: 700, color: 'var(--text-1)' }}
+              >
+                @{personalInfo.githubUsername}
+              </a>
               . No fabricated metrics — everything here is live.
             </p>
           </div>
-
-          <a
-            href={personalInfo.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="self-start md:self-auto px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs sm:text-sm font-semibold inline-flex items-center gap-2 shadow-md shadow-blue-600/20 transition active:scale-95 shrink-0"
-          >
-            <Github className="w-4 h-4" />
-            <span>View GitHub →</span>
-          </a>
         </div>
 
         {/* Real GitHub Contribution Graph & Activity */}
