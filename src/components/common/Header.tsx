@@ -26,7 +26,6 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
 
   const navLinks = [
     { name: 'Work', href: '#work', id: 'work' },
-    { name: 'How I Build', href: '#how-i-build', id: 'how-i-build' },
     { name: 'Builder Lab', href: '#builder-lab', id: 'builder-lab' },
     { name: 'Experience', href: '#experience', id: 'experience' },
     { name: 'GitHub', href: '#github', id: 'github' },

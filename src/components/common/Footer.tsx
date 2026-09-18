@@ -14,14 +14,14 @@ export const Footer: React.FC = () => {
   return (
     <footer
       aria-label="Portfolio Footer"
-      className={`py-8 sm:py-12 border-t transition-colors duration-500 ${
+      className={`py-6 sm:py-12 border-t transition-colors duration-500 ${
         isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-600 border-slate-300'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
         
         {/* Main Footer Row */}
-        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b ${
+        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b ${
           isDark ? 'border-slate-800' : 'border-slate-300'
         }`}>
           
@@ -48,12 +48,6 @@ export const Footer: React.FC = () => {
               className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
             >
               Work
-            </a>
-            <a
-              href="#how-i-build"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
-            >
-              How I Build
             </a>
             <a
               href="#experience"
@@ -127,7 +121,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Micro Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs font-mono text-slate-500">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono text-slate-500">
           <p>© {new Date().getFullYear()} Bhanuprasad L. All rights reserved.</p>
 
           <button

@@ -31,7 +31,6 @@ import {
   ProductionJourney,
   StatTile,
 } from './LabPanels';
-import { LoopStrip } from './stages';
 
 export const BuilderLabSection: React.FC = () => {
   const { theme } = useTheme();
@@ -331,9 +330,6 @@ export const BuilderLabSection: React.FC = () => {
             <EvidencePanel system={state.system} />
           </motion.div>
         )}
-
-        {/* The loop — method and playground in one section */}
-        <LoopStrip />
 
         {/* Emergent contact CTA */}
         {(state.phase === 'result' || state.manipulationLog.length > 0) && (

@@ -110,16 +110,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       },
     },
     {
-      id: 'how-i-build',
-      title: 'Go to How I Build — the process, stage by stage',
-      category: 'Navigation',
-      icon: Code,
-      action: () => {
-        window.location.hash = '#how-i-build';
-        onClose();
-      },
-    },
-    {
       id: 'experience',
       title: 'Jump to Career Timeline & Production Roles',
       category: 'Career',

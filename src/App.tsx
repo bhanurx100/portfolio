@@ -47,7 +47,7 @@ function PortfolioMain() {
 
   // Scroll spy to detect active section in viewport
   useEffect(() => {
-    const sections = ['hero', 'work', 'how-i-build', 'builder-lab', 'experience', 'github', 'contact'];
+    const sections = ['hero', 'work', 'builder-lab', 'experience', 'github', 'contact'];
     
     const handleScroll = () => {
       const scrollPos = window.scrollY + 200;
