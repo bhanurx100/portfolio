@@ -24,10 +24,18 @@ const CommandPalette = lazy(() =>
 const CaseStudyModal = lazy(() =>
   import('./components/common/CaseStudyModal').then((m) => ({ default: m.CaseStudyModal }))
 );
+/* How I Build sits below the fold — defer it too. */
+const HowIBuildSection = lazy(() =>
+  import('./components/sections/HowIBuild').then((m) => ({ default: m.HowIBuildSection }))
+);
 import { ProjectsSection } from './components/sections/ProjectsSection';
-import { HowIBuildSection } from './components/sections/HowIBuild';
-import { ExperienceSection } from './components/sections/ExperienceSection';
-import { ContactSection } from './components/sections/ContactSection';
+/* Experience + Contact sit below the fold — defer them too. */
+const ExperienceSection = lazy(() =>
+  import('./components/sections/ExperienceSection').then((m) => ({ default: m.ExperienceSection }))
+);
+const ContactSection = lazy(() =>
+  import('./components/sections/ContactSection').then((m) => ({ default: m.ContactSection }))
+);
 import { Footer } from './components/common/Footer';
 import { GlobalBackground } from './components/common/GlobalBackground';
 import { projectsData } from './data/portfolio-data';
@@ -121,15 +129,21 @@ function PortfolioMain() {
           onOpenCommandPalette={handleOpenCommandPalette}
         />
         <ProjectsSection onOpenCaseStudy={handleOpenCaseStudy} />
-        <HowIBuildSection />
+        <Suspense fallback={<div id="how-i-build" style={{ minHeight: 480 }} aria-hidden />}>
+          <HowIBuildSection />
+        </Suspense>
         <Suspense fallback={<div id="builder-lab" style={{ minHeight: 420 }} aria-hidden /> }>
           <BuilderLabSection />
         </Suspense>
-        <ExperienceSection />
+        <Suspense fallback={<div id="experience" style={{ minHeight: 320 }} aria-hidden />}>
+          <ExperienceSection />
+        </Suspense>
         <Suspense fallback={<div id="github" style={{ minHeight: 320 }} aria-hidden />}>
           <GitHubSection />
         </Suspense>
-        <ContactSection />
+        <Suspense fallback={<div id="contact" style={{ minHeight: 320 }} aria-hidden />}>
+          <ContactSection />
+        </Suspense>
       </motion.main>
 
       <Suspense fallback={null}>
