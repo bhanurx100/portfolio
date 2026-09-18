@@ -33,31 +33,6 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
         {/* Left — editorial identity */}
         <div className="col-span-7 space-y-7">
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex items-center gap-4"
-          >
-            <span
-              className="inline-flex items-center gap-2 rounded-full"
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                padding: '6px 14px',
-                color: 'var(--ok)',
-                background: 'color-mix(in srgb, var(--ok) 10%, transparent)',
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              {personalInfo.availability}
-            </span>
-            <span className="text-[13px]" style={{ color: 'var(--text-3)' }}>{personalInfo.location} · Remote</span>
-          </motion.div>
-
-          <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.06 }}
@@ -129,7 +104,7 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="relative w-full" style={{ height: 620 }}>
+          <div className="relative w-full" style={{ height: 560 }}>
             {(['stayease', 'splitfin'] as const).map((p) => {
               const isFront = p === front;
               const Screen = p === 'stayease' ? StayEaseScreen : SplitFinScreen;
@@ -148,7 +123,7 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
                 >
                   {isFront ? (
                     <div>
-                      <DeviceFrame width={276} ariaLabel={`${p === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
+                      <DeviceFrame width={248} ariaLabel={`${p === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
                         <Screen />
                       </DeviceFrame>
                     </div>
@@ -158,7 +133,7 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
                       aria-label={`Bring ${p === 'stayease' ? 'StayEase' : 'SplitFin'} to the front`}
                       className="group relative block"
                     >
-                      <DeviceFrame width={276} ariaLabel={`${p === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
+                      <DeviceFrame width={248} ariaLabel={`${p === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
                         <Screen />
                       </DeviceFrame>
                       <span

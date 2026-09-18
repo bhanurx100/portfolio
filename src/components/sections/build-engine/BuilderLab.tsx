@@ -59,7 +59,7 @@ export const BuilderLabSection: React.FC = () => {
         <div className="max-w-2xl space-y-5">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-2 rounded-lg border px-2.5 py-1 text-[11px] font-mono" style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)', color: 'var(--accent)' }}>
-              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: 'var(--accent)' }} />
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }} />
               Builder Lab
             </span>
             <span className="text-[11px] font-mono" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
@@ -145,6 +145,7 @@ export const BuilderLabSection: React.FC = () => {
                   className={`relative rounded-2xl border overflow-hidden ${
                     isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'
                   }`}
+                  style={isDark ? { boxShadow: '0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 56px color-mix(in srgb, var(--accent) 12%, transparent)' } : undefined}
                 >
                   {/* Blueprint header — the canvas reads as an instrument, not a widget */}
                   <div

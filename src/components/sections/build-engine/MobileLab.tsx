@@ -105,7 +105,7 @@ export const MobileLab: React.FC<MobileLabProps> = ({ state, gate, lensDef, sele
             className="space-y-3"
           >
             <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
-            <div className={`relative rounded-2xl border overflow-hidden ${isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className={`relative rounded-2xl border overflow-hidden ${isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'}`} style={isDark ? { boxShadow: '0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 40px color-mix(in srgb, var(--accent) 10%, transparent)' } : undefined}>
               <SystemCanvas
                 nodes={state.nodes}
                 edges={state.edges}

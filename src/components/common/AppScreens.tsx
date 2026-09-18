@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../../context/ThemeContext';
+import { devicePalette } from './deviceTheme';
 
 /* ------------------------------------------------------------------ */
 /* Primitives                                                          */
@@ -21,12 +22,14 @@ import { useTheme } from '../../context/ThemeContext';
 function useSurface() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const pal = devicePalette(isDark);
   return {
     isDark,
-    line: `1px solid var(--line${isDark ? '-dark' : ''})`,
+    pal,
+    line: `1px solid ${pal.cardBorder}`,
     card: {
-      background: isDark ? 'var(--surface-1)' : '#fff',
-      border: `1px solid var(--line${isDark ? '-dark' : ''})`,
+      background: pal.card,
+      border: `1px solid ${pal.cardBorder}`,
       borderRadius: 18,
     } as React.CSSProperties,
     sheet: {
@@ -38,14 +41,16 @@ function useSurface() {
       padding: 16,
       borderTopLeftRadius: 22,
       borderTopRightRadius: 22,
-      background: isDark ? 'var(--surface-1)' : '#fff',
-      border: `1px solid var(--line${isDark ? '-dark' : ''})`,
+      background: pal.card,
+      border: `1px solid ${pal.cardBorder}`,
       boxShadow: isDark ? 'var(--shadow-3-dark)' : 'var(--shadow-3)',
     },
   };
 }
 
-const Row: React.FC<{ label: string; value: string; strong?: boolean }> = ({ label, value, strong }) => (
+const Row: React.FC<{ label: string; value: string; strong?: boolean }> = ({ label, value, strong }) => {
+  const { pal } = useSurface();
+  return (
   <div
     style={{
       display: 'flex',
@@ -56,26 +61,27 @@ const Row: React.FC<{ label: string; value: string; strong?: boolean }> = ({ lab
       padding: '4px 0',
     }}
   >
-    <span style={{ color: strong ? 'var(--text-1)' : 'var(--text-3)', fontWeight: strong ? 800 : 400 }}>{label}</span>
+    <span style={{ color: strong ? pal.ink : pal.sub, fontWeight: strong ? 800 : 500 }}>{label}</span>
     <span style={{ fontWeight: strong ? 800 : 600 }}>{value}</span>
   </div>
-);
+  );
+};
 
 const TabBar: React.FC<{
   tabs: { id: string; label: string; icon: React.ComponentType<{ size?: number | string; color?: string }> }[];
   active: string;
   onChange: (id: string) => void;
 }> = ({ tabs, active, onChange }) => {
-  const { isDark, line } = useSurface();
+  const { pal, line } = useSurface();
   return (
     <div
       className="shrink-0 flex items-stretch"
-      style={{ height: 62, borderTop: line, background: isDark ? 'var(--surface-2)' : '#fff' }}
+      style={{ height: 62, borderTop: line, background: pal.tabBg }}
     >
       {tabs.map((t) => {
         const Icon = t.icon;
         const isActive = active === t.id;
-        const color = isActive ? 'var(--accent)' : 'var(--text-3)';
+        const color = isActive ? pal.brand : pal.faint;
         return (
           <button
             key={t.id}
@@ -129,7 +135,7 @@ function matchesQuery(s: (typeof STAYS)[number], q: string): boolean {
 /* ------------------------------------------------------------------ */
 
 export const StayEaseScreen: React.FC = () => {
-  const { isDark, line, card, sheet } = useSurface();
+  const { pal, line, card, sheet } = useSurface();
   const [tab, setTab] = useState('explore');
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<(typeof STAY_TYPES)[number]>('All');
@@ -148,9 +154,9 @@ export const StayEaseScreen: React.FC = () => {
           <div
             style={{
               width: 40, height: 40, borderRadius: 999,
-              background: isDark ? 'var(--surface-3)' : 'var(--surface-2)',
+              background: pal.chip,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, color: 'var(--text-2)',
+              fontSize: 12, fontWeight: 700, color: pal.sub,
             }}
           >
             BL
@@ -166,18 +172,18 @@ export const StayEaseScreen: React.FC = () => {
               display: 'flex', alignItems: 'center', gap: 10,
               height: 46, padding: '0 14px',
               borderRadius: 14, border: line,
-              background: isDark ? 'var(--surface-1)' : '#fff',
+              background: pal.card,
               marginBottom: 10,
             }}
           >
-            <Search size={18} color="var(--text-3)" />
+            <Search size={18} color={pal.sub} />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search villas, apartments, PGs…"
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 15, color: 'var(--text-1)' }}
             />
-            {query && <X size={16} color="var(--text-3)" onClick={() => setQuery('')} />}
+            {query && <X size={16} color={pal.sub} onClick={() => setQuery('')} />}
           </div>
 
           {/* Accommodation-type filter — the broader product model */}
@@ -192,9 +198,9 @@ export const StayEaseScreen: React.FC = () => {
                     flexShrink: 0,
                     height: 32, padding: '0 13px', borderRadius: 999,
                     fontSize: 12.5, fontWeight: active ? 700 : 500,
-                    border: `1px solid ${active ? 'var(--accent)' : line.includes('var') ? 'var(--line)' : line}`,
+                    border: `1px solid ${active ? pal.brand : pal.cardBorder}`,
                     background: active ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
-                    color: active ? 'var(--accent)' : 'var(--text-3)',
+                    color: active ? 'var(--accent)' : pal.sub,
                     cursor: 'pointer',
                   }}
                 >
@@ -208,7 +214,7 @@ export const StayEaseScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {STAYS.filter((s) => matchesQuery(s, query) && (typeFilter === 'All' || s.tag === typeFilter)).map((s) => (
               <div key={s.id} style={card}>
-                <div style={{ height: 150, background: '#0f1626', position: 'relative' }}>
+                <div style={{ height: 120, background: '#0f1626', position: 'relative' }}>
                   <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" referrerPolicy="no-referrer" />
                   <span
                     style={{
@@ -228,13 +234,13 @@ export const StayEaseScreen: React.FC = () => {
                       <Star size={13} color="var(--warn)" fill="var(--warn)" /> {s.rating}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: 'var(--text-3)', marginTop: 3 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: pal.sub, marginTop: 3 }}>
                     <MapPin size={12} /> {s.location}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                     <div>
                       <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent)' }}>₹{s.price.toLocaleString()}</span>
-                      <span style={{ fontSize: 12.5, color: 'var(--text-3)' }}> / {s.per}</span>
+                      <span style={{ fontSize: 12.5, color: pal.sub }}> / {s.per}</span>
                     </div>
                     <button
                       onClick={() => setSheetStay(s)}
@@ -264,16 +270,16 @@ export const StayEaseScreen: React.FC = () => {
             transition={{ type: 'spring', damping: 26, stiffness: 300 }}
             style={sheet}
           >
-            <div style={{ width: 36, height: 4, borderRadius: 999, background: 'var(--line)', margin: '0 auto 12px' }} />
+            <div style={{ width: 36, height: 4, borderRadius: 999, background: pal.track, margin: '0 auto 12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-1)' }}>{sheetStay.title}</div>
-                <div style={{ fontSize: 13, color: 'var(--text-3)' }}>{sheetStay.location}</div>
+                <div style={{ fontSize: 13, color: pal.sub }}>{sheetStay.location}</div>
               </div>
-              <X size={20} color="var(--text-3)" onClick={() => setSheetStay(null)} />
+              <X size={20} color={pal.sub} onClick={() => setSheetStay(null)} />
             </div>
 
-            <div style={{ margin: '12px 0', padding: 12, borderRadius: 14, background: 'var(--surface-2)' }}>
+            <div style={{ margin: '12px 0', padding: 12, borderRadius: 14, background: pal.chip }}>
               {sheetStay.per === 'month' ? (
                 <Row label="Monthly rent" value={`₹${sheetStay.price.toLocaleString()}`} />
               ) : (
@@ -304,7 +310,7 @@ export const StayEaseScreen: React.FC = () => {
             >
               Reserve · Stripe checkout
             </button>
-            <div style={{ fontSize: 11.5, color: 'var(--text-3)', textAlign: 'center', marginTop: 8 }}>
+            <div style={{ fontSize: 11.5, color: pal.sub, textAlign: 'center', marginTop: 8 }}>
               Demo preview — payments not processed here
             </div>
           </motion.div>
@@ -328,14 +334,14 @@ export const StayEaseScreen: React.FC = () => {
 /* ------------------------------------------------------------------ */
 
 const TripsScreen: React.FC<{ trip: (typeof STAYS)[number] | null }> = ({ trip }) => {
-  const { card } = useSurface();
+  const { card, pal } = useSurface();
   return (
     <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 pb-3" style={{ paddingTop: 6 }}>
       {trip ? (
         <div style={{ ...card, padding: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700 }}>
-            <span style={{ color: 'var(--ok)' }}>CONFIRMED</span>
-            <span style={{ color: 'var(--text-3)' }}>Oct 14–18</span>
+            <span style={{ color: pal.green }}>CONFIRMED</span>
+            <span style={{ color: pal.sub }}>Oct 14–18</span>
           </div>
           <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-1)', margin: '4px 0' }}>{trip.title}</div>
           <Row label="Guests" value="2 adults" />
@@ -352,9 +358,9 @@ const TripsScreen: React.FC<{ trip: (typeof STAYS)[number] | null }> = ({ trip }
             textAlign: 'center',
           }}
         >
-          <CalendarDays size={22} color="var(--text-3)" />
+          <CalendarDays size={22} color={pal.sub} />
           <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--text-1)' }}>No trips yet</div>
-          <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>
+          <div style={{ fontSize: 12.5, color: pal.sub }}>
             Reserve a stay and your confirmation will appear here.
           </div>
         </div>

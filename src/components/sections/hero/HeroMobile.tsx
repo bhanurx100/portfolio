@@ -35,26 +35,6 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
         transition={{ duration: 0.4 }}
         className="space-y-3 text-left"
       >
-        <div className="flex items-center gap-3">
-          <span
-            className="inline-flex items-center gap-2 rounded-full"
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              padding: '5px 12px',
-              color: 'var(--ok)',
-              background: 'color-mix(in srgb, var(--ok) 10%, transparent)',
-            }}
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            Available
-          </span>
-          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Bengaluru · Remote</span>
-        </div>
-
         <div className="tech-label" style={{ fontSize: 12 }}>{personalInfo.name}</div>
         <h1
           className="font-display"
@@ -80,7 +60,7 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
         transition={{ duration: 0.45, delay: 0.08 }}
         className="mt-8 flex flex-col items-center gap-5"
       >
-        <DeviceFrame width={252} ariaLabel={`${project === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
+        <DeviceFrame width={228} ariaLabel={`${project === 'stayease' ? 'StayEase' : 'SplitFin'} app preview`}>
           {project === 'stayease' ? <StayEaseScreen /> : <SplitFinScreen />}
         </DeviceFrame>
 

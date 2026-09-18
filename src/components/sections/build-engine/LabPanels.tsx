@@ -100,7 +100,7 @@ export const IdeaInput: React.FC<{
         className={`rounded-2xl border p-4 ${
           isDark ? 'bg-[var(--surface-1)] border-[var(--line-strong-dark)]' : 'bg-white border-[var(--line-strong)]'
         }`}
-        style={{ boxShadow: isDark ? 'var(--shadow-2-dark)' : 'var(--shadow-2)' }}
+        style={{ boxShadow: isDark ? 'var(--shadow-2-dark), 0 0 44px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-2)' }}
       >
         <div className={`mb-2.5 flex items-center justify-between text-[10.5px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
           <span style={{ color: 'var(--accent)' }}>What should this system do?</span>

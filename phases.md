@@ -93,3 +93,10 @@ Target: demo.png-quality presentation. Keep the engine untouched; rework only th
 - **P6** — `a9c67e3` mobile pass at 393pt: audit found no horizontal overflow (GlobalBackground contained, GitHub graph `overflow-x-auto`, all grids collapse); header drawer email truncated.
 - **P7** — `8a30842` code-split `GitHubSection`, `CommandPalette`, `CaseStudyModal` → main chunk 526 kB → **485.73 kB** (under the 500 kB warning); global `:focus-visible` + `prefers-reduced-motion` confirmed.
 - **P8** — lint + build + dev smoke green (STATUS=200, "Builder Lab" present); this report. Remaining user action: walk the page; `demo.png` still not viewable by the model and live repos not independently auditable.
+
+## Follow-ups (post-P8, user-requested)
+- Removed the "tech stack behind the work" map from How I Build; redesigned How I Build as an **agent run** (run strip + plan with done/running/queued states + output card with goal/actions/artifact), dark-neon accents from measured demo.png pixels (near-black canvas, blue/cyan glow).
+- Rebuilt the SplitFin demo: orbit of who owes you, tap-to-inspect **donut cashflow**, transaction feed with category filters, split composer (equal/custom + live math + request sheet). Home fits without scrolling.
+- New shared `deviceTheme.ts` palette fixes device legibility (dark text was washing out, light text was dull); bumped in-device type sizes.
+- Hero: removed the "Available for Full-Stack & Frontend Engineering Roles" pill row (desktop + mobile) so the headline sits higher; devices shortened (248/228pt wide).
+- Builder Lab: dark-mode neon glow on the blueprint frame (desktop + mobile), terminal input, and kicker dot — light mode untouched.
