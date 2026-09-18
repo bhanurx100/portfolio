@@ -13,14 +13,22 @@ import { HeroSection } from './components/sections/HeroSection';
 const BuilderLabSection = lazy(() =>
   import('./components/sections/build-engine/BuilderLab').then((m) => ({ default: m.BuilderLabSection }))
 );
+/* GitHub (contribution graph) sits far below the fold — defer it too. */
+const GitHubSection = lazy(() =>
+  import('./components/sections/GitHubSection').then((m) => ({ default: m.GitHubSection }))
+);
+/* On-demand overlays — only fetched when first needed. */
+const CommandPalette = lazy(() =>
+  import('./components/common/CommandPalette').then((m) => ({ default: m.CommandPalette }))
+);
+const CaseStudyModal = lazy(() =>
+  import('./components/common/CaseStudyModal').then((m) => ({ default: m.CaseStudyModal }))
+);
 import { ProjectsSection } from './components/sections/ProjectsSection';
 import { HowIBuildSection } from './components/sections/HowIBuild';
 import { ExperienceSection } from './components/sections/ExperienceSection';
-import { GitHubSection } from './components/sections/GitHubSection';
 import { ContactSection } from './components/sections/ContactSection';
 import { Footer } from './components/common/Footer';
-import { CaseStudyModal } from './components/common/CaseStudyModal';
-import { CommandPalette } from './components/common/CommandPalette';
 import { GlobalBackground } from './components/common/GlobalBackground';
 import { projectsData } from './data/portfolio-data';
 
@@ -106,27 +114,32 @@ function PortfolioMain() {
           <BuilderLabSection />
         </Suspense>
         <ExperienceSection />
-        <GitHubSection />
+        <Suspense fallback={<div id="github" style={{ minHeight: 320 }} aria-hidden />}>
+          <GitHubSection />
+        </Suspense>
         <ContactSection />
       </motion.main>
 
-      {/* Command Palette (Cmd + K) Modal */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={handleCloseCommandPalette}
-        onOpenCaseStudy={handleOpenCaseStudy}
-      />
+      <Suspense fallback={null}>
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={handleCloseCommandPalette}
+          onOpenCaseStudy={handleOpenCaseStudy}
+        />
+      </Suspense>
 
       {/* Refined Footer */}
       <Footer />
 
       {/* Case Study Modal */}
-      <CaseStudyModal
-        project={currentProject}
-        isOpen={Boolean(selectedCaseStudySlug)}
-        onClose={handleCloseCaseStudy}
-        onSwitchProject={handleOpenCaseStudy}
-      />
+      <Suspense fallback={null}>
+        <CaseStudyModal
+          project={currentProject}
+          isOpen={Boolean(selectedCaseStudySlug)}
+          onClose={handleCloseCaseStudy}
+          onSwitchProject={handleOpenCaseStudy}
+        />
+      </Suspense>
     </div>
   );
 }
