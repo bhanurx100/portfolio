@@ -89,34 +89,35 @@ const panelTitle = (isDark: boolean) =>
 export const IdeaInput: React.FC<{
   onSubmit: (idea: string) => void;
   suggestions: { chip: string; example: string }[];
-}> = ({ onSubmit, suggestions }) => {
+  deck?: boolean;
+}> = ({ onSubmit, suggestions, deck }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [value, setValue] = React.useState('');
 
   return (
-    <div className="max-w-xl mx-auto w-full space-y-4">
+    <div className={`${deck ? 'max-w-3xl' : 'max-w-xl'} mx-auto w-full ${deck ? 'space-y-5' : 'space-y-4'}`}>
       {/* Command line of the portfolio */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-2xl border p-4 ${
+        className={`rounded-2xl border ${deck ? 'p-5 sm:p-6' : 'p-4'} ${
           isDark ? 'bg-[var(--surface-1)] border-[var(--line-strong-dark)]' : 'bg-white border-[var(--line-strong)]'
         }`}
         style={{ boxShadow: isDark ? 'var(--shadow-2-dark), 0 0 44px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-2)' }}
       >
-        <div className={`mb-2.5 flex items-center justify-between text-[10.5px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <div className={`mb-2.5 flex items-center justify-between font-mono uppercase tracking-wider ${deck ? 'text-[11.5px]' : 'text-[10.5px]'} ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
           <span style={{ color: 'var(--accent)' }}>What should this system do?</span>
           <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>engine: deterministic · optional AI</span>
         </div>
         <div
-          className="flex items-center gap-3 rounded-xl border px-4 py-3.5"
+          className={`flex items-center gap-3 rounded-xl border ${deck ? 'px-5 py-4' : 'px-4 py-3.5'}`}
           style={{
             borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
             background: isDark ? 'rgba(2,6,16,0.5)' : 'rgba(248,250,252,0.6)',
           }}
         >
-          <span className="font-mono" style={{ color: 'var(--accent)', fontWeight: 700 }}>$</span>
+          <span className="font-mono" style={{ color: 'var(--accent)', fontWeight: 700, fontSize: deck ? 20 : 16 }}>$</span>
           <input
             type="text"
             value={value}
@@ -126,22 +127,24 @@ export const IdeaInput: React.FC<{
             }}
             placeholder="Describe a problem — what should we build?"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 16, color: isDark ? '#F1F5F9' : '#0F172A' }}
+            style={{ fontSize: deck ? 19 : 16, color: isDark ? '#F1F5F9' : '#0F172A' }}
             aria-label="Describe the system to build"
           />
           <button
             onClick={() => value.trim() && onSubmit(value.trim())}
             disabled={!value.trim()}
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition disabled:opacity-40"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-lg font-bold transition disabled:opacity-40"
             style={{
               background: 'var(--accent)',
               color: '#fff',
+              fontSize: deck ? 15 : 14,
+              padding: deck ? '12px 22px' : '8px 16px',
             }}
           >
-            Form system <Play size={14} />
+            Form system <Play size={deck ? 16 : 14} />
           </button>
         </div>
-        <p className={`mt-2.5 text-[11px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <p className={`mt-2.5 ${deck ? 'text-xs' : 'text-[11px]'} ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
           Runs in your browser — every system is composed from typed patterns, no account or API key required. Or try a starter:
         </p>
       </motion.div>
@@ -153,7 +156,7 @@ export const IdeaInput: React.FC<{
             onClick={() => onSubmit(s.example)}
             className={chip(isDark)}
             title={s.example}
-            style={{ fontSize: 12.5, padding: '6px 12px', minHeight: 36 }}
+            style={deck ? { fontSize: 13.5, padding: '8px 15px', minHeight: 40 } : { fontSize: 12.5, padding: '6px 12px', minHeight: 36 }}
           >
             {s.chip}
           </button>
@@ -820,6 +823,35 @@ export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => 
     </div>
   );
 };
+
+/* ------------------------------------------------------------------ */
+/* Stat tile — live session numbers for the bento rail                 */
+/* ------------------------------------------------------------------ */
+
+export const StatTile: React.FC<{ label: string; value: number; accent?: boolean }> = ({ label, value, accent }) => (
+  <div
+    className="rounded-2xl border p-3.5"
+    style={{
+      background: 'rgba(148,163,184,0.06)',
+      borderColor: accent ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : 'rgba(148,163,184,0.18)',
+      boxShadow: accent ? '0 0 28px color-mix(in srgb, var(--accent) 18%, transparent)' : 'none',
+    }}
+  >
+    <motion.div
+      key={value}
+      initial={{ opacity: 0.4, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="font-mono"
+      style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : '#F8FAFC', fontVariantNumeric: 'tabular-nums' }}
+    >
+      {String(value).padStart(2, '0')}
+    </motion.div>
+    <div className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.1em', color: '#7C8DB0', marginTop: 2 }}>
+      {label}
+    </div>
+  </div>
+);
 
 /* ------------------------------------------------------------------ */
 /* Evidence — connect claims to real work                              */
