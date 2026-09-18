@@ -52,6 +52,9 @@ export interface LabState {
   simState: SimulationState;
   simIndex: number;
   trace: SimulationTraceEntry[];
+  /** True when the visitor armed chaos — only then do failure gates fire.
+      Clean runs complete without tripping a failure; breaking is opt-in. */
+  chaos: boolean;
 
   /** Lenses. */
   activeLens: LensId;
@@ -94,6 +97,7 @@ export type LabAction =
   | { type: 'SET_LAYOUT_VARIANT'; variant: CanvasVariant }
   | { type: 'SET_LENS'; lens: import('../data/build-engine/types').LensId }
   | { type: 'SIM_START' }
+  | { type: 'SIM_START_BREAK' }
   | { type: 'SIM_STEP' }
   | { type: 'SIM_PAUSE' }
   | { type: 'SIM_RESUME' }
@@ -120,6 +124,13 @@ const labEvent = (phase: LabPhase, text: string, kind: LabEvent['kind'] = 'syste
   text,
   kind,
 });
+
+/** Clean runs skip failure gates silently; armed chaos lets them fire. */
+function skipFailure(steps: SimulationStep[], idx: number, chaos: boolean): number {
+  let i = idx;
+  while (!chaos && i < steps.length && steps[i].gate === 'failure') i++;
+  return i;
+}
 
 function deriveGraph(state: LabState): Pick<LabState, 'nodes' | 'edges'> {
   const { system, presentIds, removedIds } = state;
@@ -165,6 +176,7 @@ export function labReducer(state: LabState, action: LabAction): LabState {
         simState: 'idle',
         simIndex: -1,
         trace: [],
+        chaos: false,
         activeLens: 'product',
         decisionIndex: null,
         decisionChoices: {},
@@ -224,16 +236,32 @@ export function labReducer(state: LabState, action: LabAction): LabState {
         phase: 'simulating',
         simState: 'running',
         simIndex: 0,
+        chaos: false,
         trace: [{ index: 0, step: first }],
         events: [...(state.events ?? []), labEvent('simulating', first.label)],
       };
       return { ...nextState, ...applySimEdges(nextState, first) };
     }
 
+    case 'SIM_START_BREAK': {
+      if (!state.system) return state;
+      const first = state.system.simulation.steps[0];
+      const nextState: LabState = {
+        ...state,
+        phase: 'simulating',
+        simState: 'running',
+        simIndex: 0,
+        chaos: true,
+        trace: [{ index: 0, step: first }],
+        events: [...(state.events ?? []), labEvent('simulating', first.label), labEvent('simulating', 'Chaos armed — a failure is injected in this run', 'warn')],
+      };
+      return { ...nextState, ...applySimEdges(nextState, first) };
+    }
+
     case 'SIM_STEP': {
       if (state.simState !== 'running' || !state.system) return state;
-      const nextIndex = state.simIndex + 1;
       const steps = state.system.simulation.steps;
+      const nextIndex = skipFailure(steps, state.simIndex + 1, state.chaos);
       if (nextIndex >= steps.length) {
         return { ...state, simState: 'done', phase: 'result', events: [...(state.events ?? []), labEvent('result', 'Simulation complete — trace preserved above')] };
       }
@@ -256,13 +284,13 @@ export function labReducer(state: LabState, action: LabAction): LabState {
       return state.simState === 'paused' ? { ...state, simState: 'running' } : state;
 
     case 'SIM_RESET':
-      return { ...state, simState: 'idle', simIndex: -1, trace: [], phase: 'ready', activeEdgeIds: new Set() };
+      return { ...state, simState: 'idle', simIndex: -1, trace: [], chaos: false, phase: 'ready', activeEdgeIds: new Set() };
 
     case 'SIM_GATE_APPROVE': {
       const step = state.system?.simulation.steps[state.simIndex];
       if (!step?.gate) return state;
-      const nextIndex = state.simIndex + 1;
       const steps = state.system!.simulation.steps;
+      const nextIndex = skipFailure(steps, state.simIndex + 1, state.chaos);
       if (nextIndex >= steps.length) return { ...state, simState: 'done', phase: 'result' };
       const nextStep = steps[nextIndex];
       const nextState: LabState = {
@@ -279,8 +307,8 @@ export function labReducer(state: LabState, action: LabAction): LabState {
     case 'SIM_GATE_REJECT': {
       const step = state.system?.simulation.steps[state.simIndex];
       if (!step?.gate) return state;
-      const jumpTo = step.rejectJumpTo ?? state.system!.simulation.steps.length;
       const steps = state.system!.simulation.steps;
+      const jumpTo = skipFailure(steps, step.rejectJumpTo ?? steps.length, state.chaos);
       if (jumpTo >= steps.length) {
         return { ...state, simState: 'done', phase: 'result', events: [...(state.events ?? []), labEvent('result', 'Action rejected — simulation ended without the proposed write', 'warn')] };
       }
@@ -300,8 +328,8 @@ export function labReducer(state: LabState, action: LabAction): LabState {
       const step = state.system?.simulation.steps[state.simIndex];
       const option = step?.recoveryOptions?.find((o) => o.id === action.optionId);
       if (!step?.gate || !option) return state;
-      const jumpTo = option.jumpTo ?? state.simIndex + 1;
       const steps = state.system!.simulation.steps;
+      const jumpTo = skipFailure(steps, option.jumpTo ?? state.simIndex + 1, state.chaos);
       if (jumpTo >= steps.length) return { ...state, simState: 'done', phase: 'result' };
       const nextStep = steps[jumpTo];
       const nextState: LabState = {
@@ -484,6 +512,7 @@ export const initialLabState: LabState = {
   simState: 'idle',
   simIndex: -1,
   trace: [],
+  chaos: false,
   activeLens: 'product',
   decisionIndex: null,
   decisionChoices: {},
@@ -560,6 +589,7 @@ export function useLabMachine() {
       setLayoutVariant: (variant: CanvasVariant) => dispatch({ type: 'SET_LAYOUT_VARIANT', variant }),
       setLens: (lens: LensId) => dispatch({ type: 'SET_LENS', lens }),
       startSim: () => dispatch({ type: 'SIM_START' }),
+      breakSim: () => dispatch({ type: 'SIM_START_BREAK' }),
       pauseSim: () => dispatch({ type: 'SIM_PAUSE' }),
       resumeSim: () => dispatch({ type: 'SIM_RESUME' }),
       resetSim: () => dispatch({ type: 'SIM_RESET' }),

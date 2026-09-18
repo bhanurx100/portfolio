@@ -46,6 +46,7 @@ export interface LabActions {
   selectNode: (id: string | null) => void;
   setLens: (lens: LensId) => void;
   startSim: () => void;
+  breakSim: () => void;
   pauseSim: () => void;
   resumeSim: () => void;
   resetSim: () => void;
@@ -106,9 +107,9 @@ export const IdeaInput: React.FC<{
         }`}
         style={{ boxShadow: isDark ? 'var(--shadow-2-dark), 0 0 44px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-2)' }}
       >
-        <div className={`mb-2.5 flex items-center justify-between font-mono uppercase tracking-wider ${deck ? 'text-[11.5px]' : 'text-[10.5px]'} ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <div className={`mb-2.5 flex items-center justify-between font-mono uppercase tracking-wider ${deck ? 'text-[11.5px]' : 'text-[10.5px]'} ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
           <span style={{ color: 'var(--accent)' }}>What should this system do?</span>
-          <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>engine: deterministic · optional AI</span>
+          <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>engine: deterministic · optional AI</span>
         </div>
         <div
           className={`flex items-center gap-3 rounded-xl border ${deck ? 'px-5 py-4' : 'px-4 py-3.5'}`}
@@ -144,7 +145,7 @@ export const IdeaInput: React.FC<{
             Form system <Play size={deck ? 16 : 14} />
           </button>
         </div>
-        <p className={`mt-2.5 ${deck ? 'text-xs' : 'text-[11px]'} ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <p className={`mt-2.5 ${deck ? 'text-xs' : 'text-[11px]'} ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
           Runs in your browser — every system is composed from typed patterns, no account or API key required. Or try a starter:
         </p>
       </motion.div>
@@ -422,10 +423,11 @@ export const RunDock: React.FC<{
   simState: 'idle' | 'running' | 'paused' | 'gate' | 'done';
   steps: number;
   onStart: () => void;
+  onBreak: () => void;
   onPause: () => void;
   onResume: () => void;
   onReset: () => void;
-}> = ({ simState, steps, onStart, onPause, onResume, onReset }) => {
+}> = ({ simState, steps, onStart, onBreak, onPause, onResume, onReset }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -452,6 +454,19 @@ export const RunDock: React.FC<{
           }}
         >
           <Play size={15} /> Run the system
+        </button>
+        <button
+          onClick={onBreak}
+          title="Run with a failure injected — watch recovery"
+          className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl text-xs font-bold transition active:scale-[0.97]"
+          style={{
+            height: 44, padding: '0 13px',
+            background: 'transparent',
+            border: '1.5px solid color-mix(in srgb, var(--warn) 55%, transparent)',
+            color: 'var(--warn)',
+          }}
+        >
+          ⚠ Break
         </button>
       </div>
     );
@@ -493,11 +508,13 @@ export const RunDock: React.FC<{
 export const TraceTimeline: React.FC<{ trace: SimulationTraceEntry[] }> = ({ trace }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [open, setOpen] = React.useState(true);
+  const finePointer = () =>
+    typeof window !== 'undefined' && !!window.matchMedia?.('(pointer:fine)').matches;
+  const [open, setOpen] = React.useState<boolean>(() => finePointer());
   const boxRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (trace.length === 1) setOpen(true);
+    if (trace.length === 1 && finePointer()) setOpen(true);
   }, [trace.length]);
   React.useEffect(() => {
     const el = boxRef.current;
@@ -812,7 +829,7 @@ export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => 
           <div key={s.n} className={`rounded-lg border p-2.5 ${isDark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-slate-50/60'}`}>
             <div className="text-[10px] font-mono" style={{ color: 'var(--accent)', fontWeight: 700 }}>{s.n}</div>
             <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.label}</div>
-            <div className={`mt-0.5 text-[10.5px] leading-snug ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{s.detail}</div>
+            <div className={`mt-0.5 text-[10.5px] leading-snug ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{s.detail}</div>
           </div>
         ))}
       </div>
@@ -828,7 +845,10 @@ export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => 
 /* Stat tile — live session numbers for the bento rail                 */
 /* ------------------------------------------------------------------ */
 
-export const StatTile: React.FC<{ label: string; value: number; accent?: boolean }> = ({ label, value, accent }) => (
+export const StatTile: React.FC<{ label: string; value: number; accent?: boolean }> = ({ label, value, accent }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  return (
   <div
     className="rounded-2xl border p-3.5"
     style={{
@@ -843,15 +863,16 @@ export const StatTile: React.FC<{ label: string; value: number; accent?: boolean
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
       className="font-mono"
-      style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : '#F8FAFC', fontVariantNumeric: 'tabular-nums' }}
+      style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : isDark ? '#F8FAFC' : '#0F172A', fontVariantNumeric: 'tabular-nums' }}
     >
       {String(value).padStart(2, '0')}
     </motion.div>
-    <div className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.1em', color: '#7C8DB0', marginTop: 2 }}>
+    <div className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#64748B', marginTop: 2 }}>
       {label}
     </div>
   </div>
-);
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /* Evidence — connect claims to real work                              */

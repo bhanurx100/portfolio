@@ -291,7 +291,7 @@ export const HowIBuildSection: React.FC = () => {
                 <span key={c} style={{ width: 9, height: 9, borderRadius: 999, background: c, opacity: 0.85 }} />
               ))}
             </span>
-            <span className="font-mono" style={{ fontSize: 11, letterSpacing: '0.08em', color: 'var(--text-4)' }}>BUILD LOOP</span>
+            <span className="font-mono" style={{ fontSize: 11, letterSpacing: '0.08em', color: 'var(--text-3)' }}>BUILD LOOP</span>
             <span
               className="font-mono rounded-full"
               style={{
@@ -304,7 +304,7 @@ export const HowIBuildSection: React.FC = () => {
               ● {status}
             </span>
             <span className="flex-1" />
-            <span className="font-mono" style={{ fontSize: 11, color: 'var(--text-4)' }}>
+            <span className="font-mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>
               {String(idx + 1).padStart(2, '0')}/07
             </span>
           </div>
@@ -390,14 +390,14 @@ export const HowIBuildSection: React.FC = () => {
                           <span className="relative inline-flex rounded-full" style={{ width: 9, height: 9, background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }} />
                         </span>
                       ) : (
-                        <span className="font-mono" style={{ fontSize: 10, color: 'var(--text-4)' }}>{s.n}</span>
+                        <span className="font-mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>{s.n}</span>
                       )}
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block truncate" style={{ fontSize: 13.5, fontWeight: on ? 800 : 600, color: on ? 'var(--text-1)' : done ? 'var(--text-2)' : 'var(--text-3)' }}>
                         {s.title}
                       </span>
-                      <span className="block font-mono truncate" style={{ fontSize: 10, color: 'var(--text-4)' }}>$ {s.tool}</span>
+                      <span className="block font-mono truncate" style={{ fontSize: 10, color: 'var(--text-3)' }}>$ {s.tool}</span>
                     </span>
                   </button>
                 );

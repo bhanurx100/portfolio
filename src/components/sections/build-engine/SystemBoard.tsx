@@ -183,10 +183,10 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           <Sparkles size={19} color="#fff" />
         </span>
         <div className="flex-1 min-w-0">
-          <h3 className="truncate" style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220' }}>
+          <h3 className="truncate" style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220' }}>
             {system.title}
           </h3>
-          <div className="font-mono" style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', color: status.color }}>
+          <div className="font-mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: status.color }}>
             {status.label}
           </div>
         </div>
@@ -214,7 +214,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               onClick={() => setTab(t.id)}
               className="rounded-full transition-all shrink-0"
               style={{
-                padding: '5px 13px', fontSize: 11.5, fontWeight: 700,
+                padding: '7px 15px', fontSize: 12.5, fontWeight: 700,
                 color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
                 background: on ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : 'transparent',
                 border: 'none', cursor: 'pointer',
@@ -261,9 +261,6 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                     <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.9s" repeatCount="indefinite" />
                   )}
                 </ellipse>
-                {pts.map((p) => (
-                  <line key={p.node.id} x1={50} y1={46} x2={p.x} y2={p.y} stroke={isDark ? '#1B2740' : '#E2E8F0'} strokeWidth={1} vectorEffect="non-scaling-stroke" />
-                ))}
               </svg>
 
               {/* Hub (drifts most — foreground) */}
@@ -379,7 +376,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               </div>
 
               {/* Focus caption + status — one line, never overlaps */}
-              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono" style={{ fontSize: 10.5 }}>
+              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono" style={{ fontSize: 11.5 }}>
                 {focus && (
                   <>
                     <span

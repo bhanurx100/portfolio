@@ -183,10 +183,18 @@ export const BuilderLabSection: React.FC = () => {
                 <span className="hidden md:inline" style={{ color: '#7C8DB0' }}>
                   {state.nodes.length} nodes · {state.edges.length} edges
                 </span>
-                <span className="flex-1" />
-                <span className="hidden sm:inline" style={{ color: '#7C8DB0' }}>
-                  lens · {state.activeLens}
-                </span>
+              <span className="flex-1" />
+              <span className="hidden sm:inline" style={{ color: '#7C8DB0' }}>
+                lens · {state.activeLens}
+              </span>
+              <button
+                onClick={actions.reset}
+                className="flex items-center gap-1.5 rounded-full font-mono border transition"
+                style={{ padding: '4px 11px', fontSize: 10.5, borderColor: 'rgba(148,163,184,0.3)', color: '#AEBBCE', background: 'transparent' }}
+                title="Start over with a new idea"
+              >
+                <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">New idea</span>
+              </button>
               </div>
 
               {/* Stage */}
@@ -209,25 +217,23 @@ export const BuilderLabSection: React.FC = () => {
                 </div>
               )}
 
-                {/* Lens dock — top-left */}
-                <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-110px)]" title={lensMeta?.question}>
+              {/* Lens dock — top-left: full chips on sm+, single cycler on phones */}
+              <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-24px)]" title={lensMeta?.question}>
+                <div className="hidden min-[480px]:block">
                   <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
                 </div>
-
-                {/* New idea — top-right */}
-                <div className="absolute right-3 top-3 z-20">
-                  <button
-                    onClick={actions.reset}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-mono border backdrop-blur-xl transition"
-                    style={{
-                      borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
-                      background: isDark ? 'rgba(10,15,27,0.9)' : 'rgba(255,255,255,0.92)',
-                      color: isDark ? 'var(--text-3)' : 'var(--text-2)',
-                    }}
-                  >
-                    <RotateCcw className="w-3 h-3" /> New idea
-                  </button>
-                </div>
+                <button
+                  className="min-[480px]:hidden rounded-full border font-mono backdrop-blur-xl"
+                  style={{ padding: '6px 12px', fontSize: 11, fontWeight: 700, borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)', background: isDark ? 'rgba(10,15,27,0.9)' : 'rgba(255,255,255,0.92)', color: 'var(--accent)' }}
+                  onClick={() => {
+                    const order = systemLenses.map((l) => l.id);
+                    actions.setLens(order[(order.indexOf(state.activeLens) + 1) % order.length]);
+                  }}
+                  aria-label={`Lens: ${state.activeLens}. Tap for next lens.`}
+                >
+                  ◉ {state.activeLens} ›
+                </button>
+              </div>
 
                 {/* Trace timeline — bottom-left, above the dock */}
                 <div className="absolute left-3 bottom-[78px] sm:bottom-3 z-20">
@@ -243,7 +249,7 @@ export const BuilderLabSection: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.98 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute z-20 left-3 right-3 bottom-[78px] sm:left-auto sm:right-3 sm:top-14 sm:bottom-auto sm:w-[300px]"
+                      className="absolute z-20 left-3 right-3 top-14 sm:left-auto sm:right-3 sm:w-[300px]"
                     >
                       <NodeInspector
                         node={selectedNode}
@@ -256,14 +262,15 @@ export const BuilderLabSection: React.FC = () => {
 
                 {/* Run dock — bottom-center */}
                 <div className="absolute z-20 bottom-3 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-24px)]">
-                  <RunDock
-                    simState={state.simState}
-                    steps={state.trace.length}
-                    onStart={actions.startSim}
-                    onPause={actions.pauseSim}
-                    onResume={actions.resumeSim}
-                    onReset={actions.resetSim}
-                  />
+                <RunDock
+                  simState={state.simState}
+                  steps={state.trace.length}
+                  onStart={actions.startSim}
+                  onBreak={actions.breakSim}
+                  onPause={actions.pauseSim}
+                  onResume={actions.resumeSim}
+                  onReset={actions.resetSim}
+                />
                 </div>
 
                 {/* Gate spotlight */}

@@ -51,7 +51,8 @@ Rules:
 - entity: the core thing being managed/processed/tracked. If unclear, use id "request", label "Request".
 - channels: only channels actually present in the text; [] if none.
 - pains: short phrases (<= 6 words) from the visitor's own words.
-- primaryVerb: the visitor's dominant action verb.
+- primaryVerb: the visitor's dominant action verb, mapped to the closest enum value — sales/lead/follow-up/reminder ideas are "qualify", service/help/reply ideas are "support", money-splitting/collecting is "settle".
+- domain discipline: sales/leads/CRM/support/ticket ideas are "support"; invoices/bills/expenses/payments are "finance"; property/stay/booking/appointment ideas are "operations"; stock/warehouse/delivery/field-team ideas are "logistics"; documents/contracts/resume/policy ideas are "knowledge". Use "operations" only for inventory/property/booking/logistics ideas, never as a default.
 - Never invent business metrics, users, revenue, or outcomes.
 - Output ONLY the JSON object.`;
 
