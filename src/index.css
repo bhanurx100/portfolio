@@ -48,8 +48,34 @@
   --shadow-2: 0 4px 16px rgba(15, 23, 42, 0.08);
   --shadow-3: 0 16px 48px rgba(15, 23, 42, 0.16);
   --shadow-1-dark: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2-dark: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-2-dark: 0 16px 48px rgba(0, 0, 0, 0.45);
   --shadow-3-dark: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+/* Dark token block. MUST stay unlayered (outside any @layer) and out-
+   specific the :root defaults above: unlayered custom-property rules beat
+   layered ones no matter what, so this wins over :root when html gets the
+   .dark class. Previously this lived inside @layer base, where it lost to
+   the unlayered :root and dark mode rendered with light-on-dark text. */
+:root.dark {
+  --canvas-bg: #0B1120;
+  --surface-1: #101A2C;
+  --surface-2: #0E1626;
+  --surface-3: #16223A;
+  --text-1: #F8FAFC;
+  --text-2: #CBD5E1;
+  --text-3: #94A3B8;
+  --text-4: #64748B;
+  --accent: #3B82F6;
+  --accent-strong: #60A5FA;
+  /* Semantics step up to brights in dark mode — the day-mode depths
+     (#059669 etc.) render near-black on dark surfaces. Same convention
+     as the GitHub/Contact slate + emerald/amber text. */
+  --ok: #34D399;
+  --warn: #FBBF24;
+  --err: #F87171;
+  --line: #1E293B;
+  --line-strong: #33415C;
 }
 
 /* ==================================================================== */
@@ -77,27 +103,6 @@
     background-color: var(--canvas-bg);
     color: var(--text-2);
     transition: background-color 0.25s ease, color 0.25s ease;
-  }
-
-  .dark {
-    --canvas-bg: #0B1120;
-    --surface-1: #101A2C;
-    --surface-2: #0E1626;
-    --surface-3: #16223A;
-    --text-1: #F8FAFC;
-    --text-2: #CBD5E1;
-    --text-3: #94A3B8;
-    --text-4: #64748B;
-    --accent: #3B82F6;
-    --accent-strong: #60A5FA;
-    /* Semantics step up to brights in dark mode — the day-mode depths
-       (#059669 etc.) render near-black on dark surfaces. Same convention
-       as the GitHub/Contact slate + emerald/amber text. */
-    --ok: #34D399;
-    --warn: #FBBF24;
-    --err: #F87171;
-    --line: #1E293B;
-    --line-strong: #33415C;
   }
 
   /* Typography roles — display for headlines, body for prose, mono only for
@@ -206,6 +211,66 @@
 .lab-ghost {
   color: transparent;
   -webkit-text-stroke: 1px rgba(148, 163, 184, 0.22);
+}
+
+/* ---- Build-reel scene motion: GPU-only transforms/opacity, no SMIL ---- */
+.sc-svg * { transform-box: fill-box; }
+
+@keyframes sc-spin { to { transform: rotate(360deg); } }
+.sc-spin { animation: sc-spin var(--dur, 3s) linear infinite; transform-origin: center; }
+
+@keyframes sc-ping-soft {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.sc-ping-soft { animation: sc-ping-soft var(--dur, 2s) ease-out infinite; transform-origin: center; }
+
+@keyframes sc-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.sc-float { animation: sc-float var(--dur, 2.2s) ease-in-out infinite; }
+
+@keyframes sc-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.sc-blink { animation: sc-blink var(--dur, 1.4s) ease-in-out infinite; }
+
+@keyframes sc-flicker {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.35; }
+  40% { opacity: 1; }
+  60% { opacity: 0.55; }
+}
+.sc-flicker { animation: sc-flicker var(--dur, 1.2s) linear infinite; }
+
+@keyframes sc-rise {
+  0%, 100% { transform: translateY(5px); }
+  50% { transform: translateY(-11px); }
+}
+.sc-rise { animation: sc-rise var(--dur, 2.6s) ease-in-out infinite; }
+
+@keyframes sc-grow {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.18); }
+}
+.sc-grow { animation: sc-grow var(--dur, 1.9s) ease-in-out infinite; transform-origin: bottom; }
+
+@keyframes sc-dash-march {
+  to { stroke-dashoffset: -24; }
+}
+.sc-dash-march { animation: sc-dash-march 0.9s linear infinite; }
+
+@keyframes sc-offset-go {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+.sc-offset-go { animation: sc-offset-go var(--dur, 1.8s) linear infinite; }
+
+/* Paused state: freeze every scene animation (offscreen / paused / reduced motion) */
+.sc-paused *, .sc-paused {
+  animation-play-state: paused !important;
 }
 
 /* Reduced motion preference */
