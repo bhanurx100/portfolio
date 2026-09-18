@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+/* ==================================================================== */
+/* DESIGN TOKENS — one system, applied everywhere                        */
+/* ==================================================================== */
+
+:root {
+  /* Surfaces: solid, never translucent for content */
+  --canvas-bg: #EEF2F6;
+  --surface-1: #FFFFFF;
+  --surface-2: #F6F8FB;
+  --surface-3: #EDF1F6;
+  --canvas-bg-dark: #0B1120;
+  --surface-1-dark: #101A2C;
+  --surface-2-dark: #0E1626;
+  --surface-3-dark: #16223A;
+
+  /* Text */
+  --text-1: #0F172A;
+  --text-2: #334155;
+  --text-3: #64748B;
+  --text-4: #94A3B8;
+  --text-1-dark: #F8FAFC;
+  --text-2-dark: #CBD5E1;
+  --text-3-dark: #94A3B8;
+  --text-4-dark: #64748B;
+
+  /* One accent + semantics */
+  --accent: #2563EB;
+  --accent-strong: #1D4ED8;
+  --ok: #059669;
+  --warn: #D97706;
+  --err: #DC2626;
+
+  /* Lines */
+  --line: #D6DEE9;
+  --line-strong: #B9C4D4;
+  --line-dark: #1E293B;
+  --line-strong-dark: #33415C;
+
+  /* Radii */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 20px;
+
+  /* Elevation: shadows only on truly floating things */
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-3: 0 16px 48px rgba(15, 23, 42, 0.16);
+  --shadow-1-dark: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2-dark: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-3-dark: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+/* ==================================================================== */
+/* BASE                                                                  */
+/* ==================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--canvas-bg);
+    color: var(--text-2);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .dark {
+    --canvas-bg: #0B1120;
+    --surface-1: #101A2C;
+    --surface-2: #0E1626;
+    --surface-3: #16223A;
+    --text-1: #F8FAFC;
+    --text-2: #CBD5E1;
+    --text-3: #94A3B8;
+    --text-4: #64748B;
+    --accent: #3B82F6;
+    --accent-strong: #60A5FA;
+    --line: #1E293B;
+    --line-strong: #33415C;
+  }
+
+  /* Typography roles — display for headlines, body for prose, mono only for
+     technical metadata. Mono must never dominate. */
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.025em;
+    color: var(--text-1);
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-4) !important;
+    opacity: 1 !important;
+  }
+
+  /* Focus is always visible */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ==================================================================== */
+/* UTILITIES                                                             */
+/* ==================================================================== */
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+.scrollbar-thin::-webkit-scrollbar { height: 5px; width: 5px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+
+/* Editorial metadata label — the only sanctioned mono use outside code */
+.tech-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Builder Lab canvas animations (fill-box keeps transforms centered) */
+@keyframes lab-pulse {
+  0% { opacity: 0.5; transform: scale(1); }
+  70% { opacity: 0; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+.lab-pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lab-pulse 1.6s ease-out infinite;
+}
+
+@keyframes lab-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.lab-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lab-spin 14s linear infinite;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
