@@ -184,6 +184,28 @@
   100% { transform: translateX(300%); }
 }
 
+/* How I Build tunnel */
+@keyframes tunnel-grid {
+  from { background-position-y: 0; }
+  to { background-position-y: 44px; }
+}
+.tunnel-floor {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.20) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.20) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: tunnel-grid 1.1s linear infinite;
+}
+
+@keyframes tunnel-spin {
+  to { transform: rotate(360deg); }
+}
+.tunnel-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tunnel-spin 26s linear infinite;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
