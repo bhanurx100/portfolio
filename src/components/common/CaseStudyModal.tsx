@@ -323,7 +323,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                       className="inline-flex items-center gap-2 rounded-xl"
                       style={{
                         height: 44, padding: '0 18px', fontSize: 14, fontWeight: 700,
-                        background: isDark ? '#F1F5F9' : '#0F172A', color: isDark ? '#0B1120' : '#F8FAFC',
+                        background: 'var(--text-1)', color: 'var(--canvas-bg)',
                       }}
                     >
                       <Github size={16} /> View code

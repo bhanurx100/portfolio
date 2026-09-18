@@ -86,7 +86,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
                 height: SCREEN_H,
                 borderRadius: 44,
                 background: isDark ? '#0A0F1B' : '#F4F6FA',
-                color: isDark ? '#F1F5F9' : '#0F172A',
+                color: 'var(--text-1)',
               }}
             >
               {/* ---- Chrome: status bar + island ---- */}

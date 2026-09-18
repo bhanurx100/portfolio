@@ -123,7 +123,7 @@ export const IdeaInput: React.FC<{
             }}
             placeholder="Describe a problem — what should we build?"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 16, color: isDark ? '#F1F5F9' : '#0F172A' }}
+            style={{ fontSize: 16, color: 'var(--text-1)' }}
             aria-label="Describe the system to build"
           />
           <button

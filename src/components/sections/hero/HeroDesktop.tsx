@@ -70,8 +70,8 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
               style={{
                 height: 48,
                 padding: '0 22px',
-                background: isDark ? '#F1F5F9' : '#0F172A',
-                color: isDark ? '#0F172A' : '#F8FAFC',
+                background: 'var(--text-1)',
+                color: 'var(--canvas-bg)',
                 fontSize: 15,
                 fontWeight: 700,
               }}
@@ -177,8 +177,8 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
                   padding: '8px 18px',
                   fontSize: 13.5,
                   fontWeight: 700,
-                  color: front === p ? (isDark ? '#0B1120' : '#F8FAFC') : 'var(--text-3)',
-                  background: front === p ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
+                  color: front === p ? 'var(--canvas-bg)' : 'var(--text-3)',
+                  background: front === p ? 'var(--text-1)' : 'transparent',
                 }}
               >
                 {p === 'stayease' ? 'StayEase' : 'SplitFin'}

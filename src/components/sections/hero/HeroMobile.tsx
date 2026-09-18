@@ -82,8 +82,8 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
                 padding: '10px 0',
                 fontSize: 13.5,
                 fontWeight: 700,
-                color: project === p ? (isDark ? '#0B1120' : '#F8FAFC') : 'var(--text-3)',
-                background: project === p ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
+                color: project === p ? 'var(--canvas-bg)' : 'var(--text-3)',
+                background: project === p ? 'var(--text-1)' : 'transparent',
               }}
             >
               {p === 'stayease' ? 'StayEase' : 'SplitFin'}
@@ -118,8 +118,8 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
           className="flex items-center justify-center gap-2 rounded-xl"
           style={{
             height: 50,
-            background: isDark ? '#F1F5F9' : '#0F172A',
-            color: isDark ? '#0B1120' : '#F8FAFC',
+            background: 'var(--text-1)',
+            color: 'var(--canvas-bg)',
             fontSize: 15.5,
             fontWeight: 700,
           }}

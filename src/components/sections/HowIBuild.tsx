@@ -217,8 +217,8 @@ export const HowIBuildSection: React.FC = () => {
   const startedRef = useRef(false);
 
   const accent = 'var(--accent)';
-  /* Inactive glyph ink — same slate-400 / slate-500 secondary GitHub/Contact use. */
-  const soft = isDark ? '#94A3B8' : '#64748B';
+  /* Inactive glyph ink — Contact secondary token. */
+  const soft = 'var(--text-3)';
 
   const dPts = desktopPts();
   const mPts = mobilePts();

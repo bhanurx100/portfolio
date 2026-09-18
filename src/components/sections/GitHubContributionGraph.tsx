@@ -436,7 +436,7 @@ export const GitHubContributionGraph: React.FC = () => {
               <div
                 ref={scrollContainerRef}
                 className={`p-4 sm:p-5 rounded-2xl border overflow-x-auto scrollbar-thin relative select-none ${
-                  isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100/70 border-slate-300'
+                  isDark ? 'bg-[var(--surface-2)] border-slate-700' : 'bg-slate-100/70 border-slate-300'
                 }`}
                 style={{
                   WebkitOverflowScrolling: 'touch',
