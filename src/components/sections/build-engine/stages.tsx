@@ -36,17 +36,17 @@ export const STAGES: BuildStage[] = [
       { n: '2', text: 'The breaking moment: banking apps, spreadsheets and splitting tools each cover only part of it.' },
       { n: '3', text: '“Better” = nobody opens a spreadsheet after dinner.' },
     ],
-    evidence: { text: 'SplitFin started from that exact mismatch.', ref: 'SplitFin' },
+    evidence: { text: 'Start from a real mismatch: the tools people use each cover only part of the job.', ref: 'Method' },
   },
   {
     id: 'model', n: '02', title: 'Model', fig: 'Ledger schema',
     question: 'What are the entities, states and constraints — before any code?',
     callouts: [
-      { n: '1', text: 'Three tables: accounts, transactions, split groups/members.' },
-      { n: '2', text: 'Typed once across client, ledger and database — the schema is the contract.' },
+      { n: '1', text: 'Three tables: accounts, orders, items.' },
+      { n: '2', text: 'Typed once across client, server and database — the schema is the contract.' },
       { n: '3', text: 'Failure states modeled here, not discovered after launch.' },
     ],
-    evidence: { text: 'SplitFin’s ledger model, drawn as built.', ref: 'SplitFin' },
+    evidence: { text: 'A data model drawn before code: entities, states, and where truth lives.', ref: 'Method' },
   },
   {
     id: 'design', n: '03', title: 'Design', fig: 'Phone wireframe · 390pt',
@@ -54,9 +54,9 @@ export const STAGES: BuildStage[] = [
     callouts: [
       { n: '1', text: 'Phone layout first — 390pt wide, one decision per screen.' },
       { n: '2', text: 'Primary action inside thumb reach; 44pt minimum targets.' },
-      { n: '3', text: 'StayEase flow: search → hotel → rooms → guest → payment.' },
+      { n: '3', text: 'Checkout flow: search → detail → options → info → payment.' },
     ],
-    evidence: { text: 'StayEase booking flow, drawn as shipped.', ref: 'StayEase' },
+    evidence: { text: 'One decision per screen, drawn at true phone scale.', ref: 'Method' },
   },
   {
     id: 'build', n: '04', title: 'Build', fig: 'Vertical slice',
@@ -66,7 +66,7 @@ export const STAGES: BuildStage[] = [
       { n: '2', text: 'One type contract band ties every layer together.' },
       { n: '3', text: 'A contract change breaks at compile time, not in production.' },
     ],
-    evidence: { text: 'How both products are actually sliced.', ref: 'StayEase + SplitFin' },
+    evidence: { text: 'Typed contracts from screen to database — a contract change breaks at compile time, not in production.', ref: 'Method' },
   },
   {
     id: 'stress', n: '05', title: 'Stress', fig: 'Failure routing',
@@ -86,7 +86,7 @@ export const STAGES: BuildStage[] = [
       { n: '2', text: 'Skipped: page views, vanity counters, dashboard decor.' },
       { n: '3', text: 'Every number observable in the demo or labeled simulation.' },
     ],
-    evidence: { text: 'The standard this portfolio itself is held to.', ref: 'This site' },
+    evidence: { text: 'Every number shown is either observable in the demo or labeled simulation.', ref: 'Method' },
   },
   {
     id: 'ship', n: '07', title: 'Ship', fig: 'Release loop',
@@ -96,7 +96,7 @@ export const STAGES: BuildStage[] = [
       { n: '2', text: 'Observe real use, then loop back into the next slice.' },
       { n: '3', text: 'Feedback loops shorter than the original decision.' },
     ],
-    evidence: { text: 'Both apps deployed; source linked from Selected Work.', ref: 'Selected Work' },
+    evidence: { text: 'Ship the smallest useful version first; observe real use; iterate fast.', ref: 'Method' },
   },
 ];
 
@@ -176,8 +176,8 @@ export function Drawing({ id, ink }: { id: string; ink: Ink }) {
         <g>
           {[
             { x: 30, t: 'ACCOUNTS', rows: ['id', 'owner', 'balance'] },
-            { x: 155, t: 'TRANSACTIONS', rows: ['id', 'amount', 'state'] },
-            { x: 280, t: 'SPLITS', rows: ['id', 'members', 'shares'] },
+            { x: 155, t: 'ORDERS', rows: ['id', 'total', 'state'] },
+            { x: 280, t: 'ITEMS', rows: ['id', 'qty', 'price'] },
           ].map((tb) => (
             <g key={tb.t}>
               <rect x={tb.x} y={80} width={90} height={110} fill="none" stroke={ink.line} strokeWidth={2} />
@@ -198,7 +198,7 @@ export function Drawing({ id, ink }: { id: string; ink: Ink }) {
           </g>
           <circle cx={52} cy={222} r={9} fill={ink.accent} />
           <T x={52} y={225.5} s={10} w={800} fill={ink.paper} anchor="middle">1</T>
-          <T x={68} y={226} s={11} fill={ink.soft}>typed once — client · ledger · database</T>
+          <T x={68} y={226} s={11} fill={ink.soft}>typed once — client · server · database</T>
         </g>
       );
     case 'design':
@@ -215,7 +215,7 @@ export function Drawing({ id, ink }: { id: string; ink: Ink }) {
           <line x1={76} y1={72} x2={154} y2={72} stroke={ink.line} strokeWidth={3} strokeLinecap="round" />
           <line x1={76} y1={86} x2={140} y2={86} stroke={ink.soft} strokeWidth={2.4} strokeLinecap="round" />
           <rect x={76} y={150} width={78} height={26} rx={13} fill={ink.accent} opacity={0.9} />
-          <T x={115} y={167} s={11} w={800} fill={ink.paper} anchor="middle">RESERVE</T>
+          <T x={115} y={167} s={11} w={800} fill={ink.paper} anchor="middle">CONTINUE</T>
           <line x1={60} y1={28} x2={170} y2={28} stroke={ink.faint} strokeWidth={1} />
           <line x1={60} y1={24} x2={60} y2={32} stroke={ink.faint} strokeWidth={1} />
           <line x1={170} y1={24} x2={170} y2={32} stroke={ink.faint} strokeWidth={1} />
@@ -366,26 +366,24 @@ export const LoopStrip: React.FC = () => {
   return (
     <div ref={stripRef} id="how-i-build" className="scroll-mt-24 space-y-4">
       {/* Strip header */}
-      <div className="max-w-2xl space-y-2">
-        <p className="tech-label" style={{ color: 'var(--accent)' }}>The loop</p>
-        <div className="flex items-center gap-3 flex-wrap">
-          <h3 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
-            Seven stages behind every run.
+      <div className="flex items-end gap-3 flex-wrap">
+        <div>
+          <p className="tech-label" style={{ color: 'var(--accent)' }}>The loop</p>
+          <h3 style={{ fontSize: 'clamp(20px, 2.6vw, 26px)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-1)', marginTop: 2 }}>
+            Seven stages, zero projects.
           </h3>
-          {!reduceMotion && (
-            <span className="flex items-center gap-1">
-              <button onClick={prev} aria-label="Previous stage" className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, color: ink.soft, background: 'transparent', border: `1px solid ${sheetEdge}`, cursor: 'pointer' }}>
-                <ChevronLeft size={14} />
-              </button>
-              <button onClick={() => (idx >= STAGES.length - 1 ? (setIdx(0), setPlaying(true)) : setPlaying(!playing))} aria-label={playing ? 'Pause' : 'Play the loop'} className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, background: ink.accent, color: ink.paper, border: 'none', cursor: 'pointer' }}>
-                {playing ? <Pause size={14} /> : <Play size={14} />}
-              </button>
-            </span>
-          )}
         </div>
-        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)' }}>
-          The method the console above runs on — each sheet drawn from a shipped fragment.
-        </p>
+        <span className="flex-1" />
+        {!reduceMotion && (
+          <span className="flex items-center gap-1" style={{ paddingBottom: 2 }}>
+            <button onClick={prev} aria-label="Previous stage" className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, color: ink.soft, background: 'transparent', border: `1px solid ${sheetEdge}`, cursor: 'pointer' }}>
+              <ChevronLeft size={14} />
+            </button>
+            <button onClick={() => (idx >= STAGES.length - 1 ? (setIdx(0), setPlaying(true)) : setPlaying(!playing))} aria-label={playing ? 'Pause' : 'Play the loop'} className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, background: ink.accent, color: ink.paper, border: 'none', cursor: 'pointer' }}>
+              {playing ? <Pause size={14} /> : <Play size={14} />}
+            </button>
+          </span>
+        )}
       </div>
 
       {/* Sheet browser */}
@@ -400,7 +398,7 @@ export const LoopStrip: React.FC = () => {
               onClick={() => jump(i)}
               className="shrink-0 snap-start rounded-xl border overflow-hidden text-left transition-all"
               style={{
-                width: 168,
+                width: 144,
                 borderColor: on ? ink.accent : sheetEdge,
                 background: sheetBg,
                 boxShadow: on ? `0 0 0 1px ${ink.accent}, 0 12px 28px -14px rgba(15,23,42,0.4)` : 'none',
