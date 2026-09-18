@@ -11,7 +11,7 @@ Goal: turn the current portfolio into a premium, client-attracting product exper
 - **Performance**: keep the dev bundle healthy (baseline JS 653.70 kB / gzip 181.15 kB as of audit); lazy-load heavy visuals; no new dependencies unless justified — **no unneeded deps**.
 - **No duplicate components/folders**: reconcile `src/types/build-engine.ts` (dead draft) with `src/data/build-engine/types.ts` (live).
 - **Protected**: the restored two-device Hero, Projects, GitHub, Experience, and Contact sections must keep working after every phase.
-- No git commits unless explicitly requested.
+- No git commits unless explicitly requested or approved at a milestone checkpoint.
 
 ## Current state (audit snapshot, 2026-09)
 
@@ -78,6 +78,18 @@ Target: demo.png-quality presentation. Keep the engine untouched; rework only th
 
 ## Verification commands
 - `npm run lint` — TypeScript type check (`tsc --noEmit`).
-- `npm run build` — production build (watch the >500 kB chunk warning).
-- `npm run dev` — dev server on port 3001 (3000 is occupied).
+- `npm run build` — production build (watch the >500 kB chunk warning; now clear after P7).
+- `npm run dev` — dev server on port **3000** (the dev script is `vite --port=3000`; 3001 was only used while 3000 was occupied).
 - `npm run server` — Mode B `/api/interpret` (needs `GEMINI_API_KEY` in `.env`; engine falls back to Mode A silently without it).
+
+## Progress log (2026-09)
+
+- **P0** — `570dc4f` recovery checkpoint (63 files); lint/build/dev-smoke green.
+- **P1** — `570dc4f` data truth & hygiene: `personalInfo` → native-mobile + applied-AI; deleted `src/types/build-engine.ts`, `AboutSection.tsx`, `CapabilityLayer` type, `capabilityLayers`/`skillsCategories`/`skillsList`, confetti deps; Footer dead anchors fixed.
+- **P2** — `6b1ed31` native-first narrative + content-truth CTAs (View Code / Contact me + code-access note) across projects, case study, data.
+- **P3** — `6b1ed31` Builder Lab presentation polish (terminal-style idea input, Run CTA, editorial header, SYSTEM BLUEPRINT frame, earned evidence strip).
+- **P4** — `445033b` Idea→Production journey strip in the Lab (domain-matched, project resonance) + interactive stack→project map. Agent Playground deferred (chatbot-feel guardrail).
+- **P5** — `445033b` How I Build: tabbed staged journey kept (already interactive), stale "live builds" copy corrected, closing toolchain map added.
+- **P6** — `a9c67e3` mobile pass at 393pt: audit found no horizontal overflow (GlobalBackground contained, GitHub graph `overflow-x-auto`, all grids collapse); header drawer email truncated.
+- **P7** — `8a30842` code-split `GitHubSection`, `CommandPalette`, `CaseStudyModal` → main chunk 526 kB → **485.73 kB** (under the 500 kB warning); global `:focus-visible` + `prefers-reduced-motion` confirmed.
+- **P8** — lint + build + dev smoke green (STATUS=200, "Builder Lab" present); this report. Remaining user action: walk the page; `demo.png` still not viewable by the model and live repos not independently auditable.
