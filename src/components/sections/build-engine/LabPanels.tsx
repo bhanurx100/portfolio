@@ -411,186 +411,244 @@ export const NodeInspector: React.FC<{
 /* Simulation controls + gate                                          */
 /* ------------------------------------------------------------------ */
 
-export const SimulationPanel: React.FC<{
+/* ------------------------------------------------------------------ */
+/* Run dock — compact runtime controls floating over the console        */
+/* ------------------------------------------------------------------ */
+
+export const RunDock: React.FC<{
   simState: 'idle' | 'running' | 'paused' | 'gate' | 'done';
-  currentGate: SimulationStep | null;
-  trace: SimulationTraceEntry[];
+  steps: number;
   onStart: () => void;
   onPause: () => void;
   onResume: () => void;
   onReset: () => void;
-  onApprove: () => void;
-  onReject: () => void;
-  onRecover: (optionId: string) => void;
-}> = ({ simState, currentGate, trace, onStart, onPause, onResume, onReset, onApprove, onReject, onRecover }) => {
+}> = ({ simState, steps, onStart, onPause, onResume, onReset }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const shell = `flex items-center gap-2 rounded-2xl border px-3 py-2.5 backdrop-blur-xl ${
+    isDark
+      ? 'bg-[#0A0F1B]/92 border-slate-700/80 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.85)]'
+      : 'bg-white/94 border-slate-200 shadow-[0_16px_40px_-16px_rgba(15,23,42,0.35)]'
+  }`;
+  const ghostBtn = `px-3 h-9 rounded-xl text-xs font-semibold border transition shrink-0 ${
+    isDark ? 'border-slate-700 text-slate-300 hover:border-slate-500' : 'border-slate-300 text-slate-600 hover:border-slate-400'
+  }`;
+
+  if (simState === 'idle') {
+    return (
+      <div className={shell} style={{ minWidth: 250 }}>
+        <button
+          onClick={onStart}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition active:scale-[0.98]"
+          style={{
+            height: 44,
+            background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
+            color: '#fff',
+            boxShadow: isDark ? '0 10px 28px -10px color-mix(in srgb, var(--accent) 70%, transparent)' : '0 10px 24px -12px rgba(37,99,235,0.5)',
+          }}
+        >
+          <Play size={15} /> Run the system
+        </button>
+      </div>
+    );
+  }
+
+  const label =
+    simState === 'running' ? 'executing' : simState === 'paused' ? 'paused' : simState === 'gate' ? 'awaiting decision' : 'complete';
+  const dotColor = simState === 'running' ? 'var(--accent)' : simState === 'gate' ? 'var(--warn)' : simState === 'done' ? 'var(--ok)' : 'var(--warn)';
+
   return (
-    <div className={`${panel(isDark)} p-3 space-y-3`}>
-      <div className="flex items-center justify-between">
-        <div className={`${panelTitle(isDark)} flex items-center gap-1.5`}>
-          <Terminal className="w-3 h-3" /> Runtime
+    <div className={shell} aria-live="polite" style={{ minWidth: 250, maxWidth: 420 }}>
+      <span className="relative flex shrink-0" style={{ width: 9, height: 9 }} aria-hidden>
+        {simState === 'running' && (
+          <span className="absolute inline-flex h-full w-full rounded-full animate-ping" style={{ background: 'var(--accent)', opacity: 0.5 }} />
+        )}
+        <span className="relative inline-flex rounded-full" style={{ width: 9, height: 9, background: dotColor, boxShadow: `0 0 8px ${dotColor}` }} />
+      </span>
+      <span className="font-mono whitespace-nowrap" style={{ fontSize: 11.5, color: isDark ? 'var(--text-2)' : 'var(--text-3)' }}>
+        {label} · {steps} step{steps === 1 ? '' : 's'}
+      </span>
+      {simState === 'running' && (
+        <span className="flex-1 rounded-full overflow-hidden" style={{ height: 3, minWidth: 40, background: isDark ? '#1B2740' : '#E2E8F0' }} aria-hidden>
+          <span className="block h-full rounded-full" style={{ width: '38%', background: 'var(--accent)', animation: 'lab-scan 1.4s ease-in-out infinite' }} />
+        </span>
+      )}
+      <span className="flex-1" />
+      {simState === 'running' && <button onClick={onPause} className={ghostBtn}>Pause</button>}
+      {simState === 'paused' && <button onClick={onResume} className={ghostBtn}>Resume</button>}
+      {simState === 'done' && <button onClick={onStart} className={ghostBtn}>Run again</button>}
+      <button onClick={onReset} className={ghostBtn}>Reset</button>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Trace timeline — mission log floating on the console edge            */
+/* ------------------------------------------------------------------ */
+
+export const TraceTimeline: React.FC<{ trace: SimulationTraceEntry[] }> = ({ trace }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const [open, setOpen] = React.useState(true);
+  const boxRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (trace.length === 1) setOpen(true);
+  }, [trace.length]);
+  React.useEffect(() => {
+    const el = boxRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight });
+  }, [trace.length, open]);
+
+  if (trace.length === 0) return null;
+
+  const dot = (kind: string) =>
+    kind === 'error' ? '#F87171' : kind === 'tool-call' ? '#3B82F6' : kind === 'complete' ? '#34D399' : kind === 'warn' ? '#FBBF24' : isDark ? '#475569' : '#94A3B8';
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-full border font-mono backdrop-blur-xl"
+        style={{
+          padding: '6px 12px', fontSize: 10.5, fontWeight: 700,
+          borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+          background: isDark ? 'rgba(10,15,27,0.92)' : 'rgba(255,255,255,0.94)',
+          color: 'var(--accent)', cursor: 'pointer',
+        }}
+      >
+        Trace · {trace.length}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-2xl border overflow-hidden backdrop-blur-xl"
+      style={{
+        width: 232,
+        borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+        background: isDark ? 'rgba(4,7,13,0.92)' : 'rgba(255,255,255,0.95)',
+        boxShadow: isDark ? '0 16px 48px -12px rgba(0,0,0,0.8)' : '0 16px 40px -16px rgba(15,23,42,0.3)',
+      }}
+    >
+      <button
+        onClick={() => setOpen(false)}
+        className="w-full flex items-center gap-2 font-mono"
+        style={{ padding: '8px 12px', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: isDark ? 'var(--text-4)' : 'var(--text-3)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+      >
+        <Terminal className="w-3 h-3" /> TRACE · {trace.length}
+        <span style={{ flex: 1 }} />
+        <ChevronDown className="w-3 h-3 rotate-180" />
+      </button>
+      <div ref={boxRef} className="relative pl-4 overflow-y-auto scrollbar-thin" style={{ maxHeight: 190, paddingBottom: 10 }}>
+        <span aria-hidden className="absolute left-[11px] top-1 bottom-2 rounded-full" style={{ width: 2, background: isDark ? '#1B2740' : '#E2E8F0' }} />
+        <div className="space-y-2 pr-3">
+          {trace.map((t) => {
+            const c = dot(t.step.kind);
+            return (
+              <div key={t.index} className="relative text-[10.5px] font-mono flex items-start gap-2">
+                <span aria-hidden className="absolute rounded-full" style={{ left: -11.5, top: 4, width: 7, height: 7, background: c, boxShadow: `0 0 6px ${c}` }} />
+                <span className="flex-1 leading-snug">
+                  <span style={{ color: c, fontWeight: 700 }}>{t.step.kind}</span>{' '}
+                  <span style={{ color: isDark ? '#E2E8F0' : '#0F172A' }}>{t.step.label}</span>
+                  {t.outcomeNote && <span style={{ color: 'var(--warn)' }}> — {t.outcomeNote}</span>}
+                </span>
+              </div>
+            );
+          })}
         </div>
-        {simState !== 'idle' && (
-          <div className="flex items-center gap-1.5">
-            {simState === 'running' && (
-              <button onClick={onPause} className={`px-3 py-1 rounded-lg text-xs border ${isDark ? 'border-slate-700 text-slate-300' : 'border-slate-300 text-slate-600'}`}>
-                Pause
-              </button>
-            )}
-            {simState === 'paused' && (
-              <button onClick={onResume} className={`px-3 py-1 rounded-lg text-xs ${isDark ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'}`}>
-                Resume
-              </button>
-            )}
-            {simState !== 'idle' && (
-              <button onClick={onReset} className={`px-3 py-1 rounded-lg text-xs border ${isDark ? 'border-slate-700 text-slate-400' : 'border-slate-300 text-slate-500'}`}>
-                Reset
-              </button>
-            )}
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Gate card — the spotlight decision                                   */
+/* ------------------------------------------------------------------ */
+
+export const GateCard: React.FC<{
+  gate: SimulationStep;
+  onApprove: () => void;
+  onReject: () => void;
+  onRecover: (optionId: string) => void;
+}> = ({ gate, onApprove, onReject, onRecover }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const failure = gate.gate === 'failure';
+
+  return (
+    <div
+      className="rounded-2xl border overflow-hidden backdrop-blur-xl"
+      style={{
+        borderColor: failure ? (isDark ? 'rgba(244,63,94,0.5)' : '#FCA5A5') : isDark ? 'rgba(245,158,11,0.5)' : '#FCD34D',
+        background: isDark ? 'rgba(8,12,22,0.96)' : 'rgba(255,255,255,0.97)',
+        boxShadow: failure
+          ? (isDark ? '0 0 0 1px rgba(244,63,94,0.25), 0 24px 80px -16px rgba(244,63,94,0.45)' : '0 24px 64px -20px rgba(244,63,94,0.4)')
+          : (isDark ? '0 0 0 1px rgba(245,158,11,0.25), 0 24px 80px -16px rgba(245,158,11,0.4)' : '0 24px 64px -20px rgba(245,158,11,0.4)'),
+      }}
+    >
+      <div
+        className="flex items-center gap-2.5"
+        style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}` }}
+      >
+        <span
+          className="shrink-0 flex items-center justify-center rounded-xl"
+          style={{
+            width: 38, height: 38,
+            background: failure ? 'color-mix(in srgb, #F43F5E 16%, transparent)' : 'color-mix(in srgb, #F59E0B 16%, transparent)',
+            boxShadow: failure ? '0 0 18px rgba(244,63,94,0.5)' : '0 0 18px rgba(245,158,11,0.5)',
+          }}
+        >
+          {failure ? <ShieldAlert size={19} color="#FB7185" /> : <ShieldCheck size={19} color="#FBBF24" />}
+        </span>
+        <div className="min-w-0">
+          <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: failure ? '#FB7185' : '#FBBF24' }}>
+            {failure ? '◆ SYSTEM FAILURE' : '◆ HUMAN GATE'}
+          </div>
+          <div style={{ fontSize: 14.5, fontWeight: 700, color: isDark ? '#F1F5F9' : '#0F172A', marginTop: 1, lineHeight: 1.4 }}>
+            {failure ? gate.label : gate.gatePrompt}
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: 14 }} className="space-y-2">
+        {!failure && (
+          <div className="flex gap-2">
+            <button
+              onClick={onApprove}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition active:scale-[0.98]"
+              style={{ height: 46, background: isDark ? '#34D399' : '#059669', color: isDark ? '#052E22' : '#fff', boxShadow: '0 10px 26px -10px rgba(52,211,153,0.8)' }}
+            >
+              <Check size={15} strokeWidth={3} /> Approve
+            </button>
+            <button
+              onClick={onReject}
+              className="flex-1 rounded-xl text-sm font-bold border transition"
+              style={{ height: 46, borderColor: isDark ? 'rgba(251,113,133,0.5)' : '#FCA5A5', color: '#FB7185', background: 'transparent' }}
+            >
+              Reject
+            </button>
           </div>
         )}
-      </div>
-
-      {/* Idle: the one obvious next step */}
-      {simState === 'idle' && (
-        <div className="space-y-1.5">
+        {failure && (gate.recoveryOptions ?? []).map((opt) => (
           <button
-            onClick={onStart}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition active:scale-[0.99]"
+            key={opt.id}
+            onClick={() => onRecover(opt.id)}
+            className="w-full text-left rounded-xl border transition"
             style={{
-              height: 46,
-              background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
-              color: '#fff',
-              boxShadow: isDark ? '0 10px 28px -10px color-mix(in srgb, var(--accent) 70%, transparent)' : '0 10px 24px -12px rgba(37,99,235,0.5)',
+              padding: '11px 13px', fontSize: 13.5, fontWeight: 600,
+              borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+              color: isDark ? '#E2E8F0' : '#0F172A', background: 'transparent',
             }}
           >
-            <Play size={15} /> Run the system
+            {opt.label} <ChevronRight size={14} className="inline opacity-50" />
           </button>
-          <p className={`text-[11px] text-center ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-            Replays the blueprint as a working system — gates, failures, recovery included.
-          </p>
-        </div>
-      )}
-
-      {/* Running: live step counter */}
-      {(simState === 'running' || simState === 'paused') && (
-        <div
-          className="flex items-center gap-2 rounded-lg px-3 py-2 font-mono"
-          style={{
-            fontSize: 11,
-            background: isDark ? '#04070D' : '#F6F8FB',
-            border: `1px solid ${isDark ? '#141D31' : '#E6EBF2'}`,
-            color: isDark ? 'var(--text-3)' : 'var(--text-2)',
-          }}
-          aria-live="polite"
-        >
-          <span className="relative flex" style={{ width: 8, height: 8 }} aria-hidden>
-            {simState === 'running' && (
-              <span className="absolute inline-flex h-full w-full rounded-full animate-ping" style={{ background: 'var(--accent)', opacity: 0.5 }} />
-            )}
-            <span className="relative inline-flex rounded-full" style={{ width: 8, height: 8, background: simState === 'running' ? 'var(--accent)' : 'var(--warn)', boxShadow: simState === 'running' ? '0 0 8px var(--accent)' : 'none' }} />
-          </span>
-          {simState === 'running' ? 'executing' : 'paused'} · {trace.length} step{trace.length === 1 ? '' : 's'}
-          {simState === 'running' && (
-            <span className="flex-1 rounded-full overflow-hidden" style={{ height: 3, background: isDark ? '#141D31' : '#E6EBF2' }} aria-hidden>
-              <span className="block h-full rounded-full" style={{ width: '38%', background: 'var(--accent)', animation: 'lab-scan 1.4s ease-in-out infinite' }} />
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Interrupt gate */}
-      <AnimatePresence>
-        {currentGate?.gate === 'interrupt' && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className={`rounded-lg border p-2.5 space-y-2 ${
-              isDark ? 'bg-amber-500/5 border-amber-500/30' : 'bg-amber-50 border-amber-300'
-            }`}
-          >
-            <div className="flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <div className="text-xs leading-snug">
-                <div className={`font-semibold ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>Human gate</div>
-                <div className={isDark ? 'text-slate-300' : 'text-slate-600'}>{currentGate.gatePrompt}</div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={onApprove} className={`flex-1 px-2.5 py-2 rounded-lg text-xs font-bold ${isDark ? 'bg-emerald-500 text-emerald-950' : 'bg-emerald-600 text-white'}`} style={isDark ? { boxShadow: '0 8px 22px -8px rgba(52,211,153,0.7)' } : undefined}>
-                <Check className="w-3 h-3 inline mr-1" /> Approve
-              </button>
-              <button onClick={onReject} className={`flex-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${isDark ? 'border-rose-500/40 text-rose-400' : 'border-rose-300 text-rose-600'}`}>
-                Reject
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {currentGate?.gate === 'failure' && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className={`rounded-lg border p-2.5 space-y-2 ${
-              isDark ? 'bg-rose-500/5 border-rose-500/30' : 'bg-rose-50 border-rose-300'
-            }`}
-          >
-            <div className="flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-              <div className="text-xs leading-snug">
-                <div className={`font-semibold ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>System failure</div>
-                <div className={isDark ? 'text-slate-300' : 'text-slate-600'}>{currentGate.label}</div>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              {currentGate.recoveryOptions?.map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => onRecover(opt.id)}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs border transition ${
-                    isDark
-                      ? 'border-slate-700 text-slate-300 hover:border-blue-500/50 hover:bg-blue-500/5'
-                      : 'border-slate-300 text-slate-600 hover:border-blue-400 hover:bg-blue-50'
-                  }`}
-                >
-                  {opt.label} <ChevronRight className="w-3 h-3 inline opacity-50" />
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Trace — timeline */}
-      {trace.length > 0 && (
-        <div className="relative pl-4 max-h-44 overflow-y-auto scrollbar-thin" style={{ paddingTop: 2 }}>
-          <span aria-hidden className="absolute left-[5px] top-2 bottom-2 rounded-full" style={{ width: 2, background: isDark ? '#1B2740' : '#E2E8F0' }} />
-          <div className="space-y-2">
-            {trace.map((t) => {
-              const dot = t.step.kind === 'error' ? '#F87171' : t.step.kind === 'tool-call' ? '#3B82F6' : t.step.kind === 'complete' ? '#34D399' : t.step.kind === 'warn' ? '#FBBF24' : isDark ? '#475569' : '#94A3B8';
-              return (
-                <div key={t.index} className="relative text-[11px] font-mono flex items-start gap-2">
-                  <span
-                    aria-hidden
-                    className="absolute rounded-full"
-                    style={{ left: -13.5, top: 4, width: 7, height: 7, background: dot, boxShadow: `0 0 6px ${dot}` }}
-                  />
-                  <span className="flex-1 leading-snug" style={{ color: isDark ? 'var(--text-3)' : 'var(--text-2)' }}>
-                    <span style={{ color: dot, fontWeight: 700 }}>{t.step.kind}</span>{' '}
-                    <span style={{ color: isDark ? '#E2E8F0' : '#0F172A' }}>{t.step.label}</span>
-                    {t.step.invocation && <span style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}> · {t.step.invocation}</span>}
-                    {t.outcomeNote && <span style={{ color: 'var(--warn)' }}> — {t.outcomeNote}</span>}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+        ))}
+        <p className="font-mono text-center" style={{ fontSize: 10.5, color: isDark ? 'var(--text-4)' : 'var(--text-3)', paddingTop: 2 }}>
+          the canvas holds its breath — decide to continue the run
+        </p>
+      </div>
     </div>
   );
 };

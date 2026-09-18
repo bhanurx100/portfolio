@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FlaskConical, RotateCcw, ChevronDown } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useLabMachine, selectCurrentGate } from '../../../hooks/useLabMachine';
 import { scenarioMeta, lensTransforms, systemLenses } from '../../../data/build-engine/scenarios';
@@ -21,13 +21,14 @@ import {
   LensSwitcher,
   EventTicker,
   NodeInspector,
-  SimulationPanel,
+  RunDock,
+  TraceTimeline,
+  GateCard,
   AddOnStrip,
   DecisionPanel,
   EvidencePanel,
   ProductionJourney,
 } from './LabPanels';
-import { MobileLab } from './MobileLab';
 
 export const BuilderLabSection: React.FC = () => {
   const { theme } = useTheme();
@@ -43,8 +44,6 @@ export const BuilderLabSection: React.FC = () => {
   const lensMeta = systemLenses.find((l) => l.id === state.activeLens);
   const selectedNode = state.nodes.find((n) => n.id === state.selectedNodeId) ?? null;
   const showWorkspace = state.phase !== 'idle' && state.phase !== 'understanding';
-  const simActive = state.simState === 'running' || state.simState === 'paused' || state.simState === 'gate';
-  const railMode: 'runtime' | 'inspector' = simActive || !selectedNode ? 'runtime' : 'inspector';
   const [eventsOpen, setEventsOpen] = useState(false);
 
   return (
@@ -153,142 +152,137 @@ export const BuilderLabSection: React.FC = () => {
             {/* Console body */}
             <div className="p-3 sm:p-4">
             {/* MOBILE (<lg): one major idea per viewport — segmented switcher */}
-            <div className="lg:hidden">
-              <MobileLab
-                state={state}
-                gate={gate}
-                lensDef={lensDef}
-                lensMeta={lensMeta}
-                selectedNode={selectedNode}
-                actions={actions}
+            {/* STAGE: one console for every viewport — canvas with floating HUD */}
+            <div
+              className="relative rounded-2xl border overflow-hidden"
+              style={{
+                borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+                background: isDark ? '#05080F' : '#EDF1F7',
+              }}
+            >
+              <SystemCanvas
+                nodes={state.nodes}
+                edges={state.edges}
+                activeEdgeIds={state.activeEdgeIds}
+                lensEmphasis={new Set(lensDef?.emphasize ?? [])}
+                lensAnnotations={lensDef?.annotations ?? {}}
+                decisionHighlights={state.decisionHighlights}
+                selectedNodeId={state.selectedNodeId}
+                starvedIds={state.starvedIds}
+                simState={state.simState}
+                variant={state.layoutVariant}
+                onVariantChange={actions.setLayoutVariant}
+                onSelectNode={actions.selectNode}
               />
-            </div>
 
-            {/* DESKTOP (lg+): spatial two-column workspace */}
-            <div className="hidden lg:grid grid-cols-[1fr_340px] gap-5 items-start">
-              {/* Left: canvas + lens bar */}
-              <div className="space-y-3 min-w-0">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
-                  <div className="flex items-center gap-2">
-                    {lensMeta && (
-                      <span className={`hidden xl:inline text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`} title={lensDef ? Object.keys(lensDef.annotations).length + ' annotations' : ''}>
-                        {lensMeta.question}
-                      </span>
-                    )}
-                    <button
-                      onClick={actions.reset}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono border transition ${
-                        isDark ? 'border-slate-800 text-slate-400 hover:text-slate-200' : 'border-slate-200 text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      <RotateCcw className="w-3 h-3" /> New idea
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  className={`relative rounded-2xl border overflow-hidden ${
-                    isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'
-                  }`}
-                  style={isDark ? { boxShadow: '0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 56px color-mix(in srgb, var(--accent) 12%, transparent)' } : undefined}
-                >
-                  {/* Blueprint header — the canvas reads as an instrument, not a widget */}
-                  <div
-                    className="flex items-center justify-between gap-3 px-4 py-2 border-b"
-                    style={{
-                      borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
-                      background: isDark ? 'rgba(15,23,42,0.6)' : 'rgba(248,250,252,0.7)',
-                    }}
-                  >
-                    <span className="text-[10.5px] font-mono uppercase tracking-wider" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
-                      System blueprint
-                    </span>
-                    {lensMeta && (
-                      <span className="hidden xl:inline text-[11px] font-mono truncate" style={{ color: 'var(--accent)' }} title={lensMeta.question}>
-                        {lensMeta.label} · {lensMeta.question}
-                      </span>
-                    )}
-                  </div>
-                  <SystemCanvas
-                    nodes={state.nodes}
-                    edges={state.edges}
-                    activeEdgeIds={state.activeEdgeIds}
-                    lensEmphasis={new Set(lensDef?.emphasize ?? [])}
-                    lensAnnotations={lensDef?.annotations ?? {}}
-                    decisionHighlights={state.decisionHighlights}
-                    selectedNodeId={state.selectedNodeId}
-                    starvedIds={state.starvedIds}
-                    simState={state.simState}
-                    variant={state.layoutVariant}
-                    onVariantChange={actions.setLayoutVariant}
-                    onSelectNode={actions.selectNode}
-                  />
-                </div>
-
-                {/* Add-on strip under canvas */}
-                {state.system && (
-                  <AddOnStrip system={state.system} applied={state.appliedAddOns} onApply={actions.applyAddOn} />
-                )}
+              {/* Lens dock — top-left */}
+              <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-110px)]" title={lensMeta?.question}>
+                <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
               </div>
 
-              {/* Right: ONE contextual panel — progressive disclosure.
-                  While the system runs (or a gate is open) the runtime owns
-                  the rail; otherwise a selected node owns it; when nothing
-                  is active the rail offers the next step. */}
-              <div className="space-y-3 lg:sticky lg:top-20">
-                <AnimatePresence mode="wait" initial={false}>
-                  {railMode === 'runtime' ? (
+              {/* New idea — top-right */}
+              <div className="absolute right-3 top-3 z-20">
+                <button
+                  onClick={actions.reset}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-mono border backdrop-blur-xl transition"
+                  style={{
+                    borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+                    background: isDark ? 'rgba(10,15,27,0.9)' : 'rgba(255,255,255,0.92)',
+                    color: isDark ? 'var(--text-3)' : 'var(--text-2)',
+                  }}
+                >
+                  <RotateCcw className="w-3 h-3" /> New idea
+                </button>
+              </div>
+
+              {/* Trace timeline — bottom-left, above the dock */}
+              <div className="absolute left-3 bottom-[78px] sm:bottom-3 z-20">
+                <TraceTimeline trace={state.trace} />
+              </div>
+
+              {/* Inspector — floating card */}
+              <AnimatePresence>
+                {selectedNode && (
+                  <motion.div
+                    key="inspector"
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute z-20 left-3 right-3 bottom-[78px] sm:left-auto sm:right-3 sm:top-14 sm:bottom-auto sm:w-[300px]"
+                  >
+                    <NodeInspector
+                      node={selectedNode}
+                      onClose={() => actions.selectNode(null)}
+                      onRemove={actions.removeNode}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Run dock — bottom-center */}
+              <div className="absolute z-20 bottom-3 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-24px)]">
+                <RunDock
+                  simState={state.simState}
+                  steps={state.trace.length}
+                  onStart={actions.startSim}
+                  onPause={actions.pauseSim}
+                  onResume={actions.resumeSim}
+                  onReset={actions.resetSim}
+                />
+              </div>
+
+              {/* Gate spotlight */}
+              <AnimatePresence>
+                {gate && (
+                  <motion.div
+                    key="gate"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="absolute inset-0 z-30 flex items-center justify-center p-4"
+                    style={{
+                      background: isDark ? 'rgba(2,6,16,0.62)' : 'rgba(15,23,42,0.45)',
+                      backdropFilter: 'blur(3px)',
+                    }}
+                  >
                     <motion.div
-                      key="runtime"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.18 }}
+                      initial={{ scale: 0.94, y: 12 }}
+                      animate={{ scale: 1, y: 0 }}
+                      exit={{ scale: 0.96, y: 8 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+                      className="w-full max-w-sm"
                     >
-                      <SimulationPanel
-                        simState={state.simState}
-                        currentGate={gate}
-                        trace={state.trace}
-                        onStart={actions.startSim}
-                        onPause={actions.pauseSim}
-                        onResume={actions.resumeSim}
-                        onReset={actions.resetSim}
+                      <GateCard
+                        gate={gate}
                         onApprove={actions.approveGate}
                         onReject={actions.rejectGate}
                         onRecover={actions.recover}
                       />
                     </motion.div>
-                  ) : (
-                    <motion.div
-                      key="inspector"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.18 }}
-                    >
-                      <NodeInspector
-                        node={selectedNode}
-                        onClose={() => actions.selectNode(null)}
-                        onRemove={actions.removeNode}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-                {/* Events: collapsed to a live ticker, expandable on demand */}
+            {/* Under-stage: add-ons + events + decision entry */}
+            <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_340px]">
+              <div className="space-y-3 min-w-0">
+                {state.system && (
+                  <AddOnStrip system={state.system} applied={state.appliedAddOns} onApply={actions.applyAddOn} />
+                )}
                 <EventTicker
                   events={state.events}
                   expanded={eventsOpen}
                   onToggle={() => setEventsOpen((v) => !v)}
                 />
-
-                {/* Decision mode — only offered when the system has real
-                    tradeoffs; opens inline below the workspace */}
+              </div>
+              <div>
                 {state.system && state.system.decisions.length > 0 && state.decisionIndex === null && (
                   <button
                     onClick={actions.openDecisions}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-semibold border transition ${
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold border transition ${
                       isDark ? 'border-slate-700 text-slate-200 hover:border-slate-500' : 'border-slate-300 text-slate-700 hover:border-slate-400'
                     }`}
                   >
@@ -297,8 +291,8 @@ export const BuilderLabSection: React.FC = () => {
                 )}
               </div>
             </div>
-            </div>
           </div>
+        </div>
         )}
 
         {/* Journey — only once a system has a shape (earned, like evidence) */}
