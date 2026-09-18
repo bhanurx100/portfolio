@@ -852,8 +852,8 @@ export const StatTile: React.FC<{ label: string; value: number; accent?: boolean
   <div
     className="rounded-2xl border p-3.5"
     style={{
-      background: 'rgba(148,163,184,0.06)',
-      borderColor: accent ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : 'rgba(148,163,184,0.18)',
+      background: isDark ? 'rgba(148,163,184,0.06)' : '#fff',
+      borderColor: accent ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : isDark ? 'rgba(148,163,184,0.18)' : 'var(--line)',
       boxShadow: accent ? '0 0 28px color-mix(in srgb, var(--accent) 18%, transparent)' : 'none',
     }}
   >

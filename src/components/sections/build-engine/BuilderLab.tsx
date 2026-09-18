@@ -32,8 +32,6 @@ import {
   StatTile,
 } from './LabPanels';
 
-const MARQUEE = ['UNDERSTAND', 'MODEL', 'DESIGN', 'BUILD', 'STRESS', 'MEASURE', 'SHIP'];
-
 export const BuilderLabSection: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -50,74 +48,37 @@ export const BuilderLabSection: React.FC = () => {
   const showWorkspace = state.phase !== 'idle' && state.phase !== 'understanding';
   const [eventsOpen, setEventsOpen] = useState(false);
 
-  const hairline = 'rgba(148,163,184,0.16)';
+  const hairline = isDark ? 'var(--line-dark)' : 'var(--line)';
 
   return (
     <section
       id="builder-lab"
       aria-label="Builder Lab — interactive system experience"
-      className="relative overflow-hidden border-b"
-      style={{ borderColor: hairline, background: isDark ? '#020409' : '#070D1D' }}
+      className="py-20 sm:py-28 border-b"
+      style={{ borderColor: hairline }}
     >
-      {/* Atmosphere */}
-      <div aria-hidden className="absolute inset-0 pointer-events-none">
-        <div className="absolute lab-aurora-a rounded-full" style={{ width: 560, height: 560, left: '-140px', top: '-160px', background: 'radial-gradient(circle, rgba(59,130,246,0.16), transparent 65%)', filter: 'blur(50px)' }} />
-        <div className="absolute lab-aurora-b rounded-full" style={{ width: 620, height: 620, right: '-180px', top: '22%', background: 'radial-gradient(circle, rgba(139,92,246,0.13), transparent 65%)', filter: 'blur(60px)' }} />
-        <div className="absolute rounded-full" style={{ width: 480, height: 480, left: '32%', bottom: '-260px', background: 'radial-gradient(circle, rgba(34,211,238,0.09), transparent 65%)', filter: 'blur(60px)' }} />
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(rgba(148,163,184,0.10) 1px, transparent 1px)', backgroundSize: '26px 26px', maskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
-        <div className="absolute inset-0 lab-noise" style={{ opacity: 0.05 }} />
-      </div>
-
-      <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 sm:py-28 space-y-8 sm:space-y-10">
-        {/* Ghost word */}
-        <div aria-hidden className="lab-ghost font-display select-none pointer-events-none absolute right-2 sm:right-6 top-12 sm:top-16" style={{ fontSize: 'clamp(90px, 16vw, 220px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1 }}>
-          LAB
-        </div>
-
-        {/* Giant header */}
-        <div className="relative max-w-3xl space-y-5">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 rounded-lg border px-2.5 py-1 text-[11px] font-mono" style={{ borderColor: 'rgba(148,163,184,0.3)', color: 'var(--accent)' }}>
-              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }} />
-              Builder Lab
-            </span>
-            <span className="text-[11px] font-mono" style={{ color: '#7C8DB0' }}>
-              live · runs in your browser
-            </span>
-          </div>
-          <h2 className="font-display" style={{ fontSize: 'clamp(38px, 6vw, 68px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#F8FAFC', lineHeight: 1.02 }}>
-            Describe a problem.
-            <br />
-            <span style={{ background: 'linear-gradient(100deg, #60A5FA, #A78BFA 60%, #22D3EE)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-              Watch the system form.
-            </span>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+        {/* Editorial header — same language as every other section */}
+        <div className="max-w-2xl space-y-4">
+          <p className="tech-label" style={{ color: 'var(--accent)' }}>Builder Lab</p>
+          <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
+            Describe a problem. Watch the system form.
           </h2>
-          <p style={{ fontSize: 16.5, lineHeight: 1.65, color: '#AEBBCE', maxWidth: 560 }}>
+          <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
             The same loop as How I Build, made touchable: drop an idea, see a typed system
             assemble itself, run it, break it, and read the shape of the software underneath —
             the recovery behavior is the point.
+            <span className="font-mono" style={{ fontSize: 12.5, color: 'var(--text-4)' }}> · live · runs in your browser</span>
           </p>
           {!showWorkspace && (
             <div className="flex flex-wrap gap-2">
               {['deterministic engine', 'optional AI interpretation', 'no account · no key'].map((b) => (
-                <span key={b} className="font-mono rounded-full border" style={{ fontSize: 11, padding: '5px 12px', color: '#AEBBCE', borderColor: 'rgba(148,163,184,0.28)', background: 'rgba(148,163,184,0.06)' }}>
+                <span key={b} className="font-mono rounded-full border" style={{ fontSize: 11, padding: '5px 12px', color: 'var(--text-2)', borderColor: hairline }}>
                   {b}
                 </span>
               ))}
             </div>
           )}
-        </div>
-
-        {/* Stage marquee */}
-        <div aria-hidden className="relative overflow-hidden" style={{ borderTop: `1px solid ${hairline}`, borderBottom: `1px solid ${hairline}` }}>
-          <div className="lab-marquee flex w-max items-center gap-8 font-mono whitespace-nowrap" style={{ padding: '10px 0', fontSize: 11.5, letterSpacing: '0.14em', color: '#5B6B85' }}>
-            {[...MARQUEE, ...MARQUEE].map((m, i) => (
-              <span key={i} className="flex items-center gap-8">
-                <span>{m}</span>
-                <span style={{ color: 'var(--accent)' }}>◆</span>
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* IDLE / UNDERSTANDING: command deck */}
@@ -131,7 +92,7 @@ export const BuilderLabSection: React.FC = () => {
               className="py-2"
             >
               {state.phase === 'idle' ? (
-                <IdeaInput deck onSubmit={actions.submitIdea} suggestions={scenarioMeta.map((s) => ({ chip: s.chip, example: s.example }))} />
+                <IdeaInput onSubmit={actions.submitIdea} suggestions={scenarioMeta.map((s) => ({ chip: s.chip, example: s.example }))} />
               ) : (
                 <UnderstandingBanner idea={state.idea} rationale={state.rationale} matchedSignals={state.matchedSignals} />
               )}
@@ -180,17 +141,17 @@ export const BuilderLabSection: React.FC = () => {
                 >
                   {state.simState === 'running' ? '● running' : state.simState === 'gate' ? '◆ decision' : state.simState === 'done' ? '■ complete' : state.phase}
                 </span>
-                <span className="hidden md:inline" style={{ color: '#7C8DB0' }}>
+                <span className="hidden md:inline" style={{ color: 'var(--text-3)' }}>
                   {state.nodes.length} nodes · {state.edges.length} edges
                 </span>
-              <span className="flex-1" />
-              <span className="hidden sm:inline" style={{ color: '#7C8DB0' }}>
-                lens · {state.activeLens}
-              </span>
+                <span className="flex-1" />
+                <span className="hidden sm:inline" style={{ color: 'var(--text-3)' }}>
+                  lens · {state.activeLens}
+                </span>
               <button
                 onClick={actions.reset}
                 className="flex items-center gap-1.5 rounded-full font-mono border transition"
-                style={{ padding: '4px 11px', fontSize: 10.5, borderColor: 'rgba(148,163,184,0.3)', color: '#AEBBCE', background: 'transparent' }}
+                style={{ padding: '4px 11px', fontSize: 10.5, borderColor: hairline, color: 'var(--text-2)', background: 'transparent' }}
                 title="Start over with a new idea"
               >
                 <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">New idea</span>
@@ -376,19 +337,19 @@ export const BuilderLabSection: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl mx-auto rounded-2xl border p-5 text-center space-y-3"
-            style={{ borderColor: 'rgba(148,163,184,0.25)', background: 'rgba(148,163,184,0.05)' }}
+            style={{ borderColor: hairline, background: isDark ? 'var(--surface-1)' : '#fff' }}
           >
-            <div className="text-sm font-semibold" style={{ color: '#F8FAFC' }}>
+            <div className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
               Ready to build the real version of this?
             </div>
-            <p className="text-xs" style={{ color: '#AEBBCE' }}>
+            <p className="text-xs" style={{ color: 'var(--text-2)' }}>
               {state.idea ? `Idea: “${state.idea}”` : 'Every system above maps to patterns I have shipped.'} — interested in{' '}
               {state.system?.domain ?? 'this class of system'}? Let's talk.
             </p>
             <a
               href="#contact"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition"
-              style={{ background: '#F8FAFC', color: '#0B1120' }}
+              style={{ background: isDark ? '#F1F5F9' : '#0F172A', color: isDark ? '#0B1120' : '#F8FAFC' }}
             >
               Start a conversation
             </a>
