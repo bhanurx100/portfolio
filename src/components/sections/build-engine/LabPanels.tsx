@@ -642,6 +642,53 @@ export const DecisionPanel: React.FC<{
 };
 
 /* ------------------------------------------------------------------ */
+/* Production journey — idea → honest toolchain                        */
+/* ------------------------------------------------------------------ */
+
+const DOMAIN_MAP: Record<string, { human: string; project: string }> = {
+  finance: { human: 'finance & settlement', project: 'SplitFin' },
+  operations: { human: 'operations & logistics', project: 'StayEase' },
+  logistics: { human: 'operations & logistics', project: 'StayEase' },
+  support: { human: 'service & support', project: 'StayEase + SplitFin' },
+  knowledge: { human: 'knowledge & search', project: 'StayEase + SplitFin' },
+};
+
+const JOURNEY_STEPS = [
+  { n: '01', label: 'Blueprint', detail: 'composed from typed patterns — deterministic, no account' },
+  { n: '02', label: 'Native core', detail: 'Expo SDK 52 · React Native, one codebase both stores' },
+  { n: '03', label: 'Realtime data', detail: 'Supabase · Postgres · PostGIS, offline-first sync' },
+  { n: '04', label: 'Quality', detail: 'Maestro E2E on iOS + Android simulators' },
+] as const;
+
+export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const map = domain ? DOMAIN_MAP[domain] : undefined;
+  const project = map?.project ?? 'StayEase + SplitFin';
+
+  return (
+    <div className={`${panel(isDark)} p-4`}>
+      <div className={`${panelTitle(isDark)} mb-3 flex items-center gap-1.5`}>
+        <Layers className="w-3 h-3" /> From idea to production
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        {JOURNEY_STEPS.map((s) => (
+          <div key={s.n} className={`rounded-lg border p-2.5 ${isDark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-slate-50/60'}`}>
+            <div className="text-[10px] font-mono" style={{ color: 'var(--accent)', fontWeight: 700 }}>{s.n}</div>
+            <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.label}</div>
+            <div className={`mt-0.5 text-[10.5px] leading-snug ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{s.detail}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px]" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+        {map ? `This class of system — ${map.human} — uses patterns I have actually shipped in ` : 'The patterns above are shaped and proven in '}
+        <span className="tech-label" style={{ color: 'var(--accent)', textTransform: 'none', letterSpacing: 0 }}>{project}</span>.
+      </p>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /* Evidence — connect claims to real work                              */
 /* ------------------------------------------------------------------ */
 

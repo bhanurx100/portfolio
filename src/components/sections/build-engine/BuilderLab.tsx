@@ -25,6 +25,7 @@ import {
   AddOnStrip,
   DecisionPanel,
   EvidencePanel,
+  ProductionJourney,
 } from './LabPanels';
 import { MobileLab } from './MobileLab';
 
@@ -250,6 +251,13 @@ export const BuilderLabSection: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+
+        {/* Journey — only once a system has a shape (earned, like evidence) */}
+        {state.system && state.phase !== 'understanding' && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
+            <ProductionJourney domain={state.system.domain} />
+          </motion.div>
         )}
 
         {/* Decision panel (inline expansion, full width under workspace) */}
