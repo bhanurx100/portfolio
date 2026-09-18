@@ -139,6 +139,14 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
             <stop offset="55%" stopColor={isDark ? '#000000' : '#0f172a'} stopOpacity="0" />
             <stop offset="100%" stopColor={isDark ? '#000000' : '#0f172a'} stopOpacity={isDark ? 0.32 : 0.07} />
           </radialGradient>
+          <radialGradient id="labamb-a" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity={isDark ? 0.14 : 0.08} />
+            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="labamb-b" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={isDark ? 0.12 : 0.07} />
+            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
         {/* Ambient grid — quiet technical texture */}
@@ -146,6 +154,9 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
           <circle cx="1" cy="1" r="1" fill={gridColor} />
         </pattern>
         <rect width={dims.w} height={dims.h} fill="url(#labgrid)" />
+        {/* Ambient depth layers */}
+        <ellipse cx={dims.w * 0.2} cy={dims.h * 0.18} rx={dims.w * 0.32} ry={dims.h * 0.4} fill="url(#labamb-a)" />
+        <ellipse cx={dims.w * 0.84} cy={dims.h * 0.82} rx={dims.w * 0.3} ry={dims.h * 0.38} fill="url(#labamb-b)" />
 
         {/* Edges */}
         <g>
@@ -183,6 +194,16 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                     <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.8s" repeatCount="indefinite" />
                   )}
                 </motion.path>
+                {/* Flow packets ride active edges while the sim breathes */}
+                {isActive && !reduceMotion && (simState === 'running' || simState === 'gate') && (
+                  <g pointerEvents="none">
+                    {[0, 1].map((k) => (
+                      <circle key={k} r={k === 0 ? 3.2 : 2.2} fill={k === 0 ? '#93c5fd' : '#3b82f6'} opacity={0.95} style={{ filter: 'drop-shadow(0 0 5px #3b82f6)' }}>
+                        <animateMotion dur={`${1.1 + k * 0.55}s`} begin={`${k * 0.55}s`} repeatCount="indefinite" path={d} />
+                      </circle>
+                    ))}
+                  </g>
+                )}
                 {edge.label && !dimmed && (
                   <text
                     x={mx}
@@ -246,6 +267,9 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
 
                 {/* Node card */}
                 <g transform={`translate(${node.x - 62}, ${node.y - 34})`}>
+                  {(isSelected || isDecisionHighlight) && (
+                    <rect x={-5} y={-5} width={134} height={78} rx={16} fill="none" stroke={tone.base} strokeWidth={1.5} opacity={0.75} style={{ filter: `drop-shadow(0 0 10px ${tone.base})` }} />
+                  )}
                   <rect
                     width="124"
                     height="68"
@@ -255,6 +279,18 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                     strokeWidth={isSelected || isDecisionHighlight ? 1.8 : 1.2}
                   />
                   <rect x="0" y="0" width="124" height="4" rx="2" fill={tone.base} opacity={isStarved ? 0.3 : 0.85} />
+                  {/* Status LED */}
+                  <circle
+                    cx={112}
+                    cy={12}
+                    r={3.4}
+                    fill={isStarved ? '#f59e0b' : tone.base}
+                    style={(isSelected || isDecisionHighlight) ? { filter: `drop-shadow(0 0 5px ${isStarved ? '#f59e0b' : tone.base})` } : undefined}
+                  >
+                    {isDecisionHighlight && !reduceMotion && (
+                      <animate attributeName="opacity" values="1;0.4;1" dur="1.2s" repeatCount="indefinite" />
+                    )}
+                  </circle>
 
                   <g transform="translate(10, 12)">
                     <Icon className="w-4 h-4" style={{ color: isStarved ? mutedText : toneText }} />

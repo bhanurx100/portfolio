@@ -103,18 +103,24 @@ export const BuilderLabSection: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* WORKSPACE: canvas + panels */}
+        {/* WORKSPACE: system console */}
         {showWorkspace && (
-          <>
-            {/* Console status bar */}
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{
+              borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+              background: isDark ? 'rgba(2,6,16,0.35)' : 'var(--surface-2)',
+              boxShadow: isDark ? '0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent), 0 24px 64px -24px rgba(0,0,0,0.7)' : 'var(--shadow-2)',
+            }}
+          >
+            {/* Console header */}
             <div
-              className="flex items-center gap-3 rounded-xl border font-mono"
+              className="flex items-center gap-3 font-mono"
               style={{
-                padding: '8px 14px',
+                padding: '9px 14px',
                 fontSize: 11,
-                borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
-                background: isDark ? 'rgba(2,6,16,0.55)' : '#fff',
-                boxShadow: isDark ? '0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-1)',
+                borderBottom: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}`,
+                background: isDark ? 'rgba(15,23,42,0.65)' : 'rgba(255,255,255,0.85)',
               }}
               aria-live="polite"
             >
@@ -124,15 +130,28 @@ export const BuilderLabSection: React.FC = () => {
                 ))}
               </span>
               <span style={{ color: 'var(--accent)', fontWeight: 700 }}>SYSTEM CONSOLE</span>
-              <span style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
-                {state.phase} · {state.nodes.length} nodes · {state.edges.length} edges
-                {state.simState === 'running' ? ' · ● running' : state.simState === 'gate' ? ' · ◆ decision' : ''}
+              <span
+                className="rounded-full"
+                style={{
+                  padding: '2px 9px',
+                  fontWeight: 700,
+                  color: state.simState === 'running' ? 'var(--accent)' : state.simState === 'gate' ? 'var(--warn)' : state.simState === 'done' ? 'var(--ok)' : isDark ? 'var(--text-3)' : 'var(--text-2)',
+                  background: state.simState === 'running' ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : state.simState === 'gate' ? 'color-mix(in srgb, var(--warn) 12%, transparent)' : state.simState === 'done' ? 'color-mix(in srgb, var(--ok) 12%, transparent)' : 'transparent',
+                  border: `1px solid ${state.simState === 'idle' ? (isDark ? 'var(--line-dark)' : 'var(--line)') : 'transparent'}`,
+                }}
+              >
+                {state.simState === 'running' ? '● running' : state.simState === 'gate' ? '◆ decision' : state.simState === 'done' ? '■ complete' : state.phase}
+              </span>
+              <span className="hidden md:inline" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+                {state.nodes.length} nodes · {state.edges.length} edges
               </span>
               <span className="flex-1" />
               <span className="hidden sm:inline" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
                 lens · {state.activeLens}
               </span>
             </div>
+            {/* Console body */}
+            <div className="p-3 sm:p-4">
             {/* MOBILE (<lg): one major idea per viewport — segmented switcher */}
             <div className="lg:hidden">
               <MobileLab
@@ -278,7 +297,8 @@ export const BuilderLabSection: React.FC = () => {
                 )}
               </div>
             </div>
-          </>
+            </div>
+          </div>
         )}
 
         {/* Journey — only once a system has a shape (earned, like evidence) */}

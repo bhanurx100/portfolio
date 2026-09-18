@@ -214,7 +214,16 @@ export const LensSwitcher: React.FC<{
   const isDark = theme === 'dark';
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none" role="tablist" aria-label="System lens">
+    <div
+      className="flex items-center gap-1.5 overflow-x-auto scrollbar-none rounded-full border"
+      style={{
+        padding: '4px 8px 4px 10px',
+        borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+        background: isDark ? 'rgba(2,6,16,0.5)' : '#fff',
+      }}
+      role="tablist"
+      aria-label="System lens"
+    >
       <Eye className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
       {lenses.map((l) => (
         <button
@@ -556,21 +565,30 @@ export const SimulationPanel: React.FC<{
         )}
       </AnimatePresence>
 
-      {/* Trace */}
+      {/* Trace — timeline */}
       {trace.length > 0 && (
-        <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-thin">
-          {trace.map((t) => (
-            <div key={t.index} className={`text-[11px] font-mono flex items-start gap-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              <span className={t.step.kind === 'error' ? 'text-rose-500' : t.step.kind === 'tool-call' ? 'text-blue-500' : t.step.kind === 'complete' ? 'text-emerald-500' : ''}>
-                {t.step.kind}
-              </span>
-              <span className="flex-1">
-                {t.step.label}
-                {t.step.invocation && <span className={isDark ? 'text-slate-600' : 'text-slate-400'}> · {t.step.invocation}</span>}
-                {t.outcomeNote && <span className={isDark ? 'text-amber-400/80' : 'text-amber-600'}> — {t.outcomeNote}</span>}
-              </span>
-            </div>
-          ))}
+        <div className="relative pl-4 max-h-44 overflow-y-auto scrollbar-thin" style={{ paddingTop: 2 }}>
+          <span aria-hidden className="absolute left-[5px] top-2 bottom-2 rounded-full" style={{ width: 2, background: isDark ? '#1B2740' : '#E2E8F0' }} />
+          <div className="space-y-2">
+            {trace.map((t) => {
+              const dot = t.step.kind === 'error' ? '#F87171' : t.step.kind === 'tool-call' ? '#3B82F6' : t.step.kind === 'complete' ? '#34D399' : t.step.kind === 'warn' ? '#FBBF24' : isDark ? '#475569' : '#94A3B8';
+              return (
+                <div key={t.index} className="relative text-[11px] font-mono flex items-start gap-2">
+                  <span
+                    aria-hidden
+                    className="absolute rounded-full"
+                    style={{ left: -13.5, top: 4, width: 7, height: 7, background: dot, boxShadow: `0 0 6px ${dot}` }}
+                  />
+                  <span className="flex-1 leading-snug" style={{ color: isDark ? 'var(--text-3)' : 'var(--text-2)' }}>
+                    <span style={{ color: dot, fontWeight: 700 }}>{t.step.kind}</span>{' '}
+                    <span style={{ color: isDark ? '#E2E8F0' : '#0F172A' }}>{t.step.label}</span>
+                    {t.step.invocation && <span style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}> · {t.step.invocation}</span>}
+                    {t.outcomeNote && <span style={{ color: 'var(--warn)' }}> — {t.outcomeNote}</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
