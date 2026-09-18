@@ -1,25 +1,23 @@
 /**
- * How I Build — anatomy of shipped work.
+ * Build stages — shared loop module.
  *
- * A different theme on purpose: engineering blueprint. Each stage is a
- * dimensioned technical drawing of a REAL fragment (SplitFin's ledger model,
- * StayEase's booking flow, the failure paths, the release loop), annotated
- * with numbered callouts. Auto-drafts through the sheets; pause on hover.
- * Paper background adapts (light sheet / blueprint sheet), ink stays legible.
+ * The seven-stage method as data + blueprint drawings, plus the LoopStrip:
+ * a snap-scroll sheet browser with one expanded sheet. Used inside the
+ * Builder Lab section so method and playground live together.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'motion/react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext';
 import { useReducedMotion } from 'motion/react';
-import { Play, Pause, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface Callout {
+export interface Callout {
   n: string;
   text: string;
 }
 
-interface Stage {
+export interface BuildStage {
   id: string;
   n: string;
   title: string;
@@ -29,7 +27,7 @@ interface Stage {
   evidence: { text: string; ref: string };
 }
 
-const STAGES: Stage[] = [
+export const STAGES: BuildStage[] = [
   {
     id: 'understand', n: '01', title: 'Understand', fig: 'Problem statement',
     question: 'What problem are we solving, for whom, and what does “better” mean?',
@@ -78,7 +76,7 @@ const STAGES: Stage[] = [
       { n: '2', text: 'No signal detours through the offline queue, then rejoins.' },
       { n: '3', text: 'Retries are idempotent — retry ×3 never double-charges.' },
     ],
-    evidence: { text: 'The Builder Lab below runs this detour live.', ref: 'Builder Lab' },
+    evidence: { text: 'The Builder Lab above runs this detour live — press Break.', ref: 'Builder Lab' },
   },
   {
     id: 'measure', n: '06', title: 'Measure', fig: 'Honest instrumentation',
@@ -102,13 +100,7 @@ const STAGES: Stage[] = [
   },
 ];
 
-const STEP_MS = 4200;
-
-/* ------------------------------------------------------------------ */
-/* Drawing primitives                                                   */
-/* ------------------------------------------------------------------ */
-
-interface Ink {
+export interface Ink {
   line: string;
   soft: string;
   faint: string;
@@ -116,7 +108,22 @@ interface Ink {
   paper: string;
 }
 
-function Frame({ n, fig, ink, children }: { n: string; fig: string; ink: Ink; children: React.ReactNode }) {
+export function useInk(): { ink: Ink; isDark: boolean; sheetBg: string; sheetEdge: string; line: string } {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const ink: Ink = isDark
+    ? { line: '#DCE6F5', soft: '#9DB1CC', faint: '#5F7091', accent: '#7FB3FF', paper: '#0B2547' }
+    : { line: '#1E3A8A', soft: '#3B5BA9', faint: '#8AA0C8', accent: '#1D4ED8', paper: '#FFFFFF' };
+  return {
+    ink,
+    isDark,
+    sheetBg: isDark ? '#0B2547' : '#F2F6FD',
+    sheetEdge: isDark ? '#274067' : '#C4D3EC',
+    line: isDark ? 'var(--line-dark)' : 'var(--line)',
+  };
+}
+
+export function Frame({ n, fig, ink, children }: { n: string; fig: string; ink: Ink; children: React.ReactNode }) {
   return (
     <g>
       <defs>
@@ -127,7 +134,6 @@ function Frame({ n, fig, ink, children }: { n: string; fig: string; ink: Ink; ch
       <rect x={4} y={4} width={392} height={292} fill={`url(#bp-grid-${n})`} />
       <rect x={4} y={4} width={392} height={292} fill="none" stroke={ink.line} strokeWidth={1.5} />
       {children}
-      {/* Title block */}
       <g fontFamily="monospace">
         <text x={14} y={288} fontSize={9} letterSpacing={1} fill={ink.faint}>FIG. {n} — {fig.toUpperCase()}</text>
         <text x={386} y={288} fontSize={9} textAnchor="end" letterSpacing={1} fill={ink.faint}>SHEET {n}/07</text>
@@ -140,18 +146,16 @@ const T = ({ x, y, s = 11, w = 600, children, fill, anchor }: { x: number; y: nu
   <text x={x} y={y} fontSize={s} fontWeight={w} fill={fill} textAnchor={(anchor ?? 'start') as 'start' | 'middle' | 'end'}>{children}</text>
 );
 
-function Drawing({ id, ink }: { id: string; ink: Ink }) {
+export function Drawing({ id, ink }: { id: string; ink: Ink }) {
   const mono = 'monospace';
   switch (id) {
     case 'understand':
       return (
         <g>
-          {/* Speech bubble */}
           <rect x={36} y={70} width={180} height={84} rx={12} fill="none" stroke={ink.line} strokeWidth={2} strokeDasharray="7 5" />
           <T x={52} y={98} s={13} fill={ink.line}>“split the</T>
           <T x={52} y={116} s={13} fill={ink.line}>dinner bill?”</T>
           <path d="M 80 154 L 70 172 L 96 154" fill="none" stroke={ink.line} strokeWidth={2} />
-          {/* Arrow to target */}
           <line x1={216} y1={112} x2={272} y2={112} stroke={ink.accent} strokeWidth={2.5} />
           <path d="M 264 106 L 274 112 L 264 118" fill="none" stroke={ink.accent} strokeWidth={2.5} />
           <circle cx={318} cy={112} r={30} fill="none" stroke={ink.accent} strokeWidth={2.5} />
@@ -161,7 +165,6 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
             <text x={36} y={52} fontSize={10} letterSpacing={1.5} fill={ink.faint}>USER WORDS</text>
             <text x={288} y={52} fontSize={10} letterSpacing={1.5} fill={ink.faint}>“BETTER”</text>
           </g>
-          {/* Markers */}
           <circle cx={52} cy={186} r={9} fill={ink.accent} />
           <T x={52} y={189.5} s={10} w={800} fill={ink.paper} anchor="middle">1</T>
           <circle cx={318} cy={186} r={9} fill={ink.accent} />
@@ -201,25 +204,27 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
     case 'design':
       return (
         <g>
+          <rect x={94} y={34} width={32} height={64} rx={8} fill="none" stroke={ink.accent} strokeWidth={2.5} />
+          <line x1={101} y1={48} x2={119} y2={48} strokeLinecap="round" strokeWidth={3} stroke={ink.accent} />
+          <line x1={101} y1={56} x2={114} y2={56} stroke={ink.soft} strokeWidth={2.4} strokeLinecap="round" opacity={0.8} />
+          <rect x={101} y={66} width={18} height={8} rx={4} fill={ink.accent} opacity={0.9} />
+          <line x1={101} y1={82} x2={119} y2={82} stroke={ink.soft} strokeWidth={2} strokeLinecap="round" opacity={0.5} />
+          <path d="M 140 96 Q 158 96 162 78" fill="none" stroke={ink.accent} strokeWidth={1.6} strokeDasharray="3 3" opacity={0.8} />
+          <circle cx={162} cy={76} r={3} fill={ink.accent} />
           <rect x={60} y={40} width={110} height={210} rx={18} fill="none" stroke={ink.line} strokeWidth={2.5} />
           <line x1={76} y1={72} x2={154} y2={72} stroke={ink.line} strokeWidth={3} strokeLinecap="round" />
           <line x1={76} y1={86} x2={140} y2={86} stroke={ink.soft} strokeWidth={2.4} strokeLinecap="round" />
           <rect x={76} y={150} width={78} height={26} rx={13} fill={ink.accent} opacity={0.9} />
           <T x={115} y={167} s={11} w={800} fill={ink.paper} anchor="middle">RESERVE</T>
-          {/* Width dimension */}
           <line x1={60} y1={28} x2={170} y2={28} stroke={ink.faint} strokeWidth={1} />
           <line x1={60} y1={24} x2={60} y2={32} stroke={ink.faint} strokeWidth={1} />
           <line x1={170} y1={24} x2={170} y2={32} stroke={ink.faint} strokeWidth={1} />
           <T x={115} y={20} s={10} fill={ink.faint} anchor="middle">390pt</T>
-          {/* 44pt target callout */}
           <circle cx={250} cy={163} r={20} fill="none" stroke={ink.accent} strokeWidth={2} strokeDasharray="4 3" />
           <line x1={196} y1={163} x2={230} y2={163} stroke={ink.accent} strokeWidth={1.5} />
           <T x={250} y={140} s={10} fill={ink.faint} anchor="middle">⌀ 44pt min</T>
-          {/* Thumb arc */}
           <path d="M 250 250 Q 300 250 310 200" fill="none" stroke={ink.accent} strokeWidth={1.6} strokeDasharray="5 4" />
           <T x={288} y={262} s={10} fill={ink.faint} anchor="middle">thumb reach</T>
-          <circle cx={70} cy={222} r={9} fill={ink.accent} />
-          <T x={70} y={225.5} s={10} w={800} fill={ink.paper} anchor="middle">1</T>
         </g>
       );
     case 'build':
@@ -231,7 +236,6 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
               <T x={200} y={74 + i * 46} s={12} w={800} fill={i === 3 ? ink.paper : ink.line} anchor="middle">{l}</T>
             </g>
           ))}
-          {/* Type-contract band */}
           <rect x={76} y={52} width={14} height={172} rx={7} fill="none" stroke={ink.accent} strokeWidth={2} strokeDasharray="5 4" />
           <g fontFamily={mono} transform="rotate(-90 40 140)">
             <text x={40} y={140} fontSize={10} letterSpacing={2} fill={ink.faint} textAnchor="middle">TYPE CONTRACT</text>
@@ -244,14 +248,12 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
     case 'stress':
       return (
         <g>
-          {/* Happy path */}
           <rect x={30} y={100} width={70} height={30} rx={8} fill="none" stroke={ink.line} strokeWidth={2} />
           <T x={65} y={119} s={10} w={700} fill={ink.line} anchor="middle">REQUEST</T>
           <line x1={100} y1={115} x2={150} y2={115} stroke={ink.line} strokeWidth={2.5} />
           <T x={125} y={106} s={9} fill={ink.faint} anchor="middle">200 OK</T>
           <rect x={150} y={100} width={70} height={30} rx={8} fill="none" stroke={ink.line} strokeWidth={2} />
           <T x={185} y={119} s={10} w={700} fill={ink.line} anchor="middle">RECEIPT</T>
-          {/* Detour */}
           <path d="M 100 130 Q 125 200 185 200 L 285 200" fill="none" stroke={ink.accent} strokeWidth={2.2} strokeDasharray="7 5" />
           <path d="M 128 178 L 118 196 L 126 196 L 122 210" fill="none" stroke={ink.accent} strokeWidth={2.4} strokeLinejoin="round" />
           <T x={150} y={192} s={9} fill={ink.faint}>no signal</T>
@@ -295,7 +297,7 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
             <g key={t}>
               <rect x={24 + i * 92} y={110} width={76} height={44} rx={9} fill={i === 0 ? ink.accent : 'none'} stroke={i === 0 ? ink.accent : ink.line} strokeWidth={2} opacity={i === 0 ? 0.92 : 1} />
               <T x={62 + i * 92} y={135} s={10.5} w={800} fill={i === 0 ? ink.paper : ink.line} anchor="middle">{t}</T>
-              {i < 3 && <path d={`M ${104 + i * 92} 132 L ${114 + i * 92} 132`} stroke={ink.line} strokeWidth={2} />}
+              {i < 3 && <line x1={104 + i * 92} y1={132} x2={114 + i * 92} y2={132} stroke={ink.line} strokeWidth={2} />}
               {i < 3 && <path d={`M ${110 + i * 92} 128 L ${116 + i * 92} 132 L ${110 + i * 92} 136`} fill="none" stroke={ink.line} strokeWidth={2} />}
             </g>
           ))}
@@ -313,58 +315,40 @@ function Drawing({ id, ink }: { id: string; ink: Ink }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Loop strip — sheet browser fused into the Lab                        */
+/* ------------------------------------------------------------------ */
 
-export const HowIBuildSection: React.FC = () => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+const STEP_MS = 4600;
+
+export const LoopStrip: React.FC = () => {
+  const { ink, isDark, sheetBg, sheetEdge, line } = useInk();
   const reduceMotion = useReducedMotion();
-  const line = isDark ? 'var(--line-dark)' : 'var(--line)';
-
-  /* Blueprint ink: blue paper one way, white sheet the other. */
-  const ink: Ink = isDark
-    ? { line: '#DCE6F5', soft: '#9DB1CC', faint: '#5F7091', accent: '#7FB3FF', paper: '#0B2547' }
-    : { line: '#1E3A8A', soft: '#3B5BA9', faint: '#8AA0C8', accent: '#1D4ED8', paper: '#FFFFFF' };
-  const sheetBg = isDark ? '#0B2547' : '#F2F6FD';
-  const sheetEdge = isDark ? '#274067' : '#C4D3EC';
-
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  const inView = useInView(sectionRef, { margin: '-20% 0px' });
+  const stripRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(stripRef, { margin: '-15% 0px' });
   const startedRef = useRef(false);
 
   const jump = useCallback((i: number) => {
     setIdx(i);
-    setFinished(i === STAGES.length - 1);
     setPlaying(false);
   }, []);
 
   const next = useCallback(() => {
-    setIdx((v) => {
-      if (v >= STAGES.length - 1) {
-        setPlaying(false);
-        setFinished(true);
-        return v;
-      }
-      return v + 1;
-    });
+    setIdx((v) => (v >= STAGES.length - 1 ? v : v + 1));
   }, []);
 
   const prev = useCallback(() => {
-    setFinished(false);
     setPlaying(false);
     setIdx((v) => (v + STAGES.length - 1) % STAGES.length);
   }, []);
 
-  const replay = useCallback(() => {
-    setIdx(0);
-    setFinished(false);
-    if (!reduceMotion) setPlaying(true);
-  }, [reduceMotion]);
-
   useEffect(() => {
     if (!playing || !inView || reduceMotion) return;
+    if (idx >= STAGES.length - 1) {
+      setPlaying(false);
+      return;
+    }
     const t = setTimeout(next, STEP_MS);
     return () => clearTimeout(t);
   }, [playing, idx, next, inView, reduceMotion]);
@@ -372,7 +356,7 @@ export const HowIBuildSection: React.FC = () => {
   useEffect(() => {
     if (inView && !startedRef.current && !reduceMotion) {
       startedRef.current = true;
-      const t = setTimeout(() => setPlaying(true), 600);
+      const t = setTimeout(() => setPlaying(true), 700);
       return () => clearTimeout(t);
     }
   }, [inView, reduceMotion]);
@@ -380,95 +364,87 @@ export const HowIBuildSection: React.FC = () => {
   const stage = STAGES[idx];
 
   return (
-    <section ref={sectionRef} id="how-i-build" className="py-16 sm:py-24 border-b overflow-hidden" style={{ borderColor: line }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl space-y-3 mb-6 sm:mb-8">
-          <p className="tech-label" style={{ color: 'var(--accent)' }}>How I build</p>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
-            Anatomy of shipped work.
-          </h2>
-          <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--text-2)' }}>
-            Each stage drawn from a real fragment — SplitFin’s ledger, StayEase’s booking flow. Drafting live.
-          </p>
+    <div ref={stripRef} id="how-i-build" className="scroll-mt-24 space-y-4">
+      {/* Strip header */}
+      <div className="max-w-2xl space-y-2">
+        <p className="tech-label" style={{ color: 'var(--accent)' }}>The loop</p>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h3 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
+            Seven stages behind every run.
+          </h3>
+          {!reduceMotion && (
+            <span className="flex items-center gap-1">
+              <button onClick={prev} aria-label="Previous stage" className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, color: ink.soft, background: 'transparent', border: `1px solid ${sheetEdge}`, cursor: 'pointer' }}>
+                <ChevronLeft size={14} />
+              </button>
+              <button onClick={() => (idx >= STAGES.length - 1 ? (setIdx(0), setPlaying(true)) : setPlaying(!playing))} aria-label={playing ? 'Pause' : 'Play the loop'} className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, background: ink.accent, color: ink.paper, border: 'none', cursor: 'pointer' }}>
+                {playing ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+            </span>
+          )}
         </div>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)' }}>
+          The method the console above runs on — each sheet drawn from a shipped fragment.
+        </p>
+      </div>
 
-        <div className="grid gap-3 lg:grid-cols-[220px_1fr] items-start max-w-5xl mx-auto">
-          {/* Sheet rail */}
-          <div className="flex lg:flex-col gap-1.5 overflow-x-auto scrollbar-none" role="listbox" aria-label="Build stages">
-            {STAGES.map((s, i) => {
-              const on = i === idx;
-              const done = i < idx;
-              return (
-                <button
-                  key={s.id}
-                  role="option"
-                  aria-selected={on}
-                  onClick={() => jump(i)}
-                  className="shrink-0 lg:w-full flex items-center gap-2.5 rounded-xl text-left transition-colors"
-                  style={{
-                    padding: '8px 11px',
-                    background: on ? (isDark ? 'rgba(127,179,255,0.12)' : 'rgba(29,78,216,0.08)') : 'transparent',
-                    border: `1px solid ${on ? ink.accent : 'transparent'}`,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span className="font-mono shrink-0" style={{ fontSize: 11, fontWeight: 800, color: on ? ink.accent : done ? 'var(--ok)' : 'var(--text-4)' }}>
-                    {done ? '✓' : s.n}
-                  </span>
-                  <span style={{ fontSize: 13.5, fontWeight: on ? 800 : 600, color: on ? 'var(--text-1)' : done ? 'var(--text-2)' : 'var(--text-3)', whiteSpace: 'nowrap' }}>
-                    {s.title}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Drawing sheet */}
-          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: sheetEdge, background: sheetBg, boxShadow: isDark ? '0 24px 64px -24px rgba(0,0,0,0.7)' : '0 24px 48px -28px rgba(30,58,138,0.35)' }}>
-            {/* Sheet header */}
-            <div className="flex items-center gap-2.5" style={{ padding: '10px 14px', borderBottom: `1px solid ${sheetEdge}` }}>
-              <span className="font-mono" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', color: ink.accent }}>
-                {stage.n} · {stage.title.toUpperCase()}
-              </span>
-              <span className="flex-1" />
-              {!reduceMotion && (
-                <span className="flex items-center gap-1">
-                  <button onClick={prev} aria-label="Previous sheet" className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, color: ink.soft, background: 'transparent', border: `1px solid ${sheetEdge}`, cursor: 'pointer' }}>
-                    <ChevronLeft size={14} />
-                  </button>
-                  <button onClick={() => (finished ? replay() : playing ? setPlaying(false) : setPlaying(true))} aria-label={playing ? 'Pause drafting' : finished ? 'Replay' : 'Play'} className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, background: ink.accent, color: ink.paper, border: 'none', cursor: 'pointer' }}>
-                    {playing ? <Pause size={14} /> : finished ? <RotateCcw size={14} /> : <Play size={14} />}
-                  </button>
-                  <button onClick={() => (idx >= STAGES.length - 1 ? replay() : next())} aria-label="Next sheet" className="flex items-center justify-center rounded-lg transition active:scale-95" style={{ width: 30, height: 30, color: ink.soft, background: 'transparent', border: `1px solid ${sheetEdge}`, cursor: 'pointer' }}>
-                    <ChevronRight size={14} />
-                  </button>
-                </span>
-              )}
-            </div>
-
-            {/* Drawing */}
-            <AnimatePresence mode="wait">
-              <motion.svg
-                key={stage.id}
-                viewBox="0 0 400 300"
-                className="w-full h-auto block"
-                initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -24 }}
-                transition={{ type: 'spring', stiffness: 220, damping: 28 }}
-                role="img"
-                aria-label={`${stage.title}: ${stage.question}`}
-              >
-                <Frame n={stage.n} fig={stage.fig} ink={ink}>
-                  <Drawing id={stage.id} ink={ink} />
+      {/* Sheet browser */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-none snap-x" style={{ paddingBottom: 4 }} role="listbox" aria-label="Build stages">
+        {STAGES.map((s, i) => {
+          const on = i === idx;
+          return (
+            <button
+              key={s.id}
+              role="option"
+              aria-selected={on}
+              onClick={() => jump(i)}
+              className="shrink-0 snap-start rounded-xl border overflow-hidden text-left transition-all"
+              style={{
+                width: 168,
+                borderColor: on ? ink.accent : sheetEdge,
+                background: sheetBg,
+                boxShadow: on ? `0 0 0 1px ${ink.accent}, 0 12px 28px -14px rgba(15,23,42,0.4)` : 'none',
+                cursor: 'pointer',
+                opacity: on ? 1 : 0.72,
+              }}
+            >
+              <svg viewBox="0 0 400 300" className="w-full h-auto block pointer-events-none" aria-hidden>
+                <Frame n={s.n} fig={s.fig} ink={ink}>
+                  <Drawing id={s.id} ink={ink} />
                 </Frame>
-              </motion.svg>
-            </AnimatePresence>
+              </svg>
+              <div className="flex items-center gap-2" style={{ padding: '7px 10px', borderTop: `1px solid ${sheetEdge}` }}>
+                <span className="font-mono" style={{ fontSize: 10.5, fontWeight: 800, color: on ? ink.accent : 'var(--text-4)' }}>{s.n}</span>
+                <span style={{ fontSize: 12.5, fontWeight: on ? 800 : 600, color: on ? 'var(--text-1)' : 'var(--text-3)' }}>{s.title}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-            {/* Callouts + evidence */}
-            <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${sheetEdge}` }}>
-              <p style={{ fontSize: 14.5, fontWeight: 700, color: isDark ? '#EDF2FA' : '#0F1E3D' }}>{stage.question}</p>
-              <ul className="space-y-1.5" style={{ marginTop: 8 }}>
+      {/* Expanded sheet */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={stage.id}
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="rounded-2xl border overflow-hidden"
+          style={{ borderColor: sheetEdge, background: sheetBg }}
+        >
+          <div className="grid md:grid-cols-2">
+            <svg viewBox="0 0 400 300" className="w-full h-auto block" role="img" aria-label={`${stage.title}: ${stage.question}`}>
+              <Frame n={stage.n} fig={stage.fig} ink={ink}>
+                <Drawing id={stage.id} ink={ink} />
+              </Frame>
+            </svg>
+            <div style={{ padding: '16px 18px', borderTop: `1px solid ${sheetEdge}` }} className="md:border-t-0 md:border-l">
+              <div className="font-mono" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', color: ink.accent }}>
+                {stage.n} · {stage.title.toUpperCase()}
+              </div>
+              <p style={{ fontSize: 15, fontWeight: 700, color: isDark ? '#EDF2FA' : '#0F1E3D', marginTop: 6, lineHeight: 1.45 }}>{stage.question}</p>
+              <ul className="space-y-1.5" style={{ marginTop: 10 }}>
                 {stage.callouts.map((c) => (
                   <li key={c.n} className="flex items-start gap-2.5">
                     <span className="shrink-0 rounded-full flex items-center justify-center font-mono" style={{ width: 18, height: 18, fontSize: 10, fontWeight: 800, background: ink.accent, color: ink.paper, marginTop: 1 }}>
@@ -478,14 +454,14 @@ export const HowIBuildSection: React.FC = () => {
                   </li>
                 ))}
               </ul>
-              <div className="font-mono" style={{ fontSize: 11, marginTop: 9, color: isDark ? '#8EA0B8' : '#5B6B85' }}>
+              <div className="font-mono" style={{ fontSize: 11, marginTop: 10, color: isDark ? '#8EA0B8' : '#5B6B85' }}>
                 <span style={{ color: 'var(--ok)', fontWeight: 700 }}>→ {stage.evidence.ref} · </span>
                 {stage.evidence.text}
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 };

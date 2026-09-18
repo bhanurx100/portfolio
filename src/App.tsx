@@ -24,10 +24,6 @@ const CommandPalette = lazy(() =>
 const CaseStudyModal = lazy(() =>
   import('./components/common/CaseStudyModal').then((m) => ({ default: m.CaseStudyModal }))
 );
-/* How I Build sits below the fold — defer it too. */
-const HowIBuildSection = lazy(() =>
-  import('./components/sections/HowIBuild').then((m) => ({ default: m.HowIBuildSection }))
-);
 import { ProjectsSection } from './components/sections/ProjectsSection';
 /* Experience + Contact sit below the fold — defer them too. */
 const ExperienceSection = lazy(() =>
@@ -129,9 +125,6 @@ function PortfolioMain() {
           onOpenCommandPalette={handleOpenCommandPalette}
         />
         <ProjectsSection onOpenCaseStudy={handleOpenCaseStudy} />
-        <Suspense fallback={<div id="how-i-build" style={{ minHeight: 480 }} aria-hidden />}>
-          <HowIBuildSection />
-        </Suspense>
         <Suspense fallback={<div id="builder-lab" style={{ minHeight: 420 }} aria-hidden /> }>
           <BuilderLabSection />
         </Suspense>
