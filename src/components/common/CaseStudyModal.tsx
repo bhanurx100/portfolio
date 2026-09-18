@@ -8,9 +8,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { X, ExternalLink, Github, ChevronRight } from 'lucide-react';
+import { X, Github, Mail, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ProjectData } from '../../types';
+import { personalInfo } from '../../data/portfolio-data';
 import { DeviceFrame } from './DeviceFrame';
 import { StayEaseScreen } from './AppScreens';
 import { SplitFinScreen } from './SplitFinScreen';
@@ -40,46 +41,46 @@ interface ArchLayer {
 const ARCHITECTURE: Record<string, ArchLayer[]> = {
   splitfin: [
     {
-      id: 'ui', name: 'Client (Next.js)', purpose: 'Dashboard, transactions, categories, SplitPay settlement',
-      dataIn: 'User intent', dataOut: 'Typed queries', tech: 'Next.js · TypeScript · React Query', tradeoff: 'Mobile-first shell (~430px) is a product bet, not a responsive afterthought',
+      id: 'ui', name: 'Client (Expo SDK 52)', purpose: 'Dashboard, transactions, categories, SplitPay settlement',
+      dataIn: 'User intent', dataOut: 'Typed queries', tech: 'Expo SDK 52 · React Native · TypeScript', tradeoff: 'A native app is a product bet, not a responsive afterthought — one RN codebase for iOS and Android',
     },
     {
-      id: 'api', name: 'API layer (Hono)', purpose: '/api routes — accounts, transactions, summary — with query validation',
-      dataIn: 'Query params', dataOut: 'Validated requests', tech: 'Hono routes on Next.js', tradeoff: 'Extra boundary layer; pays for itself in testability',
+      id: 'offline', name: 'Local store (offline-first)', purpose: 'Ledger, drafts and splits work with no connection; sync reconciles later',
+      dataIn: 'Local writes', dataOut: 'Idempotent ops', tech: 'MMKV · SQLite', tradeoff: 'Offline-first adds reconciliation rules; the payoff is a ledger that never blocks on the network',
     },
     {
-      id: 'services', name: 'Services', purpose: 'Business rules — period logic, computed states',
-      dataIn: 'Validated requests', dataOut: 'Domain calls', tech: 'account-service · transaction-service', tradeoff: 'More files, but rules live in one place',
+      id: 'realtime', name: 'Realtime layer (Supabase)', purpose: 'Live group presence, settlement pushes, multi-device sync',
+      dataIn: 'Subscription', dataOut: 'Live events', tech: 'Supabase WebSockets', tradeoff: 'Realtime is additive to the offline queue, so presence updates never fight pending local edits',
     },
     {
-      id: 'repos', name: 'Repositories', purpose: 'All SQL in one place; summary runs three parallel aggregates',
-      dataIn: 'Domain calls', dataOut: 'SQL + rows', tech: 'account-repository · summary-repository', tradeoff: 'Repository indirection costs boilerplate, buys swappable persistence',
+      id: 'logic', name: 'Ledger service', purpose: 'Split rules, category intelligence, who-owes-whom',
+      dataIn: 'Validated ops', dataOut: 'Ledger updates', tech: 'Typed TypeScript service', tradeoff: 'Settlement UI is decoupled from the debt-simplification math so the solver can evolve without UI churn',
     },
     {
-      id: 'db', name: 'Database', purpose: 'Typed schemas — accounts, transactions, categories, split groups',
-      dataIn: 'SQL writes', dataOut: 'Durable records', tech: 'PostgreSQL · Drizzle ORM', tradeoff: 'Typed schemas shift errors to compile time at the cost of migrations',
+      id: 'db', name: 'Database', purpose: 'Groups, members, transactions, settlement states',
+      dataIn: 'SQL writes', dataOut: 'Durable records', tech: 'PostgreSQL · PostGIS', tradeoff: 'Typed schemas shift errors to compile time at the cost of migrations',
     },
   ],
   stayease: [
     {
-      id: 'ui', name: 'Client (React 18)', purpose: 'Search, hotel detail, booking, role dashboards',
-      dataIn: 'User intent', dataOut: 'API calls', tech: 'React 18 · Vite · Tailwind · React Query', tradeoff: 'Rich detail pages need careful image + tab performance work',
+      id: 'ui', name: 'Client (Expo SDK 52)', purpose: 'Search, map, property detail, booking, role surfaces',
+      dataIn: 'User intent', dataOut: 'API calls', tech: 'Expo SDK 52 · React Native · TypeScript', tradeoff: 'Native map + list surfaces need careful image and gesture performance work',
     },
     {
-      id: 'api', name: 'API layer (Express)', purpose: '/auth, /hotels, /search, /bookings + role-scoped my-* routes',
-      dataIn: 'REST calls', dataOut: 'Validated requests', tech: 'Express · TypeScript · JWT dual-auth', tradeoff: 'Cookie + Bearer dual-auth adds surface, covers privacy browsers',
+      id: 'offline', name: 'Local stays (offline-first)', purpose: 'Saved stays, search history and draft bookings with no connectivity',
+      dataIn: 'Local writes', dataOut: 'Sync queue', tech: 'MMKV · SQLite', tradeoff: 'Offline drafts must reconcile against live availability before confirmation',
     },
     {
-      id: 'services', name: 'Enrichment services', purpose: 'Merge Google Places + Tripadvisor + Expedia per hotel',
-      dataIn: 'Hotel identity', dataOut: 'Deduplicated merged hotel', tech: 'aggregatorService + 3 source services', tradeoff: 'External APIs rate-limit; cache misses cost latency',
+      id: 'map', name: 'Realtime map (Supabase)', purpose: 'Stay inventory rendered live from PostGIS; live availability',
+      dataIn: 'Map viewport', dataOut: 'Live stays', tech: 'Supabase realtime · PostGIS', tradeoff: 'Streaming the map viewport is cheap; reconciling against bookings is the careful part',
     },
     {
-      id: 'db', name: 'Database', purpose: 'Users, hotels, bookings, reviews, analytics',
-      dataIn: 'Service writes', dataOut: 'Durable records', tech: 'MongoDB · Mongoose', tradeoff: 'Document flexibility trades join rigor — schema discipline in code',
+      id: 'api', name: 'Edge services', purpose: 'Booking orchestration, checkout session, owner/admin flows',
+      dataIn: 'App calls', dataOut: 'Validated events', tech: 'Supabase Edge Functions', tradeoff: 'Small functions keep trust boundaries explicit but need disciplined test coverage',
     },
     {
-      id: 'ext', name: 'External inventory', purpose: 'Live worldwide stock from Booking.com RapidAPI',
-      dataIn: 'Search query', dataOut: 'Live hotels (API-native currency)', tech: 'Booking.com RapidAPI', tradeoff: 'Live data is real but outside your control — currency and caching handled explicitly',
+      id: 'db', name: 'Database', purpose: 'Stays, users, bookings, availability, reviews',
+      dataIn: 'Service writes', dataOut: 'Durable records', tech: 'PostgreSQL · PostGIS', tradeoff: 'PostGIS powers map queries; availability checks keep them consistent with bookings',
     },
   ],
 };
@@ -188,7 +189,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                   </DeviceFrame>
                 </div>
                 <p className="text-center tech-label" style={{ textTransform: 'none', letterSpacing: 0 }}>
-                  Interactive concept preview — the shipped product is the web platform linked below
+                  Interactive concept preview of the native app — code access available on request
                 </p>
               </section>
 
@@ -325,24 +326,27 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                         background: isDark ? '#F1F5F9' : '#0F172A', color: isDark ? '#0B1120' : '#F8FAFC',
                       }}
                     >
-                      <Github size={16} /> View source
+                      <Github size={16} /> View code
                     </a>
                   )}
-                  {project.liveUrl && (
+                  {personalInfo.email && (
                     <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={personalInfo.emailMailto}
                       className="inline-flex items-center gap-2 rounded-xl"
                       style={{
                         height: 44, padding: '0 18px', fontSize: 14, fontWeight: 600,
                         background: 'transparent', border: `1.5px solid var(--line${isDark ? '-strong-dark' : '-strong'})`, color: 'var(--text-1)',
                       }}
                     >
-                      <ExternalLink size={15} /> Live demo
+                      <Mail size={15} /> Contact me
                     </a>
                   )}
                 </div>
+                {personalInfo.email && (
+                  <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12.5, paddingTop: 2 }}>
+                    Code access available on request — credentials and admin portals gated for teams.
+                  </p>
+                )}
               </section>
             </div>
 

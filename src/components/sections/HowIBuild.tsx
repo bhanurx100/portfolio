@@ -42,7 +42,7 @@ const STAGES: Stage[] = [
       'Data model first: entities, relationships, and where truth lives.',
       'Decide the failure model as part of the model, not after launch.',
     ],
-    evidence: { text: 'SplitFin’s model: accounts, transactions, categories, split groups/members — typed once with Drizzle so the schema is the contract.', ref: 'SplitFin' },
+    evidence: { text: 'SplitFin’s model: accounts, transactions, categories, split groups/members — typed once across client, ledger and database so the schema is the contract.', ref: 'SplitFin' },
   },
   {
     id: 'design',
@@ -62,9 +62,9 @@ const STAGES: Stage[] = [
     question: 'What is the smallest slice that runs end to end?',
     what: [
       'UI → state → API → data, vertically, in that order — no layer done “first”.',
-      'Type the contract once (TypeScript + Drizzle) and let both sides drift together.',
+      'Type the contract once (TypeScript across client, ledger and database) and let both sides drift together.',
     ],
-    evidence: { text: 'Both products share this shape: typed contracts from screen to database — Drizzle schemas in SplitFin, typed service layers in StayEase — so a contract change breaks at compile time, not in production.', ref: 'StayEase + SplitFin' },
+    evidence: { text: 'Both products share this shape: typed contracts from screen to database — the ledger in SplitFin, live inventory in StayEase — so a contract change breaks at compile time, not in production.', ref: 'StayEase + SplitFin' },
   },
   {
     id: 'stress',

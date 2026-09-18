@@ -54,16 +54,33 @@ export const BuilderLabSection: React.FC = () => {
       aria-label="Builder Lab — interactive system experience"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Editorial header — consistent with the rest of the page */}
-        <div className="max-w-2xl space-y-4">
-          <p className="tech-label" style={{ color: 'var(--accent)' }}>Builder Lab</p>
-          <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
-            Describe a problem. Watch the system think.
+        {/* Editorial header — the thesis of the section */}
+        <div className="max-w-2xl space-y-5">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-2 rounded-lg border px-2.5 py-1 text-[11px] font-mono" style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)', color: 'var(--accent)' }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: 'var(--accent)' }} />
+              Builder Lab
+            </span>
+            <span className="text-[11px] font-mono" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+              live · runs in your browser
+            </span>
+          </div>
+          <h2 style={{ fontSize: 'clamp(32px, 5vw, 50px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1.05 }}>
+            Describe a problem.
+            <br />
+            Watch the system form.
           </h2>
-          <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
-            The same loop as How I Build, made touchable: a system forms from your idea, runs,
-            hits gates and failures, and lets you break it — the recovery behavior is the point.
+          <p style={{ fontSize: 16.5, lineHeight: 1.65, color: 'var(--text-2)', maxWidth: 520 }}>
+            The same loop as How I Build, made touchable: drop an idea, see a typed system
+            assemble itself, run it, break it, and read the shape of the software underneath —
+            the recovery behavior is the point.
           </p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-[11.5px] font-mono" style={{ color: 'var(--text-3)' }}>
+            <span className="inline-flex items-center gap-1.5"><span style={{ color: 'var(--accent)', fontWeight: 700 }}>01</span> Form</span>
+            <span className="inline-flex items-center gap-1.5"><span style={{ color: 'var(--accent)', fontWeight: 700 }}>02</span> Run</span>
+            <span className="inline-flex items-center gap-1.5"><span style={{ color: 'var(--accent)', fontWeight: 700 }}>03</span> Break</span>
+            <span className="inline-flex items-center gap-1.5"><span style={{ color: 'var(--accent)', fontWeight: 700 }}>04</span> Connect to real work</span>
+          </div>
         </div>
 
         {/* IDLE / UNDERSTANDING: centered input */}
@@ -128,6 +145,23 @@ export const BuilderLabSection: React.FC = () => {
                     isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'
                   }`}
                 >
+                  {/* Blueprint header — the canvas reads as an instrument, not a widget */}
+                  <div
+                    className="flex items-center justify-between gap-3 px-4 py-2 border-b"
+                    style={{
+                      borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+                      background: isDark ? 'rgba(15,23,42,0.6)' : 'rgba(248,250,252,0.7)',
+                    }}
+                  >
+                    <span className="text-[10.5px] font-mono uppercase tracking-wider" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+                      System blueprint
+                    </span>
+                    {lensMeta && (
+                      <span className="hidden xl:inline text-[11px] font-mono truncate" style={{ color: 'var(--accent)' }} title={lensMeta.question}>
+                        {lensMeta.label} · {lensMeta.question}
+                      </span>
+                    )}
+                  </div>
                   <SystemCanvas
                     nodes={state.nodes}
                     edges={state.edges}
@@ -213,12 +247,6 @@ export const BuilderLabSection: React.FC = () => {
                     Open decision mode — real tradeoffs
                   </button>
                 )}
-
-                {/* Evidence — earned, not permanent: appears once the
-                    system has been run or manipulated */}
-                {(state.phase === 'result' || state.manipulationLog.length > 0) && state.system && (
-                  <EvidencePanel system={state.system} />
-                )}
               </div>
             </div>
           </>
@@ -236,6 +264,14 @@ export const BuilderLabSection: React.FC = () => {
               onNext={actions.nextDecision}
               onClose={actions.closeDecisions}
             />
+          </motion.div>
+        )}
+
+        {/* Evidence — earned, not permanent: appears once the system has
+            been run or manipulated, as a full-width strip beneath the lab */}
+        {(state.phase === 'result' || state.manipulationLog.length > 0) && state.system && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
+            <EvidencePanel system={state.system} />
           </motion.div>
         )}
 

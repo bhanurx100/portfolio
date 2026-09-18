@@ -25,12 +25,12 @@ export const projectsData: Record<string, ProjectData> = {
     id: 'splitfin',
     slug: 'splitfin',
     name: 'SplitFin – Personal Finance & Expense Sharing',
-    category: 'Mobile-first Web Platform (Next.js · Typed Backend)',
-    type: 'Next.js, TypeScript, Hono API routes, Drizzle ORM, PostgreSQL, React Query, Three.js',
+    category: 'Native-first Finance & Expense (Expo SDK 52 · React Native)',
+    type: 'Expo SDK 52, React Native, TypeScript, MMKV, SQLite, Supabase (realtime), PostgreSQL, PostGIS, Maestro',
     period: '2025',
-    role: 'Full-Stack Software Engineer',
-    tagline: 'Personal accounts, category intelligence and group expense settlement in one mobile-first product.',
-    description: 'A mobile-first personal finance platform that unifies what most tools split apart: a dashboard across bank/card/wallet/cash accounts, category-level spending analysis, and per-group expense settlement with a "who owes whom" view. Built as a typed, layered full-stack app — Next.js client, Hono API routes, service/repository layers, PostgreSQL via Drizzle ORM.',
+    role: 'Product Engineer',
+    tagline: 'Personal accounts, category intelligence and group expense settlement in one native, offline-first app.',
+    description: 'A native personal finance app that unifies what most tools split apart: a dashboard across bank/card/wallet/cash accounts, category-level spending analysis, and per-group expense settlement with a "who owes whom" view. Offline-first — the ledger works with no signal and reconciles through Supabase WebSockets when you reconnect, so groups stay in sync live.',
     highlightStat: {
       value: 'SplitPay',
       label: 'Group ledgers with a simplified who-owes-whom settlement view'
@@ -38,152 +38,151 @@ export const projectsData: Record<string, ProjectData> = {
     coreMetrics: [],
     benchmarks: [],
     capabilities: [
-      'Built a unified account dashboard aggregating bank, credit card, wallet and cash balances behind one net-worth view, with a Three.js account carousel (momentum drag physics, spring-snap centering) and a 2D fallback for reduced-motion / no-WebGL contexts.',
-      'Implemented SplitPay group settlement: per-group ledgers with SplitGroup/SplitMember models tracking you-owe / you-are-owed / settled states, intentionally decoupled from the debt-simplification math so the solver can evolve without UI changes.',
-      'Engineered the financial summary layer as a single aggregation pass — three parallel Postgres aggregate queries (totals, categories, daily cash flow) scoped by a shared period clause, so every screen reads from one computed source instead of drifting client-side math.',
-      'Built the transaction timeline as an auditable ledger: month grouping, income/expense/transfer/refund filters, and server-side date-range resolution with sane 30-day defaults.',
-      'Designed category intelligence views — an orbital spend-share visualization with SVG donut fallback and client-side needs/wants/lifestyle grouping that avoids redundant network round-trips.'
+      'Built the native app around an offline-first ledger: MMKV + SQLite local store for balances, transactions and pending splits, with an idempotent sync queue that reconciles against Supabase when connectivity returns.',
+      'Implemented SplitPay group settlement: per-group ledgers with SplitGroup/SplitMember models tracking you-owe / you-are-owed / settled states, deliberately decoupled from the debt-simplification math so the solver can evolve without UI changes.',
+      'Engineered live group sync with Supabase WebSockets — new splits, paid markers and settlement pushes appear on every member device in real time, without drifting client-side tallies.',
+      'Built the transaction timeline as an auditable ledger: month grouping, income/expense/transfer/refund filters, and date-range resolution with sane 30-day defaults.',
+      'Designed category intelligence views — an orbital spend-share visualization with an SVG donut fallback and client-side needs/wants/lifestyle grouping that avoids redundant network round-trips.',
+      'Covered the search, split, settle and reconcile flows with a Maestro UI test pass on iOS and Android simulators.'
     ],
     techStack: [
-      'Next.js',
+      'Expo SDK 52',
+      'React Native',
       'TypeScript',
-      'Hono',
-      'Drizzle ORM',
+      'MMKV',
+      'SQLite',
+      'Supabase (realtime)',
       'PostgreSQL',
-      'React Query',
-      'Three.js',
-      'Tailwind CSS'
+      'PostGIS',
+      'Maestro'
     ],
     githubUrl: 'https://github.com/bhanurx100/splitfin-expense-platform',
     liveUrl: 'https://splitfinai.vercel.app/',
     themeColor: '#10b981',
     accentColor: '#34d399',
-    problem: 'Money is shared constantly — rent with roommates, trips with friends, dinners with colleagues — but existing tools force you to bounce between a banking app, a spreadsheet and a separate bill-splitting app to reconcile all of it. Personal-finance apps assume money is a solitary problem; splitting apps ignore accounts and budgets.',
-    solution: 'Collapsed the three surfaces into one mobile-first product (~430px app shell): a unified account dashboard, category-level spending narrative, and per-group settlement. The settlement UI is deliberately decoupled from the debt-simplification math, and every headline number flows from a single server-side aggregation pass so views never disagree.',
+    problem: 'Money is shared constantly — rent with roommates, trips with friends, dinners with colleagues — but existing tools force you to bounce between a banking app, a spreadsheet and a separate bill-splitting app to reconcile all of it. Personal-finance apps assume money is a solitary problem, and most assume a constant connection.',
+    solution: 'Collapsed the three surfaces into one native product: a unified account dashboard, category-level spending narrative, and per-group settlement. The ledger is offline-first for a phone that spends its life between networks, and live group sync over Supabase WebSockets keeps split decisions consistent across every member device.',
     architecture: {
-      title: 'Typed Layered Architecture (Next.js → Hono → Drizzle → Postgres)',
-      description: 'Every feature follows the same vertical path with typed contracts at each boundary.',
+      title: 'Native App over a Realtime Core (Expo → Supabase → Postgres)',
+      description: 'Every feature follows the same path: native client → local store → realtime sync → Postgres, with a typed ledger service at the boundary.',
       components: [
-        'Client: Next.js + TypeScript + React Query; mobile-first app shell (~430px) with Three.js visualization where it adds value and static SVG fallbacks where it does not.',
-        'API: Hono routes mounted under /api — accounts, transactions, summary — with query-param validation and server-side defaults.',
-        'Services: feature services (account-service, transaction-service) own business rules and period logic.',
-        'Repositories: account-repository / summary-repository encapsulate all SQL — summary runs three aggregate queries in parallel via Promise.all.',
-        'Database: PostgreSQL through Drizzle ORM with typed schemas (accounts, transactions, categories, split groups/members).'
+        'Client: Expo SDK 52 + React Native + TypeScript; one codebase for iOS and Android; offline-first local store for the ledger and pending splits.',
+        'Local store: MMKV for hot reads and SQLite for the ledger, with an idempotent sync queue that reconciles against the server.',
+        'Realtime: Supabase WebSockets push split and settlement events to every group member device.',
+        'Ledger service: typed TypeScript service owns split rules, category intelligence and who-owes-whom.',
+        'Database: PostgreSQL with PostGIS, storing groups, members, transactions and settlement states.'
       ]
     },
     keyDecisions: [
       {
-        decision: 'Layered service/repository backend instead of route-level SQL',
-        rationale: 'Keeps business rules testable and swappable — the data source can change without touching API routes, and every number has exactly one computed source.'
+        decision: 'Offline-first ledger with an idempotent sync queue',
+        rationale: 'A finance app must never block on the network or double-post a split. Local writes are queued and reconciled against Supabase, so a flutter on mobile data cannot corrupt a ledger.'
       },
       {
-        decision: 'Single aggregation pass for all headline numbers',
-        rationale: 'The dashboard card, cash-flow chart and category donut all read from one computed summary — consistent numbers across screens instead of drifting independent calculations.'
+        decision: 'Single source of truth for every headline number',
+        rationale: 'Dashboard totals, cash-flow and category views all read from the ledger and the same aggregate path — consistent numbers across screens instead of drifting independent calculations.'
       },
       {
         decision: 'Settlement UI decoupled from debt-simplification math',
         rationale: 'SimplifiedDebt is a typed contract, not a hard-wired algorithm — the current greedy solver can be replaced with a minimum-transaction-count solver without touching components.'
       },
       {
-        decision: '3D only where it earns its place',
-        rationale: 'The account carousel uses Three.js with a maintained 2D fallback for reduced-motion and no-WebGL contexts; the category view uses plain SVG.'
+        decision: 'Realtime as additive to the offline queue',
+        rationale: 'Presence and settlement pushes never overwrite pending local edits — the sync layer merges remote events against optimistic local state.'
       }
     ],
     challenges: [
       {
-        title: 'Debt simplification that survives algorithm changes',
-        challenge: 'Naive per-pair settlement creates an O(N²) web of transfers; but hard-coding a solver into the UI makes improving it painful.',
-        solution: 'Defined SimplifiedDebt as the contract between math and UI. The greedy graph solver ships behind that contract; a proper minimum-transaction-count solver is the next step and slots in without UI changes.'
+        title: 'Offline edits meeting live, conflicting group state',
+        challenge: 'A member schedules a split offline and another settles the same bill online — both must resolve without losing money or trust.',
+        solution: 'Every local op is idempotent and versioned; on reconnect the sync queue replays against the realtime state and surfaces only genuine conflicts for manual resolution.'
       },
       {
         title: 'Consistent numbers across every screen',
         challenge: 'Dashboard totals, charts and donut breakdowns computed independently always drift apart — the fastest way to lose trust in a finance product.',
-        solution: 'One summary engine: three parallel Postgres aggregates scoped by a shared period WHERE clause, compared against an equal-length prior period via date-fns.'
+        solution: 'One ledger and one aggregation path feed every headline view, compared against an equal-length prior period for the cash-flow narrative.'
       }
     ]
   },
   stayease: {
     id: 'stayease',
     slug: 'stayease',
-    name: 'StayEase – Hotel Booking Platform',
-    category: 'Full-Stack Web Platform (MERN · Multi-Source Data)',
-    type: 'React 18, TypeScript, Vite, Express, MongoDB, Stripe, Booking.com RapidAPI, Playwright',
+    name: 'StayEase – Hotel Booking App',
+    category: 'Native-first Hospitality (Expo SDK 52 · React Native)',
+    type: 'Expo SDK 52, React Native, TypeScript, Supabase (Postgres · PostGIS), Stripe, Maestro',
     period: '2025',
-    role: 'Full-Stack Software Engineer',
-    tagline: 'Full-stack booking ecosystem with live worldwide inventory, multi-source hotel enrichment, and role-based dashboards.',
-    description: 'A production-grade hotel booking platform combining live worldwide inventory (Booking.com RapidAPI), on-platform property management, and multi-source enrichment (Google Places + Tripadvisor + Expedia merged per hotel). React 18 + Vite client, Express + TypeScript backend with a service layer, MongoDB, Stripe PaymentIntent bookings, and role-based Customer/Owner/Admin portals.',
+    role: 'Product Engineer',
+    tagline: 'Native stay booking — search hotels, villas, apartments, homestays and PGs, browse inventory live on a PostGIS map, and book offline.',
+    description: 'A native stay-booking app that treats inventory as a living map: search across accommodation types, browse stays rendered live from PostGIS, save and draft bookings offline, and check out with Stripe. StayEase keeps guests, hosts and owners on one Supabase core, so live availability and role-based surfaces never disagree.',
     highlightStat: {
-      value: 'Live inventory + enrichment',
-      label: 'Booking.com stock merged with on-platform hotels, enriched from three external sources'
+      value: 'Live map + offline drafts',
+      label: 'PostGIS-backed inventory rendered live, with offline-first search and draft bookings'
     },
     coreMetrics: [],
     benchmarks: [],
     capabilities: [
-      'Built the multi-source enrichment pipeline: per-hotel merges of Google Places, Tripadvisor and Expedia data with deduplication and a 10-minute in-memory cache, behind a typed service layer.',
-      'Implemented full-text hotel search with real-time filters (star rating, hotel type, facilities, max price), sorting, and live worldwide results merged with on-platform DB hotels.',
-      'Shipped role-based portals with distinct UIs — Customer (booking history, upcoming stays), Owner (property management, per-hotel revenue stats), Admin (platform-wide analytics).',
-      'Integrated Stripe PaymentIntent bookings with live price calculation, plus a currency system that keeps DB hotels in ₹ and external hotels in their API-native currency with user-selectable display conversion.',
-      'Built an AI hotel assistant with a custom NLP intent extractor (destination, price, star rating, guest count), locale-aware ₹/£ thresholds, and parallel DB + external search with unified results.',
-      'Covered auth, hotel management, search and the full booking flow with a Playwright end-to-end suite; containerized the backend with a multi-stage Dockerfile and health checks.'
+      'Built the native Expo/React Native app with a PostGIS-backed stay map — search, filters and property cards stay in sync with live inventory streamed from Supabase.',
+      'Implemented offline-first search and booking drafts: MMKV + SQLite local state keeps saved stays and draft bookings usable with no signal, then reconciles against live availability before confirmation.',
+      'Shipped role-based surfaces with distinct UIs — guest (booking history, upcoming stays), host (property management, per-hotel revenue stats), owner (platform-wide analytics) over the same Supabase core.',
+      'Integrated Stripe checkout for the reservation flow, plus a currency layer that keeps local pricing and display conversion explicit per property.',
+      'Built an AI stay assistant with a rule-based intent extractor (destination, price, stay dates, guest count) that runs a parallel map + list search and merges results into one view.',
+      'Covered search, booking and reconciliation flows with a Maestro UI test pass across iOS and Android simulators.'
     ],
     techStack: [
-      'React 18',
+      'Expo SDK 52',
+      'React Native',
       'TypeScript',
-      'Vite',
-      'Express',
-      'MongoDB',
+      'Supabase',
+      'PostgreSQL',
+      'PostGIS',
       'Stripe',
-      'Booking.com RapidAPI',
-      'Google Places',
-      'React Query',
-      'Playwright',
-      'Docker'
+      'Maestro'
     ],
     githubUrl: 'https://github.com/bhanurx100/stayease-hotel-booking-platform',
     liveUrl: 'https://stayease-hotel-booking-platform.vercel.app/',
     themeColor: '#3b82f6',
     accentColor: '#60a5fa',
-    problem: 'Hotel booking demos are usually CRUD over a seeded database — a fixed list of properties, no real inventory, no external data, and an owner/admin story bolted on. A platform comparable to industry booking sites needs live inventory, data from sources that disagree, and three different users with three different products.',
-    solution: 'Combined live Booking.com inventory with on-platform properties, enriched every hotel from Google Places, Tripadvisor and Expedia through a cached multi-source merge, and gave Customer, Owner and Admin genuinely distinct dashboards. Stripe PaymentIntent handles bookings; a currency layer keeps ₹ for DB hotels and API-native currency for external ones.',
+    problem: 'Stay-booking demos are usually CRUD over a seeded database — a fixed list of properties, no real inventory, no geography, and an owner/host story bolted on. A product comparable to industry stay apps needs live inventory on a map, search that works on a bad connection, and three different users with three different surfaces.',
+    solution: 'Made the map the product: stay inventory lives in PostGIS and streams to the app in real time, guests can search and draft bookings offline, Stripe powers checkout, and guest / host / owner surfaces are genuinely distinct products over one Supabase core.',
     architecture: {
-      title: 'MERN with a Service Layer and External Data Pipeline',
-      description: 'Browser client → Express API → service layer → MongoDB, with external enrichment services at the edge.',
+      title: 'Native Client → Supabase realtime/PostGIS → Postgres',
+      description: 'The native app reads and writes through one realtime core, with offline reconciliation at the edge.',
       components: [
-        'Client: React 18 + TypeScript + Vite + Tailwind; Axios + React Query data layer; currency selector and sticky tab bars on detail pages.',
-        'API: Express + TypeScript routes — /auth, /hotels, /search, /my-hotels, /bookings, /my-bookings — with JWT dual-auth (httpOnly cookie + Bearer header).',
-        'Service Layer: aggregatorService, externalHotelService, googlePlacesService, tripadvisorService, expediaService — merging and deduplicating external data per hotel.',
-        'Database: MongoDB/Mongoose — User, Hotel, Booking, Review, Analytics models.',
-        'External Data: Booking.com RapidAPI (live inventory), Google Places, Tripadvisor, Expedia; 10-minute in-memory cache on enrichment.'
+        'Client: Expo SDK 52 + React Native + TypeScript; native map + list browse, offline-first search and booking drafts; one codebase for iOS and Android.',
+        'Local store: MMKV for hot reads, SQLite for saved stays and draft bookings, with a sync queue that checks live availability before confirmation.',
+        'Realtime + maps: Supabase WebSockets stream inventory; PostGIS powers viewport queries so the map and the list never disagree.',
+        'Edge services: Supabase Edge Functions orchestrate booking, checkout sessions and host/owner admin flows.',
+        'Database: PostgreSQL with PostGIS — stays, users, bookings, availability and reviews.'
       ]
     },
     keyDecisions: [
       {
-        decision: 'Service layer between routes and database',
-        rationale: 'External data from four sources disagrees constantly — merging, deduplicating and caching belongs in services, not route handlers, so the enrichment pipeline stays testable.'
+        decision: 'The map is the interface, not a feature',
+        rationale: 'Stays are inherently geographic. PostGIS viewport queries mean the list and the map render the same live inventory from the same query, instead of two views that drift.'
       },
       {
-        decision: 'On-platform and external hotels unified but never conflated',
-        rationale: 'DB hotels stay in ₹ and are bookable directly; external hotels keep their API-native currency and flow through the same UI with explicit data-source handling.'
+        decision: 'Offline drafts with hard availability checks',
+        rationale: 'Searching on a bad connection should work, but confirming a booking must never. Drafts are local; confirmation re-checks realtime availability against bookings.'
       },
       {
-        decision: 'Role-based dashboards as separate products',
-        rationale: 'Customer, Owner and Admin have genuinely different jobs — booking stays, managing inventory and revenue, platform oversight — so each gets its own portal rather than role-gated widgets on one screen.'
+        decision: 'Role-based surfaces as separate products',
+        rationale: 'Guest, host and owner have genuinely different jobs — finding and booking stays, managing inventory and revenue, platform oversight — so each gets its own surface rather than role-gated widgets on one screen.'
       },
       {
-        decision: 'Playwright E2E from day one',
-        rationale: 'Auth, add-hotel, search and booking are multi-step flows across two user roles; E2E coverage catches the cross-flow regressions unit tests miss.'
+        decision: 'AI assistant as a parallel search path',
+        rationale: 'Natural-language stays search is an intent extractor feeding the same map + list query engine, so the assistant never gets a different answer than the map does.'
       }
     ],
     challenges: [
       {
-        title: 'Merging four data sources that disagree',
-        challenge: 'The same hotel arrives with different image sets, amenity lists and review formats from Google Places, Tripadvisor, Expedia and the local database.',
-        solution: 'A typed enrichment service merges and deduplicates images, amenities and reviews per hotel, backed by a 10-minute in-memory cache so detail pages stay fast without hammering rate-limited APIs.'
+        title: 'One inventory, two live surfaces',
+        challenge: 'The map viewport and the result list are different queries — a stay filtered out of the list could still be sitting in the map frame.',
+        solution: 'Both surfaces read from the same PostGIS viewport/service, and realtime subscriptions apply the same row-level filters, so the map and list cannot disagree.'
       },
       {
-        title: 'One pricing system, two currencies',
-        challenge: 'On-platform hotels are priced in ₹ while live Booking.com inventory returns API-native currencies — displaying both naively produces nonsense prices.',
-        solution: 'formatINR() renders DB hotels always in ₹, formatExternal() uses the API-native currency code, and a user-selectable display currency converts on top without touching stored prices.'
+        title: 'Offline drafts meeting live availability',
+        challenge: 'A guest drafts a 4-night booking offline, and three nights get taken before they reconnect.',
+        solution: 'Confirmation is never local: on reconnect the draft is re-checked against live availability, and the guest is offered a clean alternative before any charge is created.'
       }
     ]
   }

@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { ArrowRight, Github, ExternalLink } from 'lucide-react';
+import { ArrowRight, Github, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ProjectShowcaseItem } from './ProjectCardDesktop';
+import { personalInfo } from '../../../data/portfolio-data';
 import { DeviceFrame } from '../../common/DeviceFrame';
 import { StayEaseScreen } from '../../common/AppScreens';
 import { SplitFinScreen } from '../../common/SplitFinScreen';
@@ -113,12 +114,10 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                   <Github size={18} />
                 </a>
               )}
-              {project.liveUrl && (
+              {personalInfo.email && (
                 <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`${project.name} live build`}
+                  href={personalInfo.emailMailto}
+                  aria-label={`Contact me about ${project.name}`}
                   className="inline-flex items-center justify-center rounded-xl"
                   style={{
                     height: 48,
@@ -127,10 +126,13 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                     color: 'var(--text-2)',
                   }}
                 >
-                  <ExternalLink size={17} />
+                  <Mail size={18} />
                 </a>
               )}
             </div>
+            <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12, marginTop: 8 }}>
+              Code access available on request — credentials and admin portals gated for teams.
+            </p>
           </motion.article>
         );
       })}

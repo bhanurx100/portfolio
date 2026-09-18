@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { ArrowRight, Github, ExternalLink } from 'lucide-react';
+import { ArrowRight, Github, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from '../../../context/ThemeContext';
+import { personalInfo } from '../../../data/portfolio-data';
 import { DeviceFrame } from '../../common/DeviceFrame';
 import { StayEaseScreen } from '../../common/AppScreens';
 import { SplitFinScreen } from '../../common/SplitFinScreen';
@@ -112,18 +113,16 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
               className="inline-flex items-center gap-1.5"
               style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)' }}
             >
-              <Github size={15} /> Source
+              <Github size={15} /> View code
             </a>
           )}
-          {project.liveUrl && (
+          {personalInfo.email && (
             <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noreferrer"
+              href={personalInfo.emailMailto}
               className="inline-flex items-center gap-1.5"
               style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)' }}
             >
-              <ExternalLink size={14} /> Live build
+              <Mail size={15} /> Contact me
             </a>
           )}
 
@@ -138,9 +137,12 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
               background: 'color-mix(in srgb, var(--ok) 12%, transparent)',
             }}
           >
-            BUILT — FULL CODEBASE
+            BUILT — FULL APP
           </span>
         </div>
+        <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12 }}>
+          Code access available on request — credentials and admin portals gated for teams.
+        </p>
       </div>
 
       {/* Device column */}
