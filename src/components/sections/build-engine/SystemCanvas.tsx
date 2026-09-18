@@ -44,6 +44,17 @@ const TONE = {
   slate: { base: '#64748b', soft: 'rgba(100,116,139,0.14)', text: '#94a3b8' },
 } as const;
 
+/* Light-mode text ramp — the neon brights above wash out on white, so labels
+   and icons step down to the same slate-anchored depth GitHub/Contact use. */
+const TONE_TEXT_LIGHT: Record<keyof typeof TONE, string> = {
+  blue: '#2563eb',
+  emerald: '#059669',
+  amber: '#d97706',
+  rose: '#e11d48',
+  violet: '#7c3aed',
+  slate: '#64748b',
+};
+
 const FLOW_DASH: Record<string, string> = {
   signal: '0',
   data: '0',
@@ -102,7 +113,9 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const dims = CANVAS_DIMS[variant];
 
-  const mutedText = isDark ? '#64748b' : '#94a3b8';
+  /* Secondary text follows the GitHub/Contact slate ramp: slate-400 on dark,
+     slate-500 on light. (This was inverted before — dark text in dark mode.) */
+  const mutedText = isDark ? '#94a3b8' : '#64748b';
   const gridColor = isDark ? 'rgba(148,163,184,0.05)' : 'rgba(100,116,139,0.07)';
 
   return (
@@ -117,7 +130,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
       >
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke={isDark ? '#475569' : '#94a3b8'} strokeWidth="1.6" />
+            <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke={isDark ? '#64748b' : '#94a3b8'} strokeWidth="1.6" />
           </marker>
           <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#3b82f6" strokeWidth="1.8" />
@@ -141,7 +154,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
               lensEmphasis.size > 0 &&
               !lensEmphasis.has(edge.from) &&
               !lensEmphasis.has(edge.to);
-            const stroke = isActive ? '#3b82f6' : dimmed ? mutedText : isDark ? '#334155' : '#cbd5e1';
+            const stroke = isActive ? '#3b82f6' : dimmed ? mutedText : isDark ? '#475569' : '#94a3b8';
             const dash = FLOW_DASH[edge.flow] ?? '0';
 
             // Curve control point
@@ -184,6 +197,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
           {nodes.map((node) => {
             const Icon = KIND_ICON[node.kind];
             const tone = TONE[node.tone];
+            const toneText = isDark ? tone.text : TONE_TEXT_LIGHT[node.tone];
             const isSelected = selectedNodeId === node.id;
             const isStarved = starvedIds.has(node.id);
             const lensDimmed = lensEmphasis.size > 0 && !lensEmphasis.has(node.id);
@@ -235,7 +249,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                   <rect x="0" y="0" width="124" height="4" rx="2" fill={tone.base} opacity={isStarved ? 0.3 : 0.85} />
 
                   <g transform="translate(10, 12)">
-                    <Icon className="w-4 h-4" style={{ color: isStarved ? mutedText : tone.text }} />
+                    <Icon className="w-4 h-4" style={{ color: isStarved ? mutedText : toneText }} />
                   </g>
                   <text x="34" y="24" fontSize="12.5" fontWeight="600" fill={isDark ? '#F1F5F9' : '#0F172A'}>
                     {node.label.length > 14 ? `${node.label.slice(0, 13)}…` : node.label}
@@ -252,7 +266,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
 
                 {/* Lens annotation */}
                 {lensAnnotations[node.id] && !lensDimmed && (
-                  <text x={node.x} y={node.y + 52} textAnchor="middle" fontSize="10" fill={tone.text} className="font-mono">
+                  <text x={node.x} y={node.y + 52} textAnchor="middle" fontSize="10" fill={toneText} className="font-mono">
                     {lensAnnotations[node.id].length > 30 ? `${lensAnnotations[node.id].slice(0, 29)}…` : lensAnnotations[node.id]}
                   </text>
                 )}
