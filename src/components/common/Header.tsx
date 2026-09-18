@@ -226,8 +226,8 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
             <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-mono ${
               isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'
             }`}>
-              <span>{personalInfo.email}</span>
-              <span className="text-emerald-500 font-medium">Available</span>
+              <span className="min-w-0 truncate">{personalInfo.email}</span>
+              <span className="text-emerald-500 font-medium shrink-0">Available</span>
             </div>
           </motion.div>
         )}
