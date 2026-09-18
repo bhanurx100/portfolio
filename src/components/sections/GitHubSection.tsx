@@ -12,22 +12,22 @@ export const GitHubSection: React.FC = () => {
     <section
       id="github"
       aria-label="GitHub Open Source & Verified Activity"
-      className={`py-16 sm:py-24 border-b transition-colors duration-500 relative overflow-hidden ${
+      className={`py-12 sm:py-20 border-b transition-colors duration-500 relative overflow-hidden ${
         isDark ? 'bg-transparent text-white border-slate-800/80' : 'bg-transparent text-slate-900 border-slate-200'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 relative z-10">
         
         {/* Section Header — editorial */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="max-w-2xl space-y-4 text-left">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-2xl space-y-3 text-left">
             <p className="tech-label" style={{ color: 'var(--accent)' }}>Built in public</p>
 
-            <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
+            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
               Code is the evidence.
             </h2>
 
-            <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
+            <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)' }}>
               Real contribution activity and repositories for{' '}
               <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>@{personalInfo.githubUsername}</span>
               . No fabricated metrics — everything here is live.
