@@ -90,6 +90,12 @@
     --text-4: #64748B;
     --accent: #3B82F6;
     --accent-strong: #60A5FA;
+    /* Semantics step up to brights in dark mode — the day-mode depths
+       (#059669 etc.) render near-black on dark surfaces. Same convention
+       as the GitHub/Contact slate + emerald/amber text. */
+    --ok: #34D399;
+    --warn: #FBBF24;
+    --err: #F87171;
     --line: #1E293B;
     --line-strong: #33415C;
   }
