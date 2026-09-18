@@ -11,6 +11,7 @@
  * route returns 503 and the client silently uses the deterministic engine.
  */
 
+import 'dotenv/config';
 import express from 'express';
 import { GoogleGenAI, Type } from '@google/genai';
 import { validateSignalBundle } from '../src/data/build-engine/interpretation-schema';
@@ -18,7 +19,7 @@ import { validateSignalBundle } from '../src/data/build-engine/interpretation-sc
 const app = express();
 app.use(express.json({ limit: '16kb' }));
 
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-3.6-flash';
 
 /* ------------------------------------------------------------------ */
 /* Prompt — interpreter, not chatbot                                   */
@@ -152,3 +153,14 @@ app.post('/api/interpret', async (req: express.Request, res: express.Response) =
 });
 
 export default app;
+
+/* ------------------------------------------------------------------ */
+/* Standalone boot — `npm run server`. Skipped when imported (tests).  */
+/* ------------------------------------------------------------------ */
+
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = Number(process.env.INTERPRET_PORT ?? 4000);
+  app.listen(PORT, '127.0.0.1', () => {
+    console.log(`[builder-lab] interpret server listening on 127.0.0.1:${PORT}`);
+  });
+}
