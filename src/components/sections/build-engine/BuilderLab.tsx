@@ -106,6 +106,33 @@ export const BuilderLabSection: React.FC = () => {
         {/* WORKSPACE: canvas + panels */}
         {showWorkspace && (
           <>
+            {/* Console status bar */}
+            <div
+              className="flex items-center gap-3 rounded-xl border font-mono"
+              style={{
+                padding: '8px 14px',
+                fontSize: 11,
+                borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
+                background: isDark ? 'rgba(2,6,16,0.55)' : '#fff',
+                boxShadow: isDark ? '0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-1)',
+              }}
+              aria-live="polite"
+            >
+              <span className="flex gap-1.5" aria-hidden>
+                {['#F87171', '#FBBF24', '#34D399'].map((c) => (
+                  <span key={c} style={{ width: 8, height: 8, borderRadius: 999, background: c, opacity: 0.85 }} />
+                ))}
+              </span>
+              <span style={{ color: 'var(--accent)', fontWeight: 700 }}>SYSTEM CONSOLE</span>
+              <span style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+                {state.phase} · {state.nodes.length} nodes · {state.edges.length} edges
+                {state.simState === 'running' ? ' · ● running' : state.simState === 'gate' ? ' · ◆ decision' : ''}
+              </span>
+              <span className="flex-1" />
+              <span className="hidden sm:inline" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
+                lens · {state.activeLens}
+              </span>
+            </div>
             {/* MOBILE (<lg): one major idea per viewport — segmented switcher */}
             <div className="lg:hidden">
               <MobileLab

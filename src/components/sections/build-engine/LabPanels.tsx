@@ -11,7 +11,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
-  Activity,
   GitBranch,
   Layers,
   Plus,
@@ -66,7 +65,7 @@ const chip = (isDark: boolean, active = false) =>
   `px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors ${
     active
       ? isDark
-        ? 'bg-blue-600/20 border-blue-500/50 text-blue-300'
+        ? 'bg-blue-600/20 border-blue-500/50 text-blue-300 shadow-[0_0_14px_rgba(59,130,246,0.35)]'
         : 'bg-blue-50 border-blue-300 text-blue-700'
       : isDark
       ? 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-600'
@@ -74,7 +73,11 @@ const chip = (isDark: boolean, active = false) =>
   }`;
 
 const panel = (isDark: boolean) =>
-  `rounded-xl border ${isDark ? 'bg-[var(--surface-1)] border-[var(--line-dark)]' : 'bg-white border-[var(--line)]'}`;
+  `rounded-xl border ${
+    isDark
+      ? 'bg-[var(--surface-1)] border-[var(--line-strong-dark)] shadow-[0_10px_32px_-14px_rgba(0,0,0,0.7)]'
+      : 'bg-white border-[var(--line)] shadow-[var(--shadow-1)]'
+  }`;
 
 const panelTitle = (isDark: boolean) =>
   `text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-slate-400'}`;
@@ -123,7 +126,7 @@ export const IdeaInput: React.FC<{
             }}
             placeholder="Describe a problem — what should we build?"
             className="flex-1 bg-transparent outline-none"
-            style={{ fontSize: 16, color: 'var(--text-1)' }}
+            style={{ fontSize: 16, color: isDark ? '#F1F5F9' : '#0F172A' }}
             aria-label="Describe the system to build"
           />
           <button
@@ -242,6 +245,26 @@ export const EventTicker: React.FC<{
   const isDark = theme === 'dark';
   const latest = events[events.length - 1];
   const recent = events.slice(-8).reverse();
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  /* Terminal follows the run */
+  React.useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [events.length, expanded]);
+
+  const tone = (kind: string) =>
+    kind === 'input'
+      ? isDark ? 'text-blue-300' : 'text-blue-700'
+      : kind === 'warn'
+      ? 'text-amber-500'
+      : kind === 'error'
+      ? 'text-rose-500'
+      : kind === 'ok'
+      ? isDark ? 'text-emerald-400' : 'text-emerald-600'
+      : isDark ? 'text-slate-300' : 'text-slate-600';
+
+  const prompt = (kind: string) =>
+    kind === 'error' ? '✕' : kind === 'warn' ? '!' : kind === 'ok' ? '✓' : kind === 'input' ? '$' : '›';
 
   return (
     <div className={`${panel(isDark)} overflow-hidden`}>
@@ -251,45 +274,47 @@ export const EventTicker: React.FC<{
         className="w-full flex items-center gap-1.5 px-3 py-2 text-left"
         style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
       >
-        <Activity className={`w-3 h-3 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-        <span className={`${panelTitle(isDark)} flex-1`}>System events</span>
+        <span className="flex gap-1" aria-hidden>
+          {['#F87171', '#FBBF24', '#34D399'].map((c) => (
+            <span key={c} style={{ width: 7, height: 7, borderRadius: 999, background: c, opacity: 0.8 }} />
+          ))}
+        </span>
+        <span className={`${panelTitle(isDark)} flex-1`}>Terminal — system events</span>
+        <span className={`font-mono text-[10px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+          {events.length} events
+        </span>
         <ChevronDown
           className={`w-3.5 h-3.5 ${isDark ? 'text-slate-500' : 'text-slate-400'} transition-transform ${expanded ? 'rotate-180' : ''}`}
         />
       </button>
-      {latest && (
-        <div className={`px-3 pb-2 text-xs leading-snug ${
-          latest.kind === 'input'
-            ? isDark ? 'text-blue-300' : 'text-blue-700'
-            : latest.kind === 'warn'
-            ? 'text-amber-500'
-            : isDark ? 'text-slate-300' : 'text-slate-600'
-        }`}>
-          <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>›</span> {latest.text}
+      <div
+        ref={scrollRef}
+        className="mx-2 mb-2 rounded-lg overflow-y-auto scrollbar-thin"
+        style={{
+          background: isDark ? '#04070D' : '#F6F8FB',
+          border: `1px solid ${isDark ? '#141D31' : '#E6EBF2'}`,
+          maxHeight: expanded ? 190 : 64,
+          transition: 'max-height 0.25s ease',
+        }}
+      >
+        <div className="px-3 py-2 space-y-1.5">
+          {(expanded ? recent : latest ? [latest] : []).map((e) => (
+            <motion.div
+              key={e.id}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={`text-xs leading-snug font-mono ${tone(e.kind)}`}
+            >
+              <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>{prompt(e.kind)}</span> {e.text}
+            </motion.div>
+          ))}
+          {events.length === 0 && (
+            <div className={`text-xs font-mono ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+              <span>$</span> awaiting first event…
+            </div>
+          )}
         </div>
-      )}
-      {expanded && (
-        <div className="px-3 pb-3 space-y-1.5 border-t" style={{ borderColor: isDark ? '#1E293B' : '#E2E8F0' }}>
-          <div className="pt-2">
-            {recent.map((e) => (
-              <motion.div
-                key={e.id}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                className={`text-xs leading-snug ${
-                  e.kind === 'input'
-                    ? isDark ? 'text-blue-300' : 'text-blue-700'
-                    : e.kind === 'warn'
-                    ? 'text-amber-500'
-                    : isDark ? 'text-slate-300' : 'text-slate-600'
-                }`}
-              >
-                <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>›</span> {e.text}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -425,13 +450,45 @@ export const SimulationPanel: React.FC<{
           <button
             onClick={onStart}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition active:scale-[0.99]"
-            style={{ height: 46, background: 'var(--accent)', color: '#fff' }}
+            style={{
+              height: 46,
+              background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
+              color: '#fff',
+              boxShadow: isDark ? '0 10px 28px -10px color-mix(in srgb, var(--accent) 70%, transparent)' : '0 10px 24px -12px rgba(37,99,235,0.5)',
+            }}
           >
             <Play size={15} /> Run the system
           </button>
           <p className={`text-[11px] text-center ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
             Replays the blueprint as a working system — gates, failures, recovery included.
           </p>
+        </div>
+      )}
+
+      {/* Running: live step counter */}
+      {(simState === 'running' || simState === 'paused') && (
+        <div
+          className="flex items-center gap-2 rounded-lg px-3 py-2 font-mono"
+          style={{
+            fontSize: 11,
+            background: isDark ? '#04070D' : '#F6F8FB',
+            border: `1px solid ${isDark ? '#141D31' : '#E6EBF2'}`,
+            color: isDark ? 'var(--text-3)' : 'var(--text-2)',
+          }}
+          aria-live="polite"
+        >
+          <span className="relative flex" style={{ width: 8, height: 8 }} aria-hidden>
+            {simState === 'running' && (
+              <span className="absolute inline-flex h-full w-full rounded-full animate-ping" style={{ background: 'var(--accent)', opacity: 0.5 }} />
+            )}
+            <span className="relative inline-flex rounded-full" style={{ width: 8, height: 8, background: simState === 'running' ? 'var(--accent)' : 'var(--warn)', boxShadow: simState === 'running' ? '0 0 8px var(--accent)' : 'none' }} />
+          </span>
+          {simState === 'running' ? 'executing' : 'paused'} · {trace.length} step{trace.length === 1 ? '' : 's'}
+          {simState === 'running' && (
+            <span className="flex-1 rounded-full overflow-hidden" style={{ height: 3, background: isDark ? '#141D31' : '#E6EBF2' }} aria-hidden>
+              <span className="block h-full rounded-full" style={{ width: '38%', background: 'var(--accent)', animation: 'lab-scan 1.4s ease-in-out infinite' }} />
+            </span>
+          )}
         </div>
       )}
 
@@ -454,7 +511,7 @@ export const SimulationPanel: React.FC<{
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={onApprove} className={`flex-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold ${isDark ? 'bg-emerald-600 text-white' : 'bg-emerald-600 text-white'}`}>
+              <button onClick={onApprove} className={`flex-1 px-2.5 py-2 rounded-lg text-xs font-bold ${isDark ? 'bg-emerald-500 text-emerald-950' : 'bg-emerald-600 text-white'}`} style={isDark ? { boxShadow: '0 8px 22px -8px rgba(52,211,153,0.7)' } : undefined}>
                 <Check className="w-3 h-3 inline mr-1" /> Approve
               </button>
               <button onClick={onReject} className={`flex-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${isDark ? 'border-rose-500/40 text-rose-400' : 'border-rose-300 text-rose-600'}`}>

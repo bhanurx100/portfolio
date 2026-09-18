@@ -113,8 +113,9 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const dims = CANVAS_DIMS[variant];
 
-  /* Secondary text follows the GitHub/Contact slate ramp via tokens. */
-  const mutedText = 'var(--text-3)';
+  /* Secondary text follows the GitHub/Contact slate ramp: slate-400 on dark,
+     slate-500 on light. (This was inverted before — dark text in dark mode.) */
+  const mutedText = isDark ? '#94a3b8' : '#64748b';
   const gridColor = isDark ? 'rgba(148,163,184,0.05)' : 'rgba(100,116,139,0.07)';
 
   return (
@@ -129,11 +130,15 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
       >
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="var(--text-4)" strokeWidth="1.6" />
+            <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke={isDark ? '#64748b' : '#94a3b8'} strokeWidth="1.6" />
           </marker>
           <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#3b82f6" strokeWidth="1.8" />
           </marker>
+          <radialGradient id="labvig" cx="50%" cy="42%" r="75%">
+            <stop offset="55%" stopColor={isDark ? '#000000' : '#0f172a'} stopOpacity="0" />
+            <stop offset="100%" stopColor={isDark ? '#000000' : '#0f172a'} stopOpacity={isDark ? 0.32 : 0.07} />
+          </radialGradient>
         </defs>
 
         {/* Ambient grid — quiet technical texture */}
@@ -153,7 +158,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
               lensEmphasis.size > 0 &&
               !lensEmphasis.has(edge.from) &&
               !lensEmphasis.has(edge.to);
-            const stroke = isActive ? '#3b82f6' : dimmed ? mutedText : 'var(--text-4)';
+            const stroke = isActive ? '#3b82f6' : dimmed ? mutedText : isDark ? '#475569' : '#94a3b8';
             const dash = FLOW_DASH[edge.flow] ?? '0';
 
             // Curve control point
@@ -168,19 +173,23 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                   fill="none"
                   stroke={stroke}
                   strokeWidth={isActive ? 2 : 1.4}
-                  strokeDasharray={dash}
+                  strokeDasharray={isActive ? '7 5' : dash}
                   markerEnd={isActive ? 'url(#arrow-active)' : 'url(#arrow)'}
                   initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: dimmed ? 0.35 : 1 }}
                   transition={{ duration: reduceMotion ? 0 : 0.7, ease: 'easeOut' }}
-                />
+                >
+                  {isActive && !reduceMotion && (
+                    <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.8s" repeatCount="indefinite" />
+                  )}
+                </motion.path>
                 {edge.label && !dimmed && (
                   <text
                     x={mx}
                     y={my - 6}
                     textAnchor="middle"
                     fontSize="10.5"
-                    fill={isActive ? '#60a5fa' : mutedText}
+                    fill={isActive ? (isDark ? '#60a5fa' : '#2563eb') : mutedText}
                     className="font-mono"
                   >
                     {edge.label}
@@ -209,7 +218,7 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-                style={{ originX: `${node.x}px`, originY: `${node.y}px` }}
+                style={{ originX: `${node.x}px`, originY: `${node.y}px`, filter: isSelected ? 'drop-shadow(0 0 16px var(--accent))' : undefined }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelectNode(node.id);
@@ -250,14 +259,14 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
                   <g transform="translate(10, 12)">
                     <Icon className="w-4 h-4" style={{ color: isStarved ? mutedText : toneText }} />
                   </g>
-                  <text x="34" y="24" fontSize="12.5" fontWeight="600" fill="var(--text-1)">
+                  <text x="34" y="24" fontSize="12.5" fontWeight="600" fill={isDark ? '#F1F5F9' : '#0F172A'}>
                     {node.label.length > 14 ? `${node.label.slice(0, 13)}…` : node.label}
                   </text>
                   <text x="10" y="45" fontSize="9.5" fill={mutedText} className="font-mono">
                     {node.kind}
                   </text>
                   {isStarved && (
-                    <text x="10" y="58" fontSize="9" fill="var(--warn)" className="font-mono">
+                    <text x="10" y="58" fontSize="9" fill="#f59e0b" className="font-mono">
                       ⚠ starved of input
                     </text>
                   )}
@@ -273,6 +282,8 @@ const SystemCanvasComponent: React.FC<SystemCanvasProps> = ({
             );
           })}
         </g>
+        {/* Vignette — depth without a 3D library */}
+        <rect width={dims.w} height={dims.h} fill="url(#labvig)" pointerEvents="none" />
       </svg>
 
       {/* Sim state chip (top-right of canvas) */}

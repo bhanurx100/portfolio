@@ -173,6 +173,12 @@
   animation: lab-spin 14s linear infinite;
 }
 
+/* Runtime scan bar sweep */
+@keyframes lab-scan {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(300%); }
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
