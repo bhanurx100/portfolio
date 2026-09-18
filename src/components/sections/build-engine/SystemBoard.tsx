@@ -1,25 +1,21 @@
 /**
- * Builder Lab — System Board.
+ * Builder Lab — System Orbit Console.
  *
- * A from-scratch replacement for the node-graph canvas: the generated system
- * presented as structured cards — header dossier, tabbed detail, a living
- * pipeline of stages, and an actions checklist. Every word comes from the
- * engine data (labels, roles, flows, decisions, evidence); nothing invented.
- * Same machine, same interactions (select, inspect, remove, run, decide).
+ * One screen, no scrolling, almost no reading: the system as an orbit —
+ * stages ring a live hub, traffic marches the ring, tap any stage for the
+ * full story in the inspector. Depth comes from parallax layers and glow.
+ * Tabs stay compact; every paragraph is clamped or moved behind a tap.
  */
 
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   User,
   LayoutDashboard,
   Cpu,
   Database,
   Plug,
-  Check,
-  AlertTriangle,
   ExternalLink,
-  Trash2,
   Sparkles,
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
@@ -38,14 +34,6 @@ const KIND_ICON: Record<SystemNodeKind, React.ComponentType<{ size?: number | st
   integration: Plug,
 };
 
-const KIND_LABEL: Record<SystemNodeKind, string> = {
-  actor: 'Actor',
-  interface: 'Interface',
-  automation: 'Automation',
-  data: 'Data store',
-  integration: 'Integration',
-};
-
 const TONE_BASE: Record<string, string> = {
   blue: '#3b82f6',
   emerald: '#10b981',
@@ -61,6 +49,14 @@ const KIND_TEXT: Record<SystemNodeKind, { dark: string; light: string }> = {
   automation: { dark: '#34d399', light: '#059669' },
   data: { dark: '#a78bfa', light: '#7c3aed' },
   integration: { dark: '#22d3ee', light: '#0891b2' },
+};
+
+const KIND_LABEL: Record<SystemNodeKind, string> = {
+  actor: 'Actor',
+  interface: 'Interface',
+  automation: 'Automation',
+  data: 'Data',
+  integration: 'Integration',
 };
 
 type BoardTab = 'flow' | 'product' | 'architecture' | 'evidence';
@@ -98,13 +94,15 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
   onSelectNode,
   onRemoveNode,
 }) => {
+  void onRemoveNode;
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const reduceMotion = useReducedMotion();
   const [tab, setTab] = useState<BoardTab>('flow');
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
-  /* Pipeline order = engine build order, then anything bolted on later. */
   const stages = useMemo(() => {
     const ordered: PositionedNode[] = [];
     for (const id of system.buildOrder) {
@@ -118,14 +116,6 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     return ordered;
   }, [system.buildOrder, byId, nodes]);
 
-  const incomingFlow = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const e of edges) {
-      if (e.visible && !m.has(e.to)) m.set(e.to, e.flow);
-    }
-    return m;
-  }, [edges]);
-
   const activeNodeIds = useMemo(() => {
     const s = new Set<string>();
     for (const e of edges) {
@@ -137,304 +127,256 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     return s;
   }, [edges, activeEdgeIds]);
 
-  const actions = useMemo(
-    () => nodes.filter((n) => n.kind === 'automation' || n.kind === 'integration'),
-    [nodes],
+  const starvedCount = useMemo(
+    () => stages.filter((n) => starvedIds.has(n.id) || n.starved).length,
+    [stages, starvedIds],
   );
-  const starvedCount = starvedIds.size;
+
+  const n = Math.max(stages.length, 1);
+  const pts = stages.map((s, i) => {
+    const a = ((-90 + (i * 360) / n) * Math.PI) / 180;
+    return { node: s, x: 50 + 38 * Math.cos(a), y: 46 + 31 * Math.sin(a) };
+  });
+
+  const running = simState === 'running' || simState === 'gate';
+  const live = !reduceMotion;
   const similar = system.projectEvidence[0];
 
-  const cardBg = isDark ? 'rgba(21,31,51,0.72)' : '#fff';
-  const cardBorder = isDark ? '#2E3E5B' : '#D8E0EC';
+  const status = starvedCount > 0
+    ? { label: `▲ ${starvedCount} STARVED`, color: '#FBBF24' }
+    : simState === 'done'
+    ? { label: '■ COMPLETE', color: '#34D399' }
+    : running
+    ? { label: `● LIVE · ${activeNodeIds.size}/${stages.length}`, color: '#60A5FA' }
+    : { label: `${stages.length} STAGES`, color: isDark ? '#7C8DB0' : '#64748B' };
+
+  const ringPct = stages.length === 0 ? 0 : activeNodeIds.size / stages.length;
+  const R = 44;
+  const CIRC = 2 * Math.PI * R;
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reduceMotion) return;
+    if (typeof window !== 'undefined' && window.matchMedia && !window.matchMedia('(pointer:fine)').matches) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    setTilt({
+      x: ((e.clientX - r.left) / r.width - 0.5) * 2,
+      y: ((e.clientY - r.top) / r.height - 0.5) * 2,
+    });
+  };
 
   return (
     <div>
-      {/* Dossier header */}
-      <div
-        className="rounded-2xl border p-4 sm:p-5"
-        style={{
-          background: isDark
-            ? 'linear-gradient(135deg, rgba(30,58,138,0.35), rgba(21,31,51,0.7) 55%, rgba(14,116,144,0.18))'
-            : 'linear-gradient(135deg, rgba(29,78,216,0.08), rgba(255,255,255,0.9) 55%, rgba(14,116,144,0.08))',
-          borderColor: cardBorder,
-        }}
-      >
-        <div className="flex items-start gap-3.5">
-          <span
-            className="shrink-0 flex items-center justify-center rounded-2xl"
-            style={{
-              width: 52, height: 52,
-              background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-              boxShadow: '0 10px 28px -8px rgba(59,130,246,0.7)',
-            }}
-          >
-            <Sparkles size={24} color="#fff" />
-          </span>
-          <div className="flex-1 min-w-0">
-            <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#64748B' }}>
-              SYSTEM GENERATED
-            </div>
-            <h3 style={{ fontSize: 'clamp(18px, 2.4vw, 24px)', fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220', marginTop: 2, lineHeight: 1.25 }}>
-              {system.title}
-            </h3>
-            <p style={{ fontSize: 13.5, lineHeight: 1.6, color: isDark ? '#B6C2D6' : '#3D4A61', marginTop: 5 }}>
-              {system.problem}
-            </p>
+      {/* Slim header */}
+      <div className="flex items-center gap-3">
+        <span
+          className="shrink-0 flex items-center justify-center rounded-xl"
+          style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)' }}
+        >
+          <Sparkles size={19} color="#fff" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <h3 className="truncate" style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220' }}>
+            {system.title}
+          </h3>
+          <div className="font-mono" style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', color: status.color }}>
+            {status.label}
           </div>
         </div>
-
-        <div className="flex items-center gap-2 flex-wrap" style={{ marginTop: 14 }}>
-          <div className="flex items-center gap-1 rounded-full border" style={{ borderColor: cardBorder, padding: 3, background: isDark ? 'rgba(2,6,16,0.5)' : 'rgba(248,250,252,0.8)' }} role="tablist" aria-label="System detail">
-            {TABS.map((t) => {
-              const on = tab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  role="tab"
-                  aria-selected={on}
-                  onClick={() => setTab(t.id)}
-                  className="rounded-full transition-all"
-                  style={{
-                    padding: '6px 14px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
-                    background: on ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: on ? '0 6px 18px -6px rgba(59,130,246,0.7)' : 'none',
-                  }}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-          <span className="flex-1" />
-          <a
-            href={similar?.url ?? '#work'}
-            target={similar?.url ? '_blank' : undefined}
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border font-semibold transition"
-            style={{ padding: '7px 14px', fontSize: 12, borderColor: cardBorder, color: isDark ? '#E2E8F0' : '#0F172A', background: 'transparent', textDecoration: 'none' }}
-          >
-            See Similar Project <ExternalLink size={13} />
-          </a>
-        </div>
+        <a
+          href={similar?.url ?? '#work'}
+          target={similar?.url ? '_blank' : undefined}
+          rel="noreferrer"
+          aria-label="See similar project"
+          className="shrink-0 flex items-center justify-center rounded-full border transition"
+          style={{ width: 36, height: 36, borderColor: isDark ? '#2E3E5B' : '#D8E0EC', color: isDark ? '#B6C2D6' : '#3D4A61', background: 'transparent' }}
+        >
+          <ExternalLink size={15} />
+        </a>
       </div>
 
-      {/* Tab body */}
+      {/* Compact tabs */}
+      <div className="flex items-center gap-1 rounded-full border overflow-x-auto scrollbar-none" style={{ marginTop: 10, padding: 3, borderColor: isDark ? '#2E3E5B' : '#D8E0EC', background: isDark ? 'rgba(2,6,16,0.5)' : 'rgba(248,250,252,0.8)' }} role="tablist" aria-label="System detail">
+        {TABS.map((t) => {
+          const on = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={on}
+              onClick={() => setTab(t.id)}
+              className="rounded-full transition-all shrink-0"
+              style={{
+                padding: '5px 13px', fontSize: 11.5, fontWeight: 700,
+                color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
+                background: on ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : 'transparent',
+                border: 'none', cursor: 'pointer',
+                boxShadow: on ? '0 4px 14px -4px rgba(59,130,246,0.7)' : 'none',
+              }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Body */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${system.id}-${tab}`}
-          initial={{ opacity: 0, y: 10 }}
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-          style={{ marginTop: 12 }}
+          exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          style={{ marginTop: 10 }}
         >
           {tab === 'flow' && (
-            <div className="grid gap-3 lg:grid-cols-[1fr_250px]">
-              {/* Pipeline */}
-              <div>
-                {stages.map((n, i) => {
-                  const toneBase = TONE_BASE[n.tone] ?? '#64748b';
-                  const kindColor = isDark ? KIND_TEXT[n.kind].dark : KIND_TEXT[n.kind].light;
-                  const Icon = KIND_ICON[n.kind];
-                  const isActive = activeNodeIds.has(n.id);
-                  const isSelected = selectedNodeId === n.id;
-                  const isStarved = starvedIds.has(n.id) || n.starved;
-                  const isDecision = decisionHighlights.has(n.id);
-                  const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(n.id);
-                  const flow = incomingFlow.get(n.id);
-                  const last = i === stages.length - 1;
-                  return (
-                    <div key={n.id} className="flex gap-3">
-                      {/* Status rail */}
-                      <div className="flex flex-col items-center shrink-0" aria-hidden style={{ width: 22 }}>
-                        <span
-                          className="rounded-full"
-                          style={{
-                            width: 13, height: 13, marginTop: 16,
-                            background: isActive ? toneBase : isStarved ? '#F59E0B' : 'transparent',
-                            border: `2px solid ${isActive ? toneBase : isStarved ? '#F59E0B' : isDark ? '#334155' : '#CBD5E1'}`,
-                            boxShadow: isActive ? `0 0 10px ${toneBase}` : 'none',
-                          }}
-                        />
-                        {!last && (
-                          <span className="flex-1 rounded-full" style={{ width: 2, margin: '4px 0', background: isActive ? `linear-gradient(${toneBase}, transparent)` : isDark ? '#1E293B' : '#E2E8F0', boxShadow: isActive ? `0 0 8px ${toneBase}` : 'none', minHeight: 14 }} />
-                        )}
-                      </div>
+            <div
+              className="relative select-none"
+              style={{ height: 300 }}
+              onMouseMove={onMove}
+              onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+            >
+              {/* Ring layer (drifts least) */}
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                className="absolute inset-0 w-full h-full"
+                aria-hidden
+                style={{ transform: live ? `translate(${tilt.x * -5}px, ${tilt.y * -4}px)` : undefined, transition: 'transform 0.3s ease-out' }}
+              >
+                <ellipse cx={50} cy={46} rx={38} ry={31} fill="none" stroke={isDark ? '#223148' : '#D8E0EC'} strokeWidth={1.4} vectorEffect="non-scaling-stroke" />
+                <ellipse
+                  cx={50} cy={46} rx={38} ry={31} fill="none" stroke="#3B82F6" strokeWidth={1.6}
+                  strokeDasharray="5 7" vectorEffect="non-scaling-stroke" opacity={running ? 0.9 : 0.3}
+                >
+                  {live && running && (
+                    <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.9s" repeatCount="indefinite" />
+                  )}
+                </ellipse>
+                {pts.map((p) => (
+                  <line key={p.node.id} x1={50} y1={46} x2={p.x} y2={p.y} stroke={isDark ? '#1B2740' : '#E2E8F0'} strokeWidth={1} vectorEffect="non-scaling-stroke" />
+                ))}
+              </svg>
 
-                      {/* Stage card */}
-                      <motion.button
-                        initial={{ opacity: 0, x: 14 }}
-                        animate={{ opacity: dimmed ? 0.4 : 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
-                        onClick={() => onSelectNode(isSelected ? null : n.id)}
-                        className="flex-1 text-left rounded-2xl border transition-all"
+              {/* Hub (drifts most — foreground) */}
+              <div
+                className="absolute"
+                style={{
+                  left: '50%', top: '46%', transform: `translate(-50%,-50%) translate(${live ? tilt.x * 7 : 0}px, ${live ? tilt.y * 6 : 0}px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              >
+                <div className="relative flex items-center justify-center" style={{ width: 118, height: 118 }}>
+                  <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden>
+                    <circle cx={50} cy={50} r={R} fill="none" stroke={isDark ? '#223148' : '#E2E8F0'} strokeWidth={6} />
+                    <circle
+                      cx={50} cy={50} r={R} fill="none" stroke="#3B82F6" strokeWidth={6} strokeLinecap="round"
+                      strokeDasharray={`${Math.max(ringPct * CIRC - 2, 0.1)} ${CIRC}`}
+                      transform="rotate(-90 50 50)"
+                      style={{ filter: 'drop-shadow(0 0 6px #3B82F6)', transition: 'stroke-dasharray 0.5s ease' }}
+                    />
+                  </svg>
+                  <div className="text-center" style={{ maxWidth: 76 }}>
+                    <div className="font-mono" style={{ fontSize: 15, fontWeight: 800, color: status.color, fontVariantNumeric: 'tabular-nums' }}>
+                      {activeNodeIds.size}/{stages.length}
+                    </div>
+                    <div className="font-mono" style={{ fontSize: 8.5, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F' }}>
+                      FLOWING
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nodes (mid layer) */}
+              <div
+                className="absolute inset-0"
+                style={{ transform: live ? `translate(${tilt.x * 4}px, ${tilt.y * 3}px)` : undefined, transition: 'transform 0.3s ease-out' }}
+              >
+                {pts.map((p, i) => {
+                  const nitem = p.node;
+                  const toneBase = TONE_BASE[nitem.tone] ?? '#64748b';
+                  const kindColor = isDark ? KIND_TEXT[nitem.kind].dark : KIND_TEXT[nitem.kind].light;
+                  const Icon = KIND_ICON[nitem.kind];
+                  const isActive = activeNodeIds.has(nitem.id);
+                  const isSelected = selectedNodeId === nitem.id;
+                  const isStarved = starvedIds.has(nitem.id) || nitem.starved;
+                  const isDecision = decisionHighlights.has(nitem.id);
+                  const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(nitem.id);
+                  return (
+                    <button
+                      key={nitem.id}
+                      onClick={() => onSelectNode(isSelected ? null : nitem.id)}
+                      aria-label={`${i + 1}. ${nitem.label} — ${nitem.role}`}
+                      className="absolute flex flex-col items-center"
+                      style={{
+                        left: `${p.x}%`, top: `${p.y}%`, transform: 'translate(-50%,-50%)',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                        opacity: dimmed ? 0.35 : 1,
+                      }}
+                    >
+                      <span
+                        className="flex items-center justify-center rounded-full"
                         style={{
-                          marginBottom: last ? 0 : 10,
-                          padding: '12px 14px',
-                          background: cardBg,
-                          borderColor: isSelected || isDecision ? toneBase : isStarved ? '#F59E0B' : cardBorder,
-                          boxShadow: isSelected || isActive
-                            ? `0 0 0 1px ${toneBase}, 0 12px 32px -12px ${toneBase}66`
-                            : isDark ? '0 8px 24px -14px rgba(0,0,0,0.7)' : '0 8px 20px -14px rgba(15,23,42,0.25)',
-                          cursor: 'pointer',
+                          width: isActive ? 50 : 44, height: isActive ? 50 : 44,
+                          background: isDark ? 'rgba(16,26,44,0.95)' : '#fff',
+                          border: `2px solid ${isStarved ? '#F59E0B' : isSelected || isDecision ? toneBase : isDark ? '#2E3E5B' : '#CBD5E1'}`,
+                          boxShadow: isActive || isSelected
+                            ? `0 0 0 2px color-mix(in srgb, ${toneBase} 45%, transparent), 0 0 22px ${toneBase}`
+                            : isDark ? '0 8px 20px -8px rgba(0,0,0,0.8)' : '0 8px 18px -10px rgba(15,23,42,0.35)',
+                          transition: 'width 0.25s, height 0.25s, box-shadow 0.25s',
                         }}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className="shrink-0 flex items-center justify-center rounded-xl"
-                            style={{ width: 36, height: 36, background: `color-mix(in srgb, ${toneBase} 14%, transparent)`, border: `1px solid color-mix(in srgb, ${toneBase} 40%, transparent)` }}
-                          >
-                            <Icon size={17} color={kindColor} />
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.01em', color: isDark ? '#F1F5F9' : '#0B1220', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {n.label}
-                            </div>
-                            <div className="font-mono" style={{ fontSize: 10.5, color: isDark ? '#7C8DB0' : '#68778F', marginTop: 1 }}>
-                              {KIND_LABEL[n.kind]} · {n.layer}
-                            </div>
-                          </div>
-                          {flow && (
-                            <span className="font-mono shrink-0 rounded-full" style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', color: kindColor, background: `color-mix(in srgb, ${toneBase} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${toneBase} 35%, transparent)` }}>
-                              {flow}
-                            </span>
-                          )}
-                          {!n.locked && (
-                            <span
-                              role="button"
-                              tabIndex={0}
-                              aria-label={`Remove ${n.label}`}
-                              onClick={(e) => { e.stopPropagation(); onRemoveNode(n.id); }}
-                              onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onRemoveNode(n.id); } }}
-                              className="shrink-0 flex items-center justify-center rounded-lg"
-                              style={{ width: 28, height: 28, color: isDark ? '#7C8DB0' : '#94A3B8' }}
-                              title="Remove stage — watch the system reroute"
-                            >
-                              <Trash2 size={14} />
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 12.5, lineHeight: 1.55, color: isDark ? '#AEBBCE' : '#3D4A61', marginTop: 7 }}>
-                          {n.role}
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-wrap" style={{ marginTop: 7 }}>
-                          {isActive && (
-                            <span className="font-mono rounded-full" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.06em', padding: '2px 8px', background: toneBase, color: '#fff' }}>
-                              ● LIVE
-                            </span>
-                          )}
-                          {isStarved && (
-                            <span className="font-mono rounded-full inline-flex items-center gap-1" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.06em', padding: '2px 8px', background: 'rgba(245,158,11,0.15)', color: '#FBBF24' }}>
-                              <AlertTriangle size={10} /> STARVED
-                            </span>
-                          )}
-                          {isDecision && (
-                            <span className="font-mono rounded-full" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.06em', padding: '2px 8px', background: 'rgba(139,92,246,0.16)', color: '#A78BFA' }}>
-                              ◆ DECISION
-                            </span>
-                          )}
-                        </div>
-                      </motion.button>
-                    </div>
+                        <Icon size={19} color={isStarved ? '#FBBF24' : kindColor} />
+                      </span>
+                      <span
+                        className="font-mono text-center"
+                        style={{
+                          marginTop: 3, maxWidth: 76, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          fontSize: 10, fontWeight: 700, color: isActive || isSelected ? (isDark ? '#F1F5F9' : '#0B1220') : isDark ? '#8EA0B8' : '#5B6B85',
+                        }}
+                      >
+                        {i + 1} · {nitem.label}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
 
-              {/* Actions checklist */}
-              <div
-                className="rounded-2xl border p-4 h-fit lg:sticky lg:top-4"
-                style={{ background: cardBg, borderColor: cardBorder }}
-              >
-                <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F', marginBottom: 10 }}>
-                  AI ACTIONS
-                </div>
-                <div className="space-y-2.5">
-                  {actions.map((a) => {
-                    const done = simState === 'done';
-                    const running = simState === 'running' || simState === 'gate';
-                    const active = activeNodeIds.has(a.id);
-                    return (
-                      <div key={a.id} className="flex items-start gap-2.5">
-                        <span
-                          className="shrink-0 rounded-full flex items-center justify-center"
-                          style={{
-                            width: 20, height: 20, marginTop: 1,
-                            background: done ? '#10B981' : active ? 'color-mix(in srgb, #3B82F6 20%, transparent)' : 'transparent',
-                            border: `1.5px solid ${done ? '#10B981' : active ? '#3B82F6' : isDark ? '#334155' : '#CBD5E1'}`,
-                            boxShadow: active ? '0 0 10px rgba(59,130,246,0.7)' : 'none',
-                          }}
-                        >
-                          {done ? (
-                            <Check size={11} strokeWidth={3.5} color="#fff" />
-                          ) : running && active ? (
-                            <span className="rounded-full animate-ping" style={{ width: 8, height: 8, background: '#3B82F6' }} />
-                          ) : running ? (
-                            <span className="rounded-full" style={{ width: 6, height: 6, background: isDark ? '#475569' : '#94A3B8' }} />
-                          ) : null}
-                        </span>
-                        <div className="min-w-0">
-                          <div style={{ fontSize: 13, fontWeight: 700, color: isDark ? '#E2E8F0' : '#0F172A' }}>{a.label}</div>
-                          <div className="font-mono" style={{ fontSize: 10.5, color: isDark ? '#7C8DB0' : '#68778F' }}>{KIND_LABEL[a.kind]}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {actions.length === 0 && (
-                    <div style={{ fontSize: 12.5, color: isDark ? '#7C8DB0' : '#68778F' }}>
-                      No automated actions in this system — human-operated flow.
-                    </div>
-                  )}
-                </div>
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${cardBorder}` }}>
-                  {starvedCount > 0 ? (
-                    <div className="rounded-xl flex items-center gap-2" style={{ padding: '9px 12px', fontSize: 12, fontWeight: 700, background: 'rgba(245,158,11,0.12)', color: '#FBBF24' }}>
-                      <AlertTriangle size={14} /> Fallback — {starvedCount} stage{starvedCount === 1 ? '' : 's'} starved, human review
-                    </div>
-                  ) : simState === 'done' ? (
-                    <div className="rounded-xl flex items-center gap-2" style={{ padding: '9px 12px', fontSize: 12, fontWeight: 700, background: 'rgba(16,185,129,0.12)', color: '#34D399' }}>
-                      <Check size={14} strokeWidth={3} /> Complete — end-to-end system ready
-                    </div>
-                  ) : (
-                    <div className="rounded-xl font-mono" style={{ padding: '9px 12px', fontSize: 11, color: isDark ? '#7C8DB0' : '#68778F', background: isDark ? 'rgba(2,6,16,0.5)' : '#F6F8FB' }}>
-                      Standby — run the system to execute
-                    </div>
-                  )}
-                </div>
+              {/* Status line */}
+              <div className="absolute bottom-0 inset-x-0 text-center font-mono" style={{ fontSize: 10.5, color: isDark ? '#7C8DB0' : '#68778F' }}>
+                {starvedCount > 0
+                  ? `▲ ${starvedCount} stage${starvedCount === 1 ? '' : 's'} starved — tap a stage, remove or reroute`
+                  : simState === 'done'
+                  ? '■ complete — end-to-end system ready'
+                  : running
+                  ? '● traffic live — tap any stage to inspect'
+                  : 'tap a stage to inspect · run the system to light the ring'}
               </div>
             </div>
           )}
 
           {tab === 'product' && (
-            <div className="rounded-2xl border p-4 sm:p-5 space-y-4" style={{ background: cardBg, borderColor: cardBorder }}>
-              <div>
-                <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F', marginBottom: 6 }}>PROBLEM</div>
-                <p style={{ fontSize: 14.5, lineHeight: 1.65, color: isDark ? '#E2E8F0' : '#0F172A' }}>{system.problem}</p>
+            <div style={{ minHeight: 300 }}>
+              <p className="line-clamp-2" style={{ fontSize: 14, lineHeight: 1.6, color: isDark ? '#E2E8F0' : '#0F172A' }}>
+                {system.problem}
+              </p>
+              <div className="flex flex-wrap gap-1.5" style={{ marginTop: 10 }}>
+                {system.actors.map((a) => (
+                  <span key={a} className="rounded-full font-semibold" style={{ fontSize: 11.5, padding: '4px 11px', background: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(37,99,235,0.08)', color: isDark ? '#93C5FD' : '#1D4ED8', border: '1px solid color-mix(in srgb, #3B82F6 30%, transparent)' }}>
+                    {a}
+                  </span>
+                ))}
               </div>
-              <div>
-                <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F', marginBottom: 6 }}>ACTORS</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {system.actors.map((a) => (
-                    <span key={a} className="rounded-full font-semibold" style={{ fontSize: 12, padding: '5px 12px', background: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(37,99,235,0.08)', color: isDark ? '#93C5FD' : '#1D4ED8', border: `1px solid color-mix(in srgb, #3B82F6 30%, transparent)` }}>
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-2" style={{ marginTop: 12 }}>
                 {[
                   { k: 'Stages', v: stages.length },
-                  { k: 'Connections', v: edges.filter((e) => e.visible).length },
+                  { k: 'Links', v: edges.filter((e) => e.visible).length },
                   { k: 'Decisions', v: system.decisions.length },
                   { k: 'Add-ons', v: system.addOns.length },
                 ].map((s) => (
-                  <div key={s.k} className="rounded-xl border text-center" style={{ padding: '10px 6px', borderColor: cardBorder, background: isDark ? 'rgba(2,6,16,0.4)' : '#F6F8FB' }}>
-                    <div className="font-mono" style={{ fontSize: 22, fontWeight: 700, color: isDark ? '#F8FAFC' : '#0B1220', fontVariantNumeric: 'tabular-nums' }}>{s.v}</div>
-                    <div className="font-mono uppercase" style={{ fontSize: 9.5, letterSpacing: '0.08em', color: isDark ? '#7C8DB0' : '#68778F' }}>{s.k}</div>
+                  <div key={s.k} className="rounded-xl border text-center" style={{ padding: '9px 4px', borderColor: isDark ? '#2E3E5B' : '#D8E0EC', background: isDark ? 'rgba(2,6,16,0.4)' : '#F6F8FB' }}>
+                    <div className="font-mono" style={{ fontSize: 20, fontWeight: 700, color: isDark ? '#F8FAFC' : '#0B1220', fontVariantNumeric: 'tabular-nums' }}>{s.v}</div>
+                    <div className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: '0.06em', color: isDark ? '#7C8DB0' : '#68778F' }}>{s.k}</div>
                   </div>
                 ))}
               </div>
@@ -442,10 +384,9 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           )}
 
           {tab === 'architecture' && (
-            <div className="rounded-2xl border p-4 sm:p-5 space-y-3" style={{ background: cardBg, borderColor: cardBorder }}>
-              <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F' }}>COMPOSITION</div>
+            <div className="space-y-2.5" style={{ minHeight: 300 }}>
               {(Object.keys(KIND_LABEL) as SystemNodeKind[]).map((k) => {
-                const list = nodes.filter((n) => n.kind === k);
+                const list = nodes.filter((nn) => nn.kind === k);
                 if (list.length === 0) return null;
                 const Icon = KIND_ICON[k];
                 const c = isDark ? KIND_TEXT[k].dark : KIND_TEXT[k].light;
@@ -453,11 +394,10 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                 return (
                   <div key={k}>
                     <div className="flex items-center gap-2" style={{ marginBottom: 4 }}>
-                      <Icon size={14} color={c} />
-                      <span style={{ fontSize: 12.5, fontWeight: 700, color: isDark ? '#E2E8F0' : '#0F172A' }}>{KIND_LABEL[k]}</span>
-                      <span className="font-mono" style={{ fontSize: 11, color: isDark ? '#7C8DB0' : '#68778F' }}>×{list.length}</span>
+                      <Icon size={13} color={c} />
+                      <span style={{ fontSize: 12, fontWeight: 700, color: isDark ? '#E2E8F0' : '#0F172A' }}>{KIND_LABEL[k]}</span>
                       <span style={{ flex: 1 }} />
-                      <span className="font-mono" style={{ fontSize: 11, color: c }}>{pct}%</span>
+                      <span className="font-mono" style={{ fontSize: 11, color: c }}>×{list.length} · {pct}%</span>
                     </div>
                     <div className="rounded-full" style={{ height: 6, background: isDark ? '#1B2740' : '#E2E8F0', overflow: 'hidden' }}>
                       <motion.div
@@ -468,9 +408,6 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                         style={{ background: `linear-gradient(90deg, ${c}, ${c}88)`, boxShadow: `0 0 10px ${c}66` }}
                       />
                     </div>
-                    <div className="font-mono" style={{ fontSize: 10.5, color: isDark ? '#7C8DB0' : '#68778F', marginTop: 3 }}>
-                      {list.map((n) => n.label).join(' · ')}
-                    </div>
                   </div>
                 );
               })}
@@ -478,26 +415,26 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           )}
 
           {tab === 'evidence' && (
-            <div className="space-y-2">
+            <div className="flex gap-2 overflow-x-auto scrollbar-none" style={{ minHeight: 300, paddingBottom: 4 }}>
               {system.projectEvidence.map((ev) => (
                 <a
                   key={ev.projectId}
                   href={ev.url ?? '#work'}
                   target={ev.url ? '_blank' : undefined}
                   rel="noreferrer"
-                  className="block rounded-2xl border transition group"
-                  style={{ padding: '13px 15px', background: cardBg, borderColor: cardBorder, textDecoration: 'none' }}
+                  className="shrink-0 rounded-2xl border"
+                  style={{ width: 228, padding: '13px 14px', background: isDark ? 'rgba(21,31,51,0.72)' : '#fff', borderColor: isDark ? '#2E3E5B' : '#D8E0EC', textDecoration: 'none' }}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span style={{ fontSize: 14, fontWeight: 800, color: isDark ? '#F1F5F9' : '#0B1220' }}>{ev.name}</span>
-                    <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-mono rounded-full" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.06em', padding: '3px 9px', background: ev.tag === 'BUILT' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: ev.tag === 'BUILT' ? '#34D399' : '#FBBF24' }}>
-                        {ev.tag}
-                      </span>
-                      <ExternalLink size={13} style={{ color: isDark ? '#7C8DB0' : '#94A3B8' }} />
+                    <span className="truncate" style={{ fontSize: 13.5, fontWeight: 800, color: isDark ? '#F1F5F9' : '#0B1220' }}>{ev.name}</span>
+                    <span className="font-mono rounded-full shrink-0" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', padding: '3px 8px', background: ev.tag === 'BUILT' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: ev.tag === 'BUILT' ? '#34D399' : '#FBBF24' }}>
+                      {ev.tag}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12.5, lineHeight: 1.6, color: isDark ? '#AEBBCE' : '#3D4A61', marginTop: 5 }}>{ev.relevance}</p>
+                  <p className="line-clamp-3" style={{ fontSize: 12, lineHeight: 1.55, color: isDark ? '#AEBBCE' : '#3D4A61', marginTop: 6 }}>{ev.relevance}</p>
+                  <span className="font-mono inline-flex items-center gap-1" style={{ fontSize: 10.5, fontWeight: 700, color: isDark ? '#60A5FA' : '#2563EB', marginTop: 8 }}>
+                    Open <ExternalLink size={11} />
+                  </span>
                 </a>
               ))}
             </div>
