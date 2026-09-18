@@ -263,7 +263,7 @@ export const HowIBuildSection: React.FC = () => {
   const status = finished ? 'COMPLETE' : playing ? 'LIVE' : 'PAUSED';
 
   return (
-    <section ref={sectionRef} id="how-i-build" className="py-20 sm:py-28 border-b" style={{ borderColor: line }}>
+    <section ref={sectionRef} id="how-i-build" className="py-20 sm:py-28 border-b overflow-hidden" style={{ borderColor: line }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl space-y-4 mb-8 sm:mb-10">
           <p className="tech-label" style={{ color: 'var(--accent)' }}>How I build</p>
@@ -277,7 +277,7 @@ export const HowIBuildSection: React.FC = () => {
 
         {/* Console */}
         <div
-          className="rounded-2xl border overflow-hidden"
+          className="rounded-2xl border overflow-hidden max-w-5xl mx-auto"
           style={{
             borderColor: line,
             background: isDark ? 'rgba(2,6,16,0.6)' : '#fff',
@@ -321,15 +321,25 @@ export const HowIBuildSection: React.FC = () => {
                 }}
               />
               <AnimatePresence mode="wait">
+                <motion.div
+                  key={`glow-${stage.id}`}
+                  className="absolute inset-0 pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  aria-hidden
+                  style={{ background: 'radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 66%)' }}
+                />
                 <motion.svg
                   key={stage.id}
                   viewBox="0 0 220 150"
                   className="relative w-full h-auto"
                   style={{ maxHeight: 240 }}
-                  initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.02 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.96, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.02, y: -6 }}
+                  transition={{ type: 'spring', stiffness: 240, damping: 26 }}
                   role="img"
                   aria-label={`${stage.title}: ${stage.caption}`}
                 >
@@ -396,7 +406,7 @@ export const HowIBuildSection: React.FC = () => {
           </div>
 
           {/* Narration */}
-          <div style={{ padding: '12px 14px' }}>
+          <div style={{ padding: '12px 14px', minHeight: 178 }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={stage.id}

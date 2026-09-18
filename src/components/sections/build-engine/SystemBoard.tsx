@@ -132,6 +132,14 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     [stages, starvedIds],
   );
 
+  /* Caption focus: selected, else first live stage, else the intake. */
+  const focus = useMemo(() => {
+    const sel = stages.find((s) => s.id === selectedNodeId);
+    if (sel) return sel;
+    const liveOne = stages.find((s) => activeNodeIds.has(s.id));
+    return liveOne ?? stages[0] ?? null;
+  }, [stages, selectedNodeId, activeNodeIds]);
+
   const n = Math.max(stages.length, 1);
   const pts = stages.map((s, i) => {
     const a = ((-90 + (i * 360) / n) * Math.PI) / 180;
@@ -232,7 +240,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           {tab === 'flow' && (
             <div
               className="relative select-none"
-              style={{ height: 300 }}
+              style={{ height: 300, touchAction: 'pan-y' }}
               onMouseMove={onMove}
               onMouseLeave={() => setTilt({ x: 0, y: 0 })}
             >
@@ -302,6 +310,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                   const isStarved = starvedIds.has(nitem.id) || nitem.starved;
                   const isDecision = decisionHighlights.has(nitem.id);
                   const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(nitem.id);
+                  const labeled = isActive || isSelected;
                   return (
                     <button
                       key={nitem.id}
@@ -311,11 +320,11 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                       style={{
                         left: `${p.x}%`, top: `${p.y}%`, transform: 'translate(-50%,-50%)',
                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        opacity: dimmed ? 0.35 : 1,
+                        opacity: dimmed ? 0.35 : 1, zIndex: labeled ? 5 : 1,
                       }}
                     >
                       <span
-                        className="flex items-center justify-center rounded-full"
+                        className="relative flex items-center justify-center rounded-full"
                         style={{
                           width: isActive ? 50 : 44, height: isActive ? 50 : 44,
                           background: isDark ? 'rgba(16,26,44,0.95)' : '#fff',
@@ -327,30 +336,66 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                         }}
                       >
                         <Icon size={19} color={isStarved ? '#FBBF24' : kindColor} />
+                        <span
+                          className="absolute font-mono flex items-center justify-center rounded-full"
+                          style={{
+                            top: -7, right: -7, width: 18, height: 18,
+                            fontSize: 9.5, fontWeight: 800,
+                            background: isActive ? toneBase : isDark ? '#1B2740' : '#E2E8F0',
+                            color: isActive ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
+                            border: `1.5px solid ${isDark ? '#0A0F1B' : '#fff'}`,
+                          }}
+                        >
+                          {i + 1}
+                        </span>
                       </span>
-                      <span
-                        className="font-mono text-center"
-                        style={{
-                          marginTop: 3, maxWidth: 76, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          fontSize: 10, fontWeight: 700, color: isActive || isSelected ? (isDark ? '#F1F5F9' : '#0B1220') : isDark ? '#8EA0B8' : '#5B6B85',
-                        }}
-                      >
-                        {i + 1} · {nitem.label}
-                      </span>
+                      {/* Label only on the focused node — ends all overlap */}
+                      <AnimatePresence>
+                        {labeled && (
+                          <motion.span
+                            key={`label-${nitem.id}`}
+                            initial={{ opacity: 0, y: -3 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -3 }}
+                            transition={{ duration: 0.18 }}
+                            className="font-mono text-center rounded-full"
+                            style={{
+                              marginTop: 4, maxWidth: 120,
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                              fontSize: 10, fontWeight: 700, padding: '2px 9px',
+                              color: isDark ? '#F1F5F9' : '#0B1220',
+                              background: isDark ? 'rgba(10,15,27,0.92)' : 'rgba(255,255,255,0.95)',
+                              border: `1px solid ${toneBase}`,
+                              boxShadow: `0 0 12px color-mix(in srgb, ${toneBase} 50%, transparent)`,
+                            }}
+                          >
+                            {nitem.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Status line */}
-              <div className="absolute bottom-0 inset-x-0 text-center font-mono" style={{ fontSize: 10.5, color: isDark ? '#7C8DB0' : '#68778F' }}>
-                {starvedCount > 0
-                  ? `▲ ${starvedCount} stage${starvedCount === 1 ? '' : 's'} starved — tap a stage, remove or reroute`
-                  : simState === 'done'
-                  ? '■ complete — end-to-end system ready'
-                  : running
-                  ? '● traffic live — tap any stage to inspect'
-                  : 'tap a stage to inspect · run the system to light the ring'}
+              {/* Focus caption + status — one line, never overlaps */}
+              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono" style={{ fontSize: 10.5 }}>
+                {focus && (
+                  <>
+                    <span
+                      className="shrink-0 rounded-full"
+                      style={{ padding: '2px 8px', fontWeight: 800, color: isDark ? '#F1F5F9' : '#0B1220', background: isDark ? 'rgba(59,130,246,0.16)' : 'rgba(37,99,235,0.1)', border: '1px solid color-mix(in srgb, #3B82F6 40%, transparent)' }}
+                    >
+                      {stages.indexOf(focus) + 1} · {focus.label}
+                    </span>
+                    <span className="flex-1 min-w-0 truncate" style={{ color: isDark ? '#8EA0B8' : '#5B6B85' }}>
+                      {focus.role}
+                    </span>
+                  </>
+                )}
+                <span className="shrink-0" style={{ color: starvedCount > 0 ? '#FBBF24' : simState === 'done' ? '#34D399' : running ? '#60A5FA' : isDark ? '#7C8DB0' : '#68778F' }}>
+                  {starvedCount > 0 ? `▲ ${starvedCount}` : simState === 'done' ? '■ ready' : running ? '● live' : '○ idle'}
+                </span>
               </div>
             </div>
           )}

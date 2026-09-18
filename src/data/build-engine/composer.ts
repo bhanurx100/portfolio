@@ -528,7 +528,7 @@ export function interpretIdea(idea: string): Interpretation {
   const classification = classifyIdea(idea);
   const signals = extractSignals(idea);
 
-  if (classification.matchedSignals.length >= 2) {
+  if (classification.matchedSignals.length >= 3) {
     const system = getSystem(classification.scenarioId);
     return {
       system,

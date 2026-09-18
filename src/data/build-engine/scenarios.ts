@@ -73,7 +73,7 @@ export const scenarioMeta: ScenarioMeta[] = [
   {
     id: 'operations',
     chip: 'Operations & booking platform',
-    example: 'I want to build software for managing PGs.',
+    example: 'Managing PGs means tracking occupancy and availability, with field staff updating records from mobile.',
     title: 'Operations & Booking Platform',
     domain: 'Full-Stack Product',
   },
