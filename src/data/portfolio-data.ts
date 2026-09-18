@@ -17,7 +17,7 @@ export const personalInfo = {
   headline: 'Designing and shipping native mobile products with applied AI.',
   supporting: 'Product-minded full-stack engineering: mobile-first UX, typed data layers, realtime collaboration, and AI features integrated where they measurably help — not bolted on.',
   availability: 'Available for Full-Stack & Frontend Engineering Roles',
-  resumeUrl: '#contact',
+  resumeUrl: 'https://drive.google.com/uc?export=download&id=1xLuLnV4ctqlz68ap07AdM1SY2CDc_yY6',
 };
 
 export const projectsData: Record<string, ProjectData> = {
@@ -123,7 +123,7 @@ export const projectsData: Record<string, ProjectData> = {
     capabilities: [
       'Built the native Expo/React Native app with a PostGIS-backed stay map — search, filters and property cards stay in sync with live inventory streamed from Supabase.',
       'Implemented offline-first search and booking drafts: MMKV + SQLite local state keeps saved stays and draft bookings usable with no signal, then reconciles against live availability before confirmation.',
-      'Shipped role-based surfaces with distinct UIs — guest (booking history, upcoming stays), host (property management, per-hotel revenue stats), owner (platform-wide analytics) over the same Supabase core.',
+      'Built role-based surfaces with distinct UIs — guest (booking history, upcoming stays), host (property management, per-hotel revenue stats), owner (platform-wide analytics) over the same Supabase core.',
       'Integrated Stripe checkout for the reservation flow, plus a currency layer that keeps local pricing and display conversion explicit per property.',
       'Built an AI stay assistant with a rule-based intent extractor (destination, price, stay dates, guest count) that runs a parallel map + list search and merges results into one view.',
       'Covered search, booking and reconciliation flows with a Maestro UI test pass across iOS and Android simulators.'
