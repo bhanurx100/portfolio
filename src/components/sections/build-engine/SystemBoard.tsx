@@ -20,9 +20,9 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import type {
-  DerivedEdge,
   GeneratedSystem,
   PositionedNode,
+  SystemEdge,
   SystemNodeKind,
 } from '../../../data/build-engine/types';
 
@@ -59,6 +59,15 @@ const KIND_LABEL: Record<SystemNodeKind, string> = {
   integration: 'Integration',
 };
 
+/* Edge flow language — direction, dependency and data movement. */
+const FLOW_COLOR: Record<string, { dark: string; light: string }> = {
+  signal: { dark: '#60A5FA', light: '#2563EB' },
+  data: { dark: '#A78BFA', light: '#6D28D9' },
+  action: { dark: '#34D399', light: '#047857' },
+  approval: { dark: '#FBBF24', light: '#B45309' },
+  escalation: { dark: '#FB7185', light: '#BE123C' },
+};
+
 type BoardTab = 'flow' | 'product' | 'architecture' | 'evidence';
 const TABS: { id: BoardTab; label: string }[] = [
   { id: 'flow', label: 'Flow' },
@@ -70,9 +79,13 @@ const TABS: { id: BoardTab; label: string }[] = [
 interface SystemBoardProps {
   system: GeneratedSystem;
   nodes: PositionedNode[];
-  edges: DerivedEdge[];
+  edges: SystemEdge[];
   activeEdgeIds: Set<string>;
   lensEmphasis: Set<string>;
+  /** Annotation text per node id under the active lens (shown in the caption). */
+  lensAnnotations?: Record<string, string>;
+  /** Question the active lens answers (shown in the board header). */
+  lensQuestion?: string;
   decisionHighlights: Set<string>;
   selectedNodeId: string | null;
   starvedIds: Set<string>;
@@ -87,6 +100,8 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
   edges,
   activeEdgeIds,
   lensEmphasis,
+  lensAnnotations,
+  lensQuestion,
   decisionHighlights,
   selectedNodeId,
   starvedIds,
@@ -98,6 +113,10 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const reduceMotion = useReducedMotion();
+  const isMobile =
+    typeof window !== 'undefined' && window.matchMedia
+      ? !window.matchMedia('(min-width: 640px)').matches
+      : false;
   const [tab, setTab] = useState<BoardTab>('flow');
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
@@ -127,6 +146,12 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     return s;
   }, [edges, activeEdgeIds]);
 
+  /* Present (both endpoints on canvas), used by the edge layer + product tab. */
+  const presentEdges = useMemo(
+    () => edges.filter((e) => nodes.some((n) => n.id === e.from) && nodes.some((n) => n.id === e.to)),
+    [edges, nodes],
+  );
+
   const starvedCount = useMemo(
     () => stages.filter((n) => starvedIds.has(n.id) || n.starved).length,
     [stages, starvedIds],
@@ -145,6 +170,25 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     const a = ((-90 + (i * 360) / n) * Math.PI) / 180;
     return { node: s, x: 50 + 38 * Math.cos(a), y: 46 + 31 * Math.sin(a) };
   });
+  const ptMap = useMemo(() => new Map(pts.map((p) => [p.node.id, p])), [pts]);
+
+  /* Edge geometry in the 100x100 stage space. */
+  const edgeGeom = useMemo(
+    () =>
+      presentEdges
+        .map((e) => {
+          const f = ptMap.get(e.from);
+          const t = ptMap.get(e.to);
+          if (!f || !t) return null;
+          const mx = (f.x + t.x) / 2;
+          const my = (f.y + t.y) / 2;
+          const active = activeEdgeIds.has(e.id);
+          const action = e.flow === 'action' || e.flow === 'escalation';
+          return { e, f, t, mx, my, active, action };
+        })
+        .filter((g): g is NonNullable<typeof g> => g !== null),
+    [presentEdges, ptMap, activeEdgeIds],
+  );
 
   const running = simState === 'running' || simState === 'gate';
   const live = !reduceMotion;
@@ -178,15 +222,15 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
       <div className="flex items-center gap-3">
         <span
           className="shrink-0 flex items-center justify-center rounded-xl"
-          style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)' }}
+          style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)', borderRadius: 10 }}
         >
-          <Sparkles size={19} color="#fff" />
+          <Sparkles size={17} color="#fff" />
         </span>
         <div className="flex-1 min-w-0">
-          <h3 className="truncate" style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220' }}>
+          <h3 className="truncate text-[15px] sm:text-[18px]" style={{ fontWeight: 800, letterSpacing: '-0.02em', color: isDark ? '#F8FAFC' : '#0B1220' }}>
             {system.title}
           </h3>
-          <div className="font-mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: status.color }}>
+          <div className="font-mono text-[9.5px] sm:text-[11px]" style={{ fontWeight: 700, letterSpacing: '0.06em', color: status.color }}>
             {status.label}
           </div>
         </div>
@@ -195,10 +239,10 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           target={similar?.url ? '_blank' : undefined}
           rel="noreferrer"
           aria-label="See similar project"
-          className="shrink-0 flex items-center justify-center rounded-full border transition"
-          style={{ width: 36, height: 36, borderColor: isDark ? '#2E3E5B' : '#D8E0EC', color: isDark ? '#B6C2D6' : '#3D4A61', background: 'transparent' }}
+          className="shrink-0 flex items-center justify-center rounded-full border transition w-[30px] h-[30px] sm:w-9 sm:h-9"
+          style={{ borderColor: isDark ? '#2E3E5B' : '#D8E0EC', color: isDark ? '#B6C2D6' : '#3D4A61', background: 'transparent' }}
         >
-          <ExternalLink size={15} />
+          <ExternalLink size={14} />
         </a>
       </div>
 
@@ -212,9 +256,9 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               role="tab"
               aria-selected={on}
               onClick={() => setTab(t.id)}
-              className="rounded-full transition-all shrink-0"
+              className="rounded-full transition-all shrink-0 px-[11px] py-1.5 sm:px-[15px] sm:py-[7px]"
               style={{
-                padding: '7px 15px', fontSize: 12.5, fontWeight: 700,
+                fontSize: 12.5, fontWeight: 700,
                 color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
                 background: on ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : 'transparent',
                 border: 'none', cursor: 'pointer',
@@ -226,6 +270,16 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           );
         })}
       </div>
+
+      {/* Lens reveal — the active perspective, stated once */}
+      {tab === 'flow' && lensQuestion && (
+        <div className="flex items-center gap-2" style={{ marginTop: 8 }}>
+          <span className="font-mono rounded-full shrink-0" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', padding: '3px 9px', color: isDark ? '#93C5FD' : '#1D4ED8', background: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(37,99,235,0.08)', border: '1px solid color-mix(in srgb, #3B82F6 35%, transparent)' }}>
+            LENS
+          </span>
+          <span className="truncate" style={{ fontSize: 12, color: isDark ? '#8EA0B8' : '#5B6B85' }}>{lensQuestion}</span>
+        </div>
+      )}
 
       {/* Body */}
       <AnimatePresence mode="wait">
@@ -239,8 +293,8 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
         >
           {tab === 'flow' && (
             <div
-              className="relative select-none"
-              style={{ height: 300, touchAction: 'pan-y' }}
+              className="relative select-none h-[210px] sm:h-[300px]"
+              style={{ touchAction: 'pan-y' }}
               onMouseMove={onMove}
               onMouseLeave={() => setTilt({ x: 0, y: 0 })}
             >
@@ -261,6 +315,43 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                     <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.9s" repeatCount="indefinite" />
                   )}
                 </ellipse>
+              </svg>
+
+              {/* Edge layer — real dependencies made visible */}
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                aria-hidden
+                style={{ transform: live ? `translate(${tilt.x * 4}px, ${tilt.y * 3}px)` : undefined, transition: 'transform 0.3s ease-out' }}
+              >
+                {edgeGeom.map(({ e, f, t, mx, my, active, action }) => {
+                  const c = isDark ? FLOW_COLOR[e.flow].dark : FLOW_COLOR[e.flow].light;
+                  const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(e.from) && !lensEmphasis.has(e.to);
+                  return (
+                    <g key={e.id} opacity={active ? 1 : dimmed ? 0.22 : 0.5}>
+                      <line
+                        x1={f.x} y1={f.y} x2={t.x} y2={t.y}
+                        stroke={c}
+                        strokeWidth={active ? (isMobile ? 1.5 : 2) : isMobile ? 1 : 1.3}
+                        strokeDasharray={active ? '5 6' : undefined}
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                        className={active && live && running && action ? 'lab-edge-flow' : undefined}
+                      />
+                      {active && (
+                        <>
+                          <circle cx={mx} cy={my} r={0.9} fill={c} opacity={0.95}>
+                            {live && running && <animate attributeName="r" values="0.6;1.4;0.6" dur="0.8s" repeatCount="indefinite" />}
+                          </circle>
+                          <text x={mx} y={my - 1.6} textAnchor="middle" fontSize={3} fontWeight={700} fill={c} letterSpacing="0.15" opacity={running ? 0.85 : 0.5}>
+                            {e.flow.toUpperCase()}
+                          </text>
+                        </>
+                      )}
+                    </g>
+                  );
+                })}
               </svg>
 
               {/* Hub (drifts most — foreground) */}
@@ -321,26 +412,27 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                       }}
                     >
                       <span
-                        className="relative flex items-center justify-center rounded-full"
+                        className={`relative flex items-center justify-center rounded-full ${
+                          isActive ? 'w-[26px] h-[26px] sm:w-[50px] sm:h-[50px]' : 'w-[22px] h-[22px] sm:w-11 sm:h-11'
+                        }`}
                         style={{
-                          width: isActive ? 50 : 44, height: isActive ? 50 : 44,
                           background: isDark ? 'rgba(16,26,44,0.95)' : '#fff',
-                          border: `2px solid ${isStarved ? '#F59E0B' : isSelected || isDecision ? toneBase : isDark ? '#2E3E5B' : '#CBD5E1'}`,
+                          border: `${isMobile ? 1.5 : 2}px solid ${isStarved ? '#F59E0B' : isSelected || isDecision ? toneBase : isDark ? '#2E3E5B' : '#CBD5E1'}`,
                           boxShadow: isActive || isSelected
-                            ? `0 0 0 2px color-mix(in srgb, ${toneBase} 45%, transparent), 0 0 22px ${toneBase}`
+                            ? `0 0 0 2px color-mix(in srgb, ${toneBase} 45%, transparent), 0 0 18px ${toneBase}`
                             : isDark ? '0 8px 20px -8px rgba(0,0,0,0.8)' : '0 8px 18px -10px rgba(15,23,42,0.35)',
                           transition: 'width 0.25s, height 0.25s, box-shadow 0.25s',
                         }}
                       >
-                        <Icon size={19} color={isStarved ? '#FBBF24' : kindColor} />
+                        <Icon size={14} color={isStarved ? '#FBBF24' : kindColor} />
                         <span
-                          className="absolute font-mono flex items-center justify-center rounded-full"
+                          className="absolute font-mono flex items-center justify-center rounded-full w-[11px] h-[11px] sm:w-[18px] sm:h-[18px] text-[6px] sm:text-[9.5px]"
                           style={{
-                            top: -7, right: -7, width: 18, height: 18,
-                            fontSize: 9.5, fontWeight: 800,
+                            top: -5, right: -5,
+                            fontWeight: 800,
                             background: isActive ? toneBase : isDark ? '#1B2740' : '#E2E8F0',
                             color: isActive ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
-                            border: `1.5px solid ${isDark ? '#0A0F1B' : '#fff'}`,
+                            border: `1px solid ${isDark ? '#0A0F1B' : '#fff'}`,
                           }}
                         >
                           {i + 1}
@@ -355,11 +447,10 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -3 }}
                             transition={{ duration: 0.18 }}
-                            className="font-mono text-center rounded-full"
+                            className="font-mono text-center rounded-full text-[8px] sm:text-[10px] px-1.5 sm:px-[9px] py-0.5 mt-0.5 sm:mt-1 max-w-[70px] sm:max-w-[120px] whitespace-nowrap overflow-hidden"
                             style={{
-                              marginTop: 4, maxWidth: 120,
-                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                              fontSize: 10, fontWeight: 700, padding: '2px 9px',
+                              textOverflow: 'ellipsis',
+                              fontWeight: 700,
                               color: isDark ? '#F1F5F9' : '#0B1220',
                               background: isDark ? 'rgba(10,15,27,0.92)' : 'rgba(255,255,255,0.95)',
                               border: `1px solid ${toneBase}`,
@@ -376,7 +467,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               </div>
 
               {/* Focus caption + status — one line, never overlaps */}
-              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono" style={{ fontSize: 11.5 }}>
+              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono text-[10.5px] sm:text-[11.5px]">
                 {focus && (
                   <>
                     <span
@@ -386,11 +477,11 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                       {stages.indexOf(focus) + 1} · {focus.label}
                     </span>
                     <span className="flex-1 min-w-0 truncate" style={{ color: isDark ? '#8EA0B8' : '#5B6B85' }}>
-                      {focus.role}
+                      {lensAnnotations?.[focus.id] ?? focus.role}
                     </span>
                   </>
                 )}
-                <span className="shrink-0" style={{ color: starvedCount > 0 ? '#FBBF24' : simState === 'done' ? '#34D399' : running ? '#60A5FA' : isDark ? '#7C8DB0' : '#68778F' }}>
+                <span className="shrink-0 text-[10px] sm:text-[11.5px]" style={{ color: starvedCount > 0 ? '#FBBF24' : simState === 'done' ? '#34D399' : running ? '#60A5FA' : isDark ? '#7C8DB0' : '#68778F' }}>
                   {starvedCount > 0 ? `▲ ${starvedCount}` : simState === 'done' ? '■ ready' : running ? '● live' : '○ idle'}
                 </span>
               </div>
@@ -412,13 +503,13 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               <div className="grid grid-cols-4 gap-2" style={{ marginTop: 12 }}>
                 {[
                   { k: 'Stages', v: stages.length },
-                  { k: 'Links', v: edges.filter((e) => e.visible).length },
+                  { k: 'Links', v: presentEdges.length },
                   { k: 'Decisions', v: system.decisions.length },
                   { k: 'Add-ons', v: system.addOns.length },
                 ].map((s) => (
-                  <div key={s.k} className="rounded-xl border text-center" style={{ padding: '9px 4px', borderColor: isDark ? '#2E3E5B' : '#D8E0EC', background: isDark ? 'rgba(2,6,16,0.4)' : '#F6F8FB' }}>
-                    <div className="font-mono" style={{ fontSize: 20, fontWeight: 700, color: isDark ? '#F8FAFC' : '#0B1220', fontVariantNumeric: 'tabular-nums' }}>{s.v}</div>
-                    <div className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: '0.06em', color: isDark ? '#7C8DB0' : '#68778F' }}>{s.k}</div>
+                  <div key={s.k} className="rounded-xl border text-center px-1 py-1.5 sm:px-1.5 sm:py-2.5" style={{ borderColor: isDark ? '#2E3E5B' : '#D8E0EC', background: isDark ? 'rgba(2,6,16,0.4)' : '#F6F8FB' }}>
+                    <div className="font-mono text-base sm:text-[20px]" style={{ fontWeight: 700, color: isDark ? '#F8FAFC' : '#0B1220', fontVariantNumeric: 'tabular-nums' }}>{s.v}</div>
+                    <div className="font-mono uppercase text-[8px] sm:text-[9px]" style={{ letterSpacing: '0.06em', color: isDark ? '#7C8DB0' : '#68778F' }}>{s.k}</div>
                   </div>
                 ))}
               </div>

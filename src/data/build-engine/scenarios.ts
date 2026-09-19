@@ -89,6 +89,7 @@ function sys(id: string, scenarioId: string, data: Omit<GeneratedSystem, 'id' | 
 
 export const generatedSystems: Record<string, GeneratedSystem> = {
   voiceSupport: sys('sys-voice', 'voiceSupport', {
+    domain: 'support',
     title: 'AI Support & Lead Follow-Up System',
     problem: 'Support and sales conversations arrive through voice and chat. Reps manually log every outcome into the CRM, so follow-ups slip and nothing is measurable.',
     actors: ['Customer', 'Support Rep', 'Team Lead'],
@@ -197,6 +198,7 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
   }),
 
   invoices: sys('sys-invoice', 'invoices', {
+    domain: 'finance',
     title: 'Invoice Intelligence Pipeline',
     problem: 'Invoices arrive as email attachments. Someone reads each one, extracts fields, and re-types them into the finance system — slow, error-prone, and invisible until something breaks.',
     actors: ['Vendor', 'Finance Ops', 'Approver'],
@@ -301,6 +303,7 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
   }),
 
   operations: sys('sys-ops', 'operations', {
+    domain: 'operations',
     title: 'Operations & Booking Platform',
     problem: 'Inventory, availability and bookings are managed across spreadsheets and phone calls. Nobody has one truthful, current view of what is bookable right now.',
     actors: ['Owner', 'Staff', 'Customer'],

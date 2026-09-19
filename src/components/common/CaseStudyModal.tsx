@@ -7,7 +7,7 @@
  * grids, no dashboard. Device preview appears once, as the product itself.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Mail, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ProjectData } from '../../types';
@@ -90,13 +90,9 @@ const ARCHITECTURE: Record<string, ArchLayer[]> = {
 /* ------------------------------------------------------------------ */
 
 export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen, onClose, onSwitchProject }) => {
-  /* Case study renders as a light document in every site theme —
-     black on white, including the embedded device preview. */
-  const isDark = false;
-  const lightTheme = useMemo(
-    () => ({ theme: 'light' as const, toggleTheme: () => {}, setTheme: (_t: 'dark' | 'light') => {} }),
-    [],
-  );
+  const themeContext = React.useContext(ThemeContext);
+  const theme = themeContext?.theme || 'light';
+  const isDark = theme === 'dark';
   const [layer, setLayer] = useState<string | null>(null);
 
   useEffect(() => {
@@ -140,14 +136,13 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
             style={{ background: 'rgba(2, 6, 16, 0.72)' }}
           />
 
-          {/* Panel — pinned light document */}
-          <ThemeContext.Provider value={lightTheme}>
+          {/* Panel — respects site theme */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="relative w-full sm:max-w-3xl sm:rounded-2xl overflow-hidden flex flex-col light-doc"
+            className="relative w-full sm:max-w-3xl sm:rounded-2xl overflow-hidden flex flex-col"
             style={{
               background: isDark ? 'var(--surface-1)' : '#fff',
               border: `1px solid var(--line${isDark ? '-dark' : ''})`,
@@ -362,7 +357,6 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
               </div>
             )}
           </motion.div>
-          </ThemeContext.Provider>
         </div>
       )}
     </AnimatePresence>

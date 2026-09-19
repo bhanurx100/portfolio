@@ -16,6 +16,7 @@ import { useLabMachine, selectCurrentGate } from '../../../hooks/useLabMachine';
 import { scenarioMeta, lensTransforms, systemLenses } from '../../../data/build-engine/scenarios';
 import { composedLensTransforms } from '../../../data/build-engine/composer';
 import { SystemBoard } from './SystemBoard';
+import { AgentRun } from './AgentRun';
 import {
   IdeaInput,
   UnderstandingBanner,
@@ -47,6 +48,13 @@ export const BuilderLabSection: React.FC = () => {
   const selectedNode = state.nodes.find((n) => n.id === state.selectedNodeId) ?? null;
   const showWorkspace = state.phase !== 'idle' && state.phase !== 'understanding';
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [view, setView] = useState<'system' | 'agent'>('system');
+  const showAgentView = view === 'agent' && state.system != null;
+
+  /* New idea → land on the system view, not a stale agent run. */
+  React.useEffect(() => {
+    if (state.phase === 'understanding' || state.phase === 'forming') setView('system');
+  }, [state.phase]);
 
   const hairline = isDark ? 'var(--line-dark)' : 'var(--line)';
 
@@ -54,7 +62,7 @@ export const BuilderLabSection: React.FC = () => {
     <section
       id="builder-lab"
       aria-label="Builder Lab — interactive system experience"
-      className="py-20 sm:py-28 border-b"
+      className="py-12 sm:py-16 border-b"
       style={{ borderColor: hairline }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
@@ -148,62 +156,110 @@ export const BuilderLabSection: React.FC = () => {
                 <span className="hidden sm:inline" style={{ color: 'var(--text-3)' }}>
                   lens · {state.activeLens}
                 </span>
-              <button
-                onClick={actions.reset}
-                className="flex items-center gap-1.5 rounded-full font-mono border transition"
-                style={{ padding: '4px 11px', fontSize: 10.5, borderColor: hairline, color: 'var(--text-2)', background: 'transparent' }}
-                title="Start over with a new idea"
-              >
-                <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">New idea</span>
-              </button>
+                {/* View toggle — System graph or Agent run */}
+                <div className="flex items-center gap-0.5 rounded-full border font-mono" style={{ borderColor: hairline, padding: 2 }} role="tablist" aria-label="Builder view">
+                  {(['system', 'agent'] as const).map((v) => (
+                    <button
+                      key={v}
+                      role="tab"
+                      aria-selected={view === v}
+                      onClick={() => setView(v)}
+                      className="rounded-full transition font-bold"
+                      style={{
+                        padding: '4px 11px',
+                        fontSize: 10.5,
+                        color: view === v ? (isDark ? '#0B1120' : '#fff') : 'var(--text-3)',
+                        background: view === v ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {v === 'system' ? 'SYSTEM' : 'AGENT'}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={actions.reset}
+                  className="flex items-center gap-1.5 rounded-full font-mono border transition"
+                  style={{ padding: '4px 11px', fontSize: 10.5, borderColor: hairline, color: 'var(--text-2)', background: 'transparent' }}
+                  title="Start over with a new idea"
+                >
+                  <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">New idea</span>
+                </button>
               </div>
 
               {/* Stage */}
               <div className="relative">
-              {state.system && (
-                <div style={{ padding: 12 }} className="sm:p-4">
-                  <SystemBoard
-                    system={state.system}
-                    nodes={state.nodes}
-                    edges={state.edges}
-                    activeEdgeIds={state.activeEdgeIds}
-                    lensEmphasis={new Set(lensDef?.emphasize ?? [])}
-                    decisionHighlights={state.decisionHighlights}
-                    selectedNodeId={state.selectedNodeId}
-                    starvedIds={state.starvedIds}
-                    simState={state.simState}
-                    onSelectNode={actions.selectNode}
-                    onRemoveNode={actions.removeNode}
-                  />
-                </div>
-              )}
+                {state.system && (showAgentView ? (
+                  <div style={{ padding: 8 }} className="sm:p-4">
+                    <AgentRun
+                      system={state.system}
+                      phase={state.phase}
+                      simState={state.simState}
+                      simIndex={state.simIndex}
+                      trace={state.trace}
+                      gate={gate}
+                      chaos={state.chaos}
+                      onStart={actions.startSim}
+                      onBreak={actions.breakSim}
+                      onPause={actions.pauseSim}
+                      onResume={actions.resumeSim}
+                      onApprove={actions.approveGate}
+                      onReject={actions.rejectGate}
+                      onRecover={actions.recover}
+                      onReset={actions.resetSim}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ padding: 8 }} className="sm:p-4">
+                    <SystemBoard
+                      system={state.system}
+                      nodes={state.nodes}
+                      edges={state.edges}
+                      activeEdgeIds={state.activeEdgeIds}
+                      lensEmphasis={new Set(lensDef?.emphasize ?? [])}
+                      lensAnnotations={lensDef?.annotations}
+                      lensQuestion={lensMeta?.question}
+                      decisionHighlights={state.decisionHighlights}
+                      selectedNodeId={state.selectedNodeId}
+                      starvedIds={state.starvedIds}
+                      simState={state.simState}
+                      onSelectNode={actions.selectNode}
+                      onRemoveNode={actions.removeNode}
+                    />
+                  </div>
+                ))}
 
-              {/* Lens dock — top-left: full chips on sm+, single cycler on phones */}
-              <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-24px)]" title={lensMeta?.question}>
-                <div className="hidden min-[480px]:block">
-                  <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
-                </div>
-                <button
-                  className="min-[480px]:hidden rounded-full border font-mono backdrop-blur-xl"
-                  style={{ padding: '6px 12px', fontSize: 11, fontWeight: 700, borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)', background: isDark ? 'rgba(10,15,27,0.9)' : 'rgba(255,255,255,0.92)', color: 'var(--accent)' }}
-                  onClick={() => {
-                    const order = systemLenses.map((l) => l.id);
-                    actions.setLens(order[(order.indexOf(state.activeLens) + 1) % order.length]);
-                  }}
-                  aria-label={`Lens: ${state.activeLens}. Tap for next lens.`}
-                >
-                  ◉ {state.activeLens} ›
-                </button>
-              </div>
+                {/* Lens dock — top-left: full chips on sm+, single cycler on phones */}
+                {!showAgentView && (
+                  <div className="absolute left-3 top-3 z-20 max-w-[calc(100%-24px)]" title={lensMeta?.question}>
+                    <div className="hidden min-[480px]:block">
+                      <LensSwitcher lenses={systemLenses} active={state.activeLens} onChange={actions.setLens} />
+                    </div>
+                    <button
+                      className="min-[480px]:hidden rounded-full border font-mono backdrop-blur-xl"
+                      style={{ padding: '6px 12px', fontSize: 11, fontWeight: 700, borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)', background: isDark ? 'rgba(10,15,27,0.9)' : 'rgba(255,255,255,0.92)', color: 'var(--accent)' }}
+                      onClick={() => {
+                        const order = systemLenses.map((l) => l.id);
+                        actions.setLens(order[(order.indexOf(state.activeLens) + 1) % order.length]);
+                      }}
+                      aria-label={`Lens: ${state.activeLens}. Tap for next lens.`}
+                    >
+                      ◉ {state.activeLens} ›
+                    </button>
+                  </div>
+                )}
 
                 {/* Trace timeline — bottom-left, above the dock */}
-                <div className="absolute left-3 bottom-[78px] sm:bottom-3 z-20">
-                  <TraceTimeline trace={state.trace} />
-                </div>
+                {!showAgentView && (
+                  <div className="absolute left-3 bottom-[78px] sm:bottom-3 z-20">
+                    <TraceTimeline trace={state.trace} />
+                  </div>
+                )}
 
                 {/* Inspector — floating card */}
                 <AnimatePresence>
-                  {selectedNode && (
+                  {!showAgentView && selectedNode && (
                     <motion.div
                       key="inspector"
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -222,21 +278,23 @@ export const BuilderLabSection: React.FC = () => {
                 </AnimatePresence>
 
                 {/* Run dock — bottom-center */}
-                <div className="absolute z-20 bottom-3 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-24px)]">
-                <RunDock
-                  simState={state.simState}
-                  steps={state.trace.length}
-                  onStart={actions.startSim}
-                  onBreak={actions.breakSim}
-                  onPause={actions.pauseSim}
-                  onResume={actions.resumeSim}
-                  onReset={actions.resetSim}
-                />
-                </div>
+                {!showAgentView && (
+                  <div className="absolute z-20 bottom-3 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-24px)]">
+                    <RunDock
+                      simState={state.simState}
+                      steps={state.trace.length}
+                      onStart={actions.startSim}
+                      onBreak={actions.breakSim}
+                      onPause={actions.pauseSim}
+                      onResume={actions.resumeSim}
+                      onReset={actions.resetSim}
+                    />
+                  </div>
+                )}
 
-                {/* Gate spotlight */}
+                {/* Gate spotlight — only in System view; the Agent view decides inline */}
                 <AnimatePresence>
-                  {gate && (
+                  {!showAgentView && gate && (
                     <motion.div
                       key="gate"
                       initial={{ opacity: 0 }}
@@ -270,12 +328,12 @@ export const BuilderLabSection: React.FC = () => {
             </div>
 
             {/* Live rail */}
-            <div className="lg:col-span-4 grid grid-cols-2 lg:grid-cols-2 gap-3">
+            <div className="lg:col-span-4 grid grid-cols-2 lg:grid-cols-2 gap-2">
               <StatTile label="nodes" value={state.nodes.length} accent />
               <StatTile label="edges" value={state.edges.length} />
               <StatTile label="steps" value={state.trace.length} />
               <StatTile label="events" value={state.events.length} />
-              <div className="col-span-2 space-y-3">
+              <div className="col-span-2 space-y-2">
                 {state.system && (
                   <AddOnStrip system={state.system} applied={state.appliedAddOns} onApply={actions.applyAddOn} />
                 )}
@@ -336,7 +394,7 @@ export const BuilderLabSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto rounded-2xl border p-5 text-center space-y-3"
+            className="max-w-3xl mx-auto rounded-2xl border p-4 text-center space-y-3"
             style={{ borderColor: hairline, background: isDark ? 'var(--surface-1)' : '#fff' }}
           >
             <div className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>

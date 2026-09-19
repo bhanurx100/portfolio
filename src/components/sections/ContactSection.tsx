@@ -40,7 +40,7 @@ export const ContactSection: React.FC = () => {
     message: '',
   });
 
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [formStatus, setFormStatus] = useState<'idle' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleCopyEmail = () => {
@@ -85,14 +85,13 @@ export const ContactSection: React.FC = () => {
       return;
     }
 
-    setFormStatus('submitting');
-
-    // Simulate reliable dispatch
-    setTimeout(() => {
-      setFormStatus('success');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setFormStatus('idle'), 6000);
-    }, 650);
+    // Honest dispatch: compose a real email in the user's mail client.
+    // No fake "message received" — the message only leaves once the user
+    // hits send in their own mail app.
+    const subject = `[Portfolio] ${formData.subject}`;
+    const body = [`From: ${formData.name}`, `Reply-to: ${formData.email}`, '', formData.message].join('\n');
+    const url = `mailto:${personalInfo.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = url;
   };
 
   return (
@@ -417,7 +416,7 @@ export const ContactSection: React.FC = () => {
                     Message <span className="text-blue-500">*</span>
                   </label>
                   <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Markdown supported
+                    plain-text draft
                   </span>
                 </div>
                 <Textarea
@@ -441,26 +440,17 @@ export const ContactSection: React.FC = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Submit Button — opens the visitor's own mail client */}
               <Button
                 type="submit"
-                disabled={formStatus === 'submitting'}
                 className="w-full h-11 text-xs font-mono font-bold flex items-center justify-center gap-2 cursor-pointer"
               >
-                {formStatus === 'submitting' ? (
-                  <span>Sending message...</span>
-                ) : formStatus === 'success' ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Message received. I will reply shortly.</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Send Message</span>
-                    <Send className="w-3.5 h-3.5" />
-                  </>
-                )}
+                <span>Compose in email app</span>
+                <Send className="w-3.5 h-3.5" />
               </Button>
+              <p className={`text-[10.5px] font-mono leading-relaxed ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                Opens a pre-filled draft to my inbox — nothing is sent until you hit send in your mail client. For faster replies, email or WhatsApp me directly.
+              </p>
 
             </form>
           </div>

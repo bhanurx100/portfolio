@@ -328,9 +328,9 @@ export const EventTicker: React.FC<{
           )}
         </div>
       </div>
-    </div>
-  );
-};
+      </div>
+    );
+  };
 
 /* ------------------------------------------------------------------ */
 /* Node inspector                                                      */
@@ -431,36 +431,36 @@ export const RunDock: React.FC<{
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const shell = `flex items-center gap-2 rounded-2xl border px-3 py-2.5 backdrop-blur-xl ${
+  const shell = `flex items-center gap-1.5 sm:gap-2 rounded-2xl border px-2 sm:px-3 py-1.5 sm:py-2.5 backdrop-blur-xl ${
     isDark
       ? 'bg-[#0A0F1B]/92 border-slate-700/80 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.85)]'
       : 'bg-white/94 border-slate-200 shadow-[0_16px_40px_-16px_rgba(15,23,42,0.35)]'
   }`;
-  const ghostBtn = `px-3 h-9 rounded-xl text-xs font-semibold border transition shrink-0 ${
+  const ghostBtn = `px-2 sm:px-3 h-8 sm:h-9 rounded-xl text-[11px] sm:text-xs font-semibold border transition shrink-0 ${
     isDark ? 'border-slate-700 text-slate-300 hover:border-slate-500' : 'border-slate-300 text-slate-600 hover:border-slate-400'
   }`;
 
   if (simState === 'idle') {
     return (
-      <div className={shell} style={{ minWidth: 250 }}>
+      <div className={shell} style={{ minWidth: 210, maxWidth: '90vw' }}>
         <button
           onClick={onStart}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition active:scale-[0.98]"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl text-xs sm:text-sm font-bold transition active:scale-[0.98]"
           style={{
-            height: 44,
+            height: 36,
             background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
             color: '#fff',
             boxShadow: isDark ? '0 10px 28px -10px color-mix(in srgb, var(--accent) 70%, transparent)' : '0 10px 24px -12px rgba(37,99,235,0.5)',
           }}
         >
-          <Play size={15} /> Run the system
+          <Play size={14} /> Run the system
         </button>
         <button
           onClick={onBreak}
           title="Run with a failure injected — watch recovery"
-          className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl text-xs font-bold transition active:scale-[0.97]"
+          className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl text-[11px] sm:text-xs font-bold transition active:scale-[0.97]"
           style={{
-            height: 44, padding: '0 13px',
+            height: 36, padding: '0 11px',
             background: 'transparent',
             border: '1.5px solid color-mix(in srgb, var(--warn) 55%, transparent)',
             color: 'var(--warn)',
@@ -477,14 +477,14 @@ export const RunDock: React.FC<{
   const dotColor = simState === 'running' ? 'var(--accent)' : simState === 'gate' ? 'var(--warn)' : simState === 'done' ? 'var(--ok)' : 'var(--warn)';
 
   return (
-    <div className={shell} aria-live="polite" style={{ minWidth: 250, maxWidth: 420 }}>
-      <span className="relative flex shrink-0" style={{ width: 9, height: 9 }} aria-hidden>
+    <div className={shell} aria-live="polite" style={{ minWidth: 210, maxWidth: '92vw' }}>
+      <span className="relative flex shrink-0" style={{ width: 8, height: 8 }} aria-hidden>
         {simState === 'running' && (
           <span className="absolute inline-flex h-full w-full rounded-full animate-ping" style={{ background: 'var(--accent)', opacity: 0.5 }} />
         )}
-        <span className="relative inline-flex rounded-full" style={{ width: 9, height: 9, background: dotColor, boxShadow: `0 0 8px ${dotColor}` }} />
+        <span className="relative inline-flex rounded-full" style={{ width: 8, height: 8, background: dotColor, boxShadow: `0 0 8px ${dotColor}` }} />
       </span>
-      <span className="font-mono whitespace-nowrap" style={{ fontSize: 11.5, color: isDark ? 'var(--text-2)' : 'var(--text-3)' }}>
+      <span className="font-mono whitespace-nowrap text-[10px] sm:text-[11.5px]" style={{ color: isDark ? 'var(--text-2)' : 'var(--text-3)' }}>
         {label} · {steps} step{steps === 1 ? '' : 's'}
       </span>
       {simState === 'running' && (
@@ -545,9 +545,8 @@ export const TraceTimeline: React.FC<{ trace: SimulationTraceEntry[] }> = ({ tra
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden backdrop-blur-xl"
+      className="rounded-2xl border overflow-hidden backdrop-blur-xl w-[190px] sm:w-[232px]"
       style={{
-        width: 232,
         borderColor: isDark ? 'var(--line-strong-dark)' : 'var(--line-strong)',
         background: isDark ? 'rgba(4,7,13,0.92)' : 'rgba(255,255,255,0.95)',
         boxShadow: isDark ? '0 16px 48px -12px rgba(0,0,0,0.8)' : '0 16px 40px -16px rgba(15,23,42,0.3)',
@@ -611,17 +610,17 @@ export const GateCard: React.FC<{
     >
       <div
         className="flex items-center gap-2.5"
-        style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}` }}
+        style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}` }}
       >
         <span
           className="shrink-0 flex items-center justify-center rounded-xl"
           style={{
-            width: 38, height: 38,
+            width: 32, height: 32,
             background: failure ? 'color-mix(in srgb, #F43F5E 16%, transparent)' : 'color-mix(in srgb, #F59E0B 16%, transparent)',
             boxShadow: failure ? '0 0 18px rgba(244,63,94,0.5)' : '0 0 18px rgba(245,158,11,0.5)',
           }}
         >
-          {failure ? <ShieldAlert size={19} color="#FB7185" /> : <ShieldCheck size={19} color="#FBBF24" />}
+          {failure ? <ShieldAlert size={17} color="#FB7185" /> : <ShieldCheck size={17} color="#FBBF24" />}
         </span>
         <div className="min-w-0">
           <div className="font-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: failure ? '#FB7185' : '#FBBF24' }}>
@@ -725,68 +724,93 @@ export const DecisionPanel: React.FC<{
   const isDark = theme === 'dark';
   const decision = decisionIndex !== null ? system.decisions[decisionIndex] : null;
 
+  const row = (tone: 'ok' | 'warn' | 'sys', label: string, text: string) => {
+    const c = tone === 'ok' ? (isDark ? '#34D399' : '#059669') : tone === 'warn' ? (isDark ? '#FBBF24' : '#B45309') : (isDark ? '#8EA0B8' : '#5B6B85');
+    return (
+      <div className="mt-1.5">
+        <div className="font-mono" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', color: c }}>{label}</div>
+        <div className="leading-snug" style={{ fontSize: 11.5, color: 'var(--text-2)' }}>{text}</div>
+      </div>
+    );
+  };
+
   return (
-    <div className={`${panel(isDark)} p-3 space-y-3`}>
+    <div className={`${panel(isDark)} p-3 sm:p-3.5 space-y-3`}>
       <div className="flex items-center justify-between">
         <div className={`${panelTitle(isDark)} flex items-center gap-1.5`}>
-          <Scale className="w-3 h-3" /> Decision mode
+          <Scale className="w-3 h-3" /> Decision room
         </div>
         {decision && (
-          <button onClick={onClose} className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`} aria-label="Close decisions">
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="font-mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>
+              {decisionIndex !== null ? `decision ${decisionIndex + 1} / ${system.decisions.length}` : ''}
+            </span>
+            <button onClick={onClose} className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`} aria-label="Close decision mode">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         )}
       </div>
 
       {decision ? (
         <>
           <div>
-            <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{decision.question}</div>
-            <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{decision.dimension} · contextual — no wrong answer</div>
+            <div className="text-sm" style={{ fontWeight: 700, color: 'var(--text-1)' }}>{decision.question}</div>
+            <div className="font-mono mt-0.5" style={{ fontSize: 10, color: 'var(--text-3)' }}>
+              dimension · {decision.dimension} — tradeoff framed, not scored
+            </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="grid gap-2 md:grid-cols-3">
             {decision.options.map((opt) => {
               const chosen = choices[decision.id] === opt.id;
+              const affected = opt.highlights.length > 0;
               return (
                 <button
                   key={opt.id}
                   onClick={() => onChoose(decision.id, opt.id)}
-                  className={`w-full text-left rounded-lg border p-2.5 transition ${
+                  aria-pressed={chosen}
+                  className={`text-left rounded-xl border p-3 transition active:scale-[0.99] ${
                     chosen
-                      ? isDark ? 'border-blue-500/50 bg-blue-500/5' : 'border-blue-400 bg-blue-50'
-                      : isDark ? 'border-slate-700 hover:border-slate-600' : 'border-slate-200 hover:border-slate-300'
+                      ? isDark ? 'border-blue-500/60 bg-blue-500/8' : 'border-blue-400 bg-blue-50'
+                      : isDark ? 'border-slate-700/80 hover:border-slate-600 hover:bg-slate-800/30' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
+                  style={{ minHeight: 150 }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{opt.label}</span>
-                    {chosen && <Check className="w-3.5 h-3.5 text-blue-500" />}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold" style={{ fontSize: 12.5, color: 'var(--text-1)' }}>{opt.label}</span>
+                    {chosen && <Check className="w-3.5 h-3.5 shrink-0" color={isDark ? '#60A5FA' : '#2563EB'} />}
                   </div>
-                  <div className={`mt-1 text-[11px] leading-snug ${isDark ? 'text-emerald-400/90' : 'text-emerald-600'}`}>+ {opt.advantage}</div>
-                  <div className={`text-[11px] leading-snug ${isDark ? 'text-amber-400/90' : 'text-amber-600'}`}>− {opt.tradeoff}</div>
-                  <div className={`mt-1 text-[11px] font-mono leading-snug ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{opt.consequence}</div>
+                  {row('ok', 'ADVANTAGE', opt.advantage)}
+                  {row('warn', 'TRADEOFF', opt.tradeoff)}
+                  {row('sys', 'CONSEQUENCE · SYSTEM', opt.consequence)}
+                  {affected && (
+                    <span className="inline-flex font-mono rounded-full mt-2" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', padding: '2px 8px', color: isDark ? '#93C5FD' : '#2563EB', background: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(37,99,235,0.08)' }}>
+                      changes the canvas
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
           {highlights.size > 0 && (
-            <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-              canvas highlights the affected subsystem — compare the tradeoff spatially
+            <div className="font-mono" style={{ fontSize: 10.5, color: 'var(--text-3)' }}>
+              switch to SYSTEM view — the affected subsystem is highlighted on the canvas, spatially
             </div>
           )}
 
           <button
             onClick={onNext}
-            className={`w-full px-3 py-2 rounded-lg text-xs font-semibold border transition ${
+            className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold border transition min-h-[40px] ${
               isDark ? 'border-slate-700 text-slate-200 hover:border-slate-500' : 'border-slate-300 text-slate-700 hover:border-slate-400'
             }`}
           >
-            {decisionIndex !== null && decisionIndex < system.decisions.length - 1 ? 'Next decision' : 'Done — close decision mode'}
+            {decisionIndex !== null && decisionIndex < system.decisions.length - 1 ? 'Next decision' : 'Done — close decision room'}
           </button>
         </>
       ) : (
-        <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+        <div className="text-xs" style={{ color: 'var(--text-3)' }}>
           Choose an option — the system visibly changes with each tradeoff.
         </div>
       )}
@@ -795,7 +819,7 @@ export const DecisionPanel: React.FC<{
 };
 
 /* ------------------------------------------------------------------ */
-/* Production journey — idea → honest toolchain                        */
+/* Production journey — interactive idea → proven toolchain            */
 /* ------------------------------------------------------------------ */
 
 const DOMAIN_MAP: Record<string, { human: string; project: string }> = {
@@ -806,33 +830,114 @@ const DOMAIN_MAP: Record<string, { human: string; project: string }> = {
   knowledge: { human: 'knowledge & search', project: 'StayEase + SplitFin' },
 };
 
-const JOURNEY_STEPS = [
-  { n: '01', label: 'Blueprint', detail: 'composed from typed patterns — deterministic, no account' },
-  { n: '02', label: 'Native core', detail: 'Expo SDK 52 · React Native, one codebase both stores' },
-  { n: '03', label: 'Realtime data', detail: 'Supabase · Postgres · PostGIS, offline-first sync' },
-  { n: '04', label: 'Quality', detail: 'Maestro E2E on iOS + Android simulators' },
-] as const;
+const JOURNEY_STEPS: { n: string; label: string; detail: string; witness: string; url?: string }[] = [
+  {
+    n: '01',
+    label: 'Blueprint',
+    detail: 'composed from typed patterns — deterministic, no account',
+    witness: 'witnessed live, here — the SYSTEM canvas you just generated',
+  },
+  {
+    n: '02',
+    label: 'Native core',
+    detail: 'Expo SDK 52 · React Native · TS · SQLite + MMKV',
+    witness: 'witnessed in the SplitFin case study — one codebase, both stores',
+    url: '#work',
+  },
+  {
+    n: '03',
+    label: 'Realtime data',
+    detail: 'Supabase · Postgres · PostGIS, offline-first sync',
+    witness: 'witnessed in the StayEase case study — PostGIS-geocoded stays, offline-first',
+    url: '#work',
+  },
+  {
+    n: '04',
+    label: 'Payments',
+    detail: 'Stripe — settlement that survives double-entry',
+    witness: 'witnessed in the SplitFin case study — payout ledger, Stripe events',
+    url: '#work',
+  },
+  {
+    n: '05',
+    label: 'E2E quality',
+    detail: 'Maestro on iOS + Android simulators',
+    witness: 'witnessed in both repos — scripted, repeatable flows',
+  },
+];
 
 export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [active, setActive] = React.useState(0);
+  const hairline = isDark ? 'var(--line-dark)' : 'var(--line)';
   const map = domain ? DOMAIN_MAP[domain] : undefined;
   const project = map?.project ?? 'StayEase + SplitFin';
+  const step = JOURNEY_STEPS[active];
 
   return (
-    <div className={`${panel(isDark)} p-4`}>
+    <div className={`${panel(isDark)} p-3 sm:p-4`}>
       <div className={`${panelTitle(isDark)} mb-3 flex items-center gap-1.5`}>
         <Layers className="w-3 h-3" /> From idea to production
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        {JOURNEY_STEPS.map((s) => (
-          <div key={s.n} className={`rounded-lg border p-2.5 ${isDark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-slate-50/60'}`}>
-            <div className="text-[10px] font-mono" style={{ color: 'var(--accent)', fontWeight: 700 }}>{s.n}</div>
-            <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.label}</div>
-            <div className={`mt-0.5 text-[10.5px] leading-snug ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{s.detail}</div>
-          </div>
-        ))}
+
+      {/* Clickable rail — each stage is a real mechanism in the portfolio */}
+      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Idea to production stages">
+        {JOURNEY_STEPS.map((s, i) => {
+          const on = i === active;
+          return (
+            <button
+              key={s.n}
+              role="tab"
+              aria-selected={on}
+              onClick={() => setActive(i)}
+              className="rounded-full border font-mono transition min-h-[40px]"
+              style={{
+                padding: '8px 12px',
+                fontSize: 10.5,
+                fontWeight: on ? 800 : 600,
+                color: on ? (isDark ? '#0B1120' : '#fff') : 'var(--text-2)',
+                background: on ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
+                borderColor: on ? (isDark ? '#F1F5F9' : '#0F172A') : hairline,
+              }}
+              aria-label={`Stage ${s.n}: ${s.label}`}
+            >
+              {s.n} · {s.label}
+            </button>
+          );
+        })}
       </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step.n}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.16 }}
+          className={`mt-2.5 rounded-lg border p-3 ${isDark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-200 bg-slate-50/60'}`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-mono" style={{ color: 'var(--accent)', fontSize: 10, fontWeight: 800 }}>{step.n}</span>
+            <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{step.label}</span>
+          </div>
+          <div className={`mt-1 text-[11.5px] leading-snug ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{step.detail}</div>
+          <div className="mt-1.5 font-mono flex items-center gap-1.5" style={{ fontSize: 10.5, color: 'var(--text-3)' }}>
+            <ExternalLink className="w-3 h-3" />
+            <a
+              href={step.url ?? '#work'}
+              target={step.url ? '_self' : undefined}
+              className="transition"
+              style={{ color: 'var(--accent)' }}
+              onClick={step.url ? undefined : (e) => { e.preventDefault(); }}
+              aria-label={step.witness}
+            >
+              {step.witness}
+            </a>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
       <p className="mt-3 text-[11px]" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
         {map ? `This class of system — ${map.human} — uses patterns from ` : 'The patterns above are shaped and proven in '}
         <span className="tech-label" style={{ color: 'var(--accent)', textTransform: 'none', letterSpacing: 0 }}>{project}</span>.
@@ -849,8 +954,8 @@ export const StatTile: React.FC<{ label: string; value: number; accent?: boolean
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   return (
-  <div
-    className="rounded-2xl border p-3.5"
+<div
+    className="rounded-2xl border p-2 sm:p-3.5"
     style={{
       background: isDark ? 'rgba(148,163,184,0.06)' : '#fff',
       borderColor: accent ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : isDark ? 'rgba(148,163,184,0.18)' : 'var(--line)',
@@ -862,12 +967,12 @@ export const StatTile: React.FC<{ label: string; value: number; accent?: boolean
       initial={{ opacity: 0.4, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="font-mono"
-      style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : isDark ? '#F8FAFC' : '#0F172A', fontVariantNumeric: 'tabular-nums' }}
+      className="font-mono text-lg sm:text-[30px]"
+      style={{ fontWeight: 700, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : isDark ? '#F8FAFC' : '#0F172A', fontVariantNumeric: 'tabular-nums' }}
     >
       {String(value).padStart(2, '0')}
     </motion.div>
-    <div className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#64748B', marginTop: 2 }}>
+<div className="font-mono uppercase text-[8px] sm:text-[10px]" style={{ letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#64748B', marginTop: 1 }}>
       {label}
     </div>
   </div>
@@ -906,6 +1011,10 @@ export const EvidencePanel: React.FC<{ system: GeneratedSystem }> = ({ system })
                     ? 'bg-emerald-500/15 text-emerald-500'
                     : ev.tag === 'PROTOTYPE'
                     ? 'bg-amber-500/15 text-amber-500'
+                    : ev.tag === 'RELEVANT'
+                    ? 'bg-blue-500/15 text-blue-500'
+                    : ev.tag === 'CONCEPT'
+                    ? 'bg-violet-500/15 text-violet-500'
                     : 'bg-slate-500/15 text-slate-400'
                 }`}>
                   {ev.tag}

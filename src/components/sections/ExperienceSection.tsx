@@ -59,12 +59,12 @@ export const ExperienceSection: React.FC = () => {
   const line = isDark ? 'var(--line-dark)' : 'var(--line)';
 
   return (
-    <section id="experience" aria-label="Professional experience" className="py-20 sm:py-28 border-b" style={{ borderColor: line }}>
+    <section id="experience" aria-label="Professional experience" className="py-12 sm:py-16 border-b" style={{ borderColor: line }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Editorial header */}
-        <div className="max-w-2xl space-y-4 mb-12 sm:mb-16">
+        <div className="max-w-2xl space-y-3 mb-8">
           <p className="tech-label" style={{ color: 'var(--accent)' }}>Experience</p>
-          <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
             Where I've built.
           </h2>
         </div>

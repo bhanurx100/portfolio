@@ -18,13 +18,17 @@ const GitHubSection = lazy(() =>
   import('./components/sections/GitHubSection').then((m) => ({ default: m.GitHubSection }))
 );
 /* On-demand overlays — only fetched when first needed. */
-const CommandPalette = lazy(() =>
-  import('./components/common/CommandPalette').then((m) => ({ default: m.CommandPalette }))
-);
 const CaseStudyModal = lazy(() =>
   import('./components/common/CaseStudyModal').then((m) => ({ default: m.CaseStudyModal }))
 );
 import { ProjectsSection } from './components/sections/ProjectsSection';
+/* Meet the Builder + Tech Skills sit with Experience, below the fold too. */
+const MeetBuilderSection = lazy(() =>
+  import('./components/sections/MeetBuilderSection').then((m) => ({ default: m.MeetBuilderSection }))
+);
+const TechSkillsSection = lazy(() =>
+  import('./components/sections/TechSkillsSection').then((m) => ({ default: m.TechSkillsSection }))
+);
 /* Experience + Contact sit below the fold — defer them too. */
 const ExperienceSection = lazy(() =>
   import('./components/sections/ExperienceSection').then((m) => ({ default: m.ExperienceSection }))
@@ -41,17 +45,16 @@ function PortfolioMain() {
   const prefersReducedMotion = useReducedMotion();
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [selectedCaseStudySlug, setSelectedCaseStudySlug] = useState<string | null>(null);
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
 
   const isDark = theme === 'dark';
 
   // Scroll spy to detect active section in viewport
   useEffect(() => {
-    const sections = ['hero', 'work', 'builder-lab', 'experience', 'github', 'contact'];
-    
+    const sections = ['hero', 'work', 'builder-lab', 'experience', 'meet-the-builder', 'tech-skills', 'github', 'contact'];
+
     const handleScroll = () => {
       const scrollPos = window.scrollY + 200;
-      
+
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (el) {
@@ -70,18 +73,6 @@ function PortfolioMain() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ⌘K / Ctrl+K opens (or closes) the command palette — matches the header + hero affordances.
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsCommandPaletteOpen((open) => !open);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   const handleOpenCaseStudy = (slug: string) => {
     setSelectedCaseStudySlug(slug);
   };
@@ -90,27 +81,17 @@ function PortfolioMain() {
     setSelectedCaseStudySlug(null);
   };
 
-  const handleOpenCommandPalette = () => {
-    setIsCommandPaletteOpen(true);
-  };
-
-  const handleCloseCommandPalette = () => {
-    setIsCommandPaletteOpen(false);
-  };
-
   const currentProject = selectedCaseStudySlug ? projectsData[selectedCaseStudySlug] : null;
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-blue-600 selection:text-white flex flex-col relative transition-colors duration-300 ${
-      isDark ? 'bg-[#0E1626] text-slate-200' : 'bg-[#EEF2F6] text-slate-900'
-    }`}>
+    <div className={`min-h-screen font-sans selection:bg-blue-600 selection:text-white flex flex-col relative transition-colors duration-300 ${isDark ? 'bg-[#0E1626] text-slate-200' : 'bg-[#EEF2F6] text-slate-900'
+      }`}>
       {/* Restrained Quiet Ambient Background */}
       <GlobalBackground />
 
       {/* Sticky Clean Header Navigation */}
       <Header
         activeSection={activeSection}
-        onOpenCommandPalette={handleOpenCommandPalette}
       />
 
       {/* Main Content Sections with Subtle Page Reveal */}
@@ -122,14 +103,19 @@ function PortfolioMain() {
       >
         <HeroSection
           onOpenCaseStudy={handleOpenCaseStudy}
-          onOpenCommandPalette={handleOpenCommandPalette}
         />
         <ProjectsSection onOpenCaseStudy={handleOpenCaseStudy} />
-        <Suspense fallback={<div id="builder-lab" style={{ minHeight: 420 }} aria-hidden /> }>
+        <Suspense fallback={<div id="builder-lab" style={{ minHeight: 420 }} aria-hidden />}>
           <BuilderLabSection />
         </Suspense>
         <Suspense fallback={<div id="experience" style={{ minHeight: 320 }} aria-hidden />}>
           <ExperienceSection />
+        </Suspense>
+        <Suspense fallback={<div id="meet-the-builder" style={{ minHeight: 320 }} aria-hidden />}>
+          <MeetBuilderSection />
+        </Suspense>
+        <Suspense fallback={<div id="tech-skills" style={{ minHeight: 320 }} aria-hidden />}>
+          <TechSkillsSection />
         </Suspense>
         <Suspense fallback={<div id="github" style={{ minHeight: 320 }} aria-hidden />}>
           <GitHubSection />
@@ -138,14 +124,6 @@ function PortfolioMain() {
           <ContactSection />
         </Suspense>
       </motion.main>
-
-      <Suspense fallback={null}>
-        <CommandPalette
-          isOpen={isCommandPaletteOpen}
-          onClose={handleCloseCommandPalette}
-          onOpenCaseStudy={handleOpenCaseStudy}
-        />
-      </Suspense>
 
       {/* Refined Footer */}
       <Footer />

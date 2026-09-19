@@ -8,7 +8,6 @@ export { HeroMotionWrapper } from './hero/HeroMotion';
 
 interface HeroSectionProps {
   onOpenCaseStudy: (slug: string) => void;
-  onOpenCommandPalette?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = (props) => {

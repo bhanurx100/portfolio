@@ -60,14 +60,14 @@ const EVIDENCE_BY_DOMAIN: GeneratedSystem['projectEvidence'] = [
   {
     projectId: 'splitfin',
     name: 'SplitFin',
-    relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — the same reliability pattern this system needs for safe writes.',
-    tag: 'ACTIVE',
+    relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — a relevant pattern, not the same system.',
+    tag: 'RELEVANT',
   },
   {
     projectId: 'stayease',
     name: 'StayEase',
-    relevance: 'Real-time availability via Supabase WebSockets and PostGIS spatial queries — the same event-driven backbone for live intake.',
-    tag: 'ACTIVE',
+    relevance: 'Real-time availability via Supabase WebSockets and PostGIS spatial queries — a relevant backbone, not the same system.',
+    tag: 'RELEVANT',
   },
 ];
 
@@ -424,6 +424,7 @@ export function composeSystem(idea: string, s: SignalBundle): GeneratedSystem {
   const system: GeneratedSystem = {
     id: `sys-composed-${e.id}-${s.primaryVerb}`,
     scenarioId: 'composed',
+    domain: s.domain,
     title: `${e.pluralLabel} ${VERB_TITLES[s.primaryVerb]} System`,
     problem,
     actors: [human, 'Requester', ...(s.modifiers.humanGate ? ['Approver'] : [])],

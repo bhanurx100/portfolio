@@ -40,17 +40,17 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenCaseStud
   return (
     <section
       id="work"
-      className="py-20 sm:py-28 border-b"
+      className="py-12 sm:py-16 border-b"
       style={{ borderColor: line }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Editorial header — open composition, no pill */}
-        <div className="max-w-2xl space-y-4 mb-6 sm:mb-10">
+        <div className="max-w-2xl space-y-3 mb-6">
           <p className="tech-label" style={{ color: 'var(--accent)' }}>Selected work</p>
-          <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
             Two products, actively in build.
           </h2>
-          <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)' }}>
             Both are real products in active development — designed, engineered and iterated by one person.
             Open a case study to see how each system is put together, what it costs, and what I'd change next.
           </p>

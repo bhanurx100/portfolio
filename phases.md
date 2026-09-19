@@ -100,3 +100,19 @@ Target: demo.png-quality presentation. Keep the engine untouched; rework only th
 - New shared `deviceTheme.ts` palette fixes device legibility (dark text was washing out, light text was dull); bumped in-device type sizes.
 - Hero: removed the "Available for Full-Stack & Frontend Engineering Roles" pill row (desktop + mobile) so the headline sits higher; devices shortened (248/228pt wide).
 - Builder Lab: dark-mode neon glow on the blueprint frame (desktop + mobile), terminal input, and kicker dot — light mode untouched.
+
+## Builder Lab 2.0 + final completion (master agent prompt, 2026-09)
+- **P0 audit** — mapped engine/state machine to prompt sections; found the gaps: Agent Playground, Decision Room upgrade, interactive Idea→Production, Meet the Builder, Tech↔Real Work graph, honest contact.
+- **P1/2 wiring** — `SystemBoard` edges prop to `SystemEdge[]` (pre-existing `TS2304`/assignability errors fixed), `GeneratedSystem.domain` added to types + backfilled in composer/scenarios.
+- **P2 Agent Playground** — new `AgentRun.tsx` (mission header, stage rail Understand/Plan/Tool/Result/Decide/Action/Recover/Verify, inline gate + recovery surfaces, Run/Break/Pause/Resume/Reset, 46px controls) wired into `BuilderLab` behind a **SYSTEM | AGENT** console toggle; view resets to SYSTEM on a new idea; GateCard modal only in SYSTEM view.
+- **P1 canvas** — SystemBoard HTTPS-SVG edge layer: flow-colored lines, animated dash traffic (new `lab-edge-flow` keyframes), lens-reveal line + lens annotations in captions.
+- **P3 Decision Room** — `DecisionPanel` = Decision Room: ADVANTAGE / TRADEOFF / CONSEQUENCE·SYSTEM-labeled rows, no scores, "changes the canvas" chip, decision N/M counter, 3-col option grid (md+).
+- **P4 Idea→Production** — `ProductionJourney` now interactive: 5 clickable stages (Blueprint/Native/Realtime/Payments/E2E), each with an honest witness line linking to the case-study section (`#work`); travel through real Expo/RN/TS/Postgres/PostGIS/Stripe/Maestro toolchain.
+- **P5 Meet the Builder** — new lazy `MeetBuilderSection.tsx`: cross-identity (PRODUCT/ENGINEERING/AI/MOBILE/SYSTEMS) selector with per-identity meaning + "as seen in" witness; "How AI fits my workflow" card (honest, bounded roles); reduced-motion aware.
+- **P6 Tech↔Work graph** — new lazy `TechWorkGraphSection.tsx`: deterministic SVG proof graph (8 techs → 4 artifacts, traceable edges, tap-to-focus both directions, caption + case-study CTA); mobile shows the same mapping as a tap-safe stack.
+- **P7 Credibility** — evidence tag union extended with `RELEVANT`/`CONCEPT`; composer domain evidence retagged from `ACTIVE` → `RELEVANT` ("relevant pattern, not the same system"); EvidencePanel colors for all six tags.
+- **P8 Honest contact** — removed fake `setTimeout` "Message received" from `ContactSection`; submit now composes a real `mailto:` draft (honest note under the button; "plain-text draft" replaces "Markdown supported").
+- **P9 a11y** — touch targets ≥ 40–44px on journey tabs / agent controls / graph + identity chips; no `@ts-ignore`; no stray console logs.
+- **Closed dead-end links** — `#/project/splitfin`, `#/project/stayease` hash routes in ProductionJourney were unroutable → replaced with `#work`.
+- **Verified** — `npm run lint` green, `npm run build` green (MeetBuilder 7.51 kB, TechGraph + BuilderLab lazy chunks), preview smoke HTTP 200.
+- Remainder of user tree (worker copy changes to HeroMobile/HeroDesktop, ContactSection shrunk buttons, engine staging, repomix-output.xml) left uncommitted per guardrail; no commits made this round.

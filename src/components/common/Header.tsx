@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight, Sun, Moon, Search } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { personalInfo } from '../../data/portfolio-data';
 import { useTheme } from '../../context/ThemeContext';
 
 interface HeaderProps {
   activeSection: string;
-  onOpenCommandPalette?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPalette }) => {
+export const Header: React.FC<HeaderProps> = ({ activeSection }) => {
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,16 +43,15 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${
-          isScrolled
-            ? isDark
-              ? 'py-3 bg-[#0E1626]/90 backdrop-blur-md border-b border-slate-800 shadow-sm'
-              : 'py-3 bg-white/90 backdrop-blur-md border-b border-slate-300/80 shadow-xs'
-            : 'py-4 sm:py-5 bg-transparent border-b border-transparent'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${isScrolled
+          ? isDark
+            ? 'py-3 bg-[#0E1626]/90 backdrop-blur-md border-b border-slate-800 shadow-sm'
+            : 'py-3 bg-white/90 backdrop-blur-md border-b border-slate-300/80 shadow-xs'
+          : 'py-4 sm:py-5 bg-transparent border-b border-transparent'
+          }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          
+
           {/* Logo / Brand */}
           <a
             href="#hero"
@@ -61,33 +59,29 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
             className="group flex items-center gap-2.5 focus:outline-hidden"
             aria-label="Bhanuprasad L Portfolio"
           >
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs tracking-tight transition ${
-              isDark
-                ? 'bg-slate-800 text-white border border-slate-700/80 group-hover:border-slate-600'
-                : 'bg-slate-900 text-white group-hover:bg-slate-800'
-            }`}>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs tracking-tight transition ${isDark
+              ? 'bg-slate-800 text-white border border-slate-700/80 group-hover:border-slate-600'
+              : 'bg-slate-900 text-white group-hover:bg-slate-800'
+              }`}>
               BL
             </div>
             <div className="flex flex-col">
-              <span className={`font-semibold text-sm tracking-tight transition leading-none ${
-                isDark ? 'text-white group-hover:text-slate-200' : 'text-slate-900 group-hover:text-slate-700'
-              }`}>
+              <span className={`font-semibold text-sm tracking-tight transition leading-none ${isDark ? 'text-white group-hover:text-slate-200' : 'text-slate-900 group-hover:text-slate-700'
+                }`}>
                 {personalInfo.name}
               </span>
-              <span className={`text-[11px] mt-1 tracking-tight ${
-                isDark ? 'text-slate-400' : 'text-slate-500'
-              }`}>
+              <span className={`text-[11px] mt-1 tracking-tight ${isDark ? 'text-slate-400' : 'text-slate-500'
+                }`}>
                 Product Engineer
               </span>
             </div>
           </a>
 
           {/* Desktop Navigation Links */}
-          <nav className={`hidden md:flex items-center gap-0.5 px-2 py-1 rounded-full border transition ${
-            isDark
-              ? 'bg-slate-900/60 border-slate-800/80 backdrop-blur-md'
-              : 'bg-slate-100/80 border-slate-200/80 backdrop-blur-md'
-          }`}>
+          <nav className={`hidden md:flex items-center gap-0.5 px-2 py-1 rounded-full border transition ${isDark
+            ? 'bg-slate-900/60 border-slate-800/80 backdrop-blur-md'
+            : 'bg-slate-100/80 border-slate-200/80 backdrop-blur-md'
+            }`}>
             {navLinks.map((link) => {
               const isActive = activeSection === link.id;
               return (
@@ -95,22 +89,20 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className={`relative px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${
-                    isActive
-                      ? isDark
-                        ? 'text-white'
-                        : 'text-slate-900'
-                      : isDark
+                  className={`relative px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${isActive
+                    ? isDark
+                      ? 'text-white'
+                      : 'text-slate-900'
+                    : isDark
                       ? 'text-slate-400 hover:text-slate-200'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeNavIndicator"
-                      className={`absolute inset-0 rounded-full ${
-                        isDark ? 'bg-slate-800' : 'bg-white shadow-2xs border border-slate-200/60'
-                      }`}
+                      className={`absolute inset-0 rounded-full ${isDark ? 'bg-slate-800' : 'bg-white shadow-2xs border border-slate-200/60'
+                        }`}
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -122,34 +114,13 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
 
           {/* Right Action Section */}
           <div className="flex items-center gap-2">
-            
-            {/* Command Palette Trigger */}
-            {onOpenCommandPalette && (
-              <button
-                onClick={onOpenCommandPalette}
-                className={`hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition ${
-                  isDark
-                    ? 'bg-slate-900/60 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-slate-200'
-                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 shadow-2xs'
-                }`}
-                title="Search and jump to section (Cmd + K)"
-              >
-                <Search className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Search</span>
-                <kbd className={`px-1 py-0.2 rounded text-[10px] font-mono border ${
-                  isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-600'
-                }`}>⌘K</kbd>
-              </button>
-            )}
-
             {/* Dark / Light Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-lg border transition ${
-                isDark
-                  ? 'bg-slate-900/60 hover:bg-slate-800 border-slate-800 text-slate-300 hover:text-white'
-                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-2xs'
-              }`}
+              className={`p-2 rounded-lg border transition ${isDark
+                ? 'bg-slate-900/60 hover:bg-slate-800 border-slate-800 text-slate-300 hover:text-white'
+                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-2xs'
+                }`}
               title={isDark ? 'Switch to Light theme' : 'Switch to Dark theme'}
               aria-label="Toggle color theme"
             >
@@ -160,11 +131,10 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
             <a
               href="#contact"
               onClick={(e) => handleNavClick(e, '#contact')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 ${
-                isDark
-                  ? 'bg-white text-slate-900 hover:bg-slate-100 font-semibold'
-                  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-2xs font-semibold'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 ${isDark
+                ? 'bg-white text-slate-900 hover:bg-slate-100 font-semibold'
+                : 'bg-slate-900 text-white hover:bg-slate-800 shadow-2xs font-semibold'
+                }`}
             >
               <span>Get in Touch</span>
               <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
@@ -173,11 +143,10 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg border transition ${
-                isDark
-                  ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white'
-                  : 'bg-white border-slate-200 text-slate-700 shadow-2xs'
-              }`}
+              className={`md:hidden p-2 rounded-lg border transition ${isDark
+                ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white'
+                : 'bg-white border-slate-200 text-slate-700 shadow-2xs'
+                }`}
               aria-label="Toggle Mobile Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -194,11 +163,10 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`fixed inset-x-0 top-[56px] z-30 border-b backdrop-blur-xl p-5 md:hidden space-y-3 shadow-lg ${
-              isDark 
-                ? 'bg-[#0E1626]/98 border-slate-800' 
-                : 'bg-white/98 border-slate-300 text-slate-900'
-            }`}
+            className={`fixed inset-x-0 top-[56px] z-30 border-b backdrop-blur-xl p-5 md:hidden space-y-3 shadow-lg ${isDark
+              ? 'bg-[#0E1626]/98 border-slate-800'
+              : 'bg-white/98 border-slate-300 text-slate-900'
+              }`}
           >
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => (
@@ -206,15 +174,14 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className={`px-3.5 py-2.5 rounded-lg text-xs font-medium transition flex items-center justify-between ${
-                    activeSection === link.id
-                      ? isDark
-                        ? 'bg-slate-800 text-white'
-                        : 'bg-slate-100 text-slate-900 font-semibold'
-                      : isDark
+                  className={`px-3.5 py-2.5 rounded-lg text-xs font-medium transition flex items-center justify-between ${activeSection === link.id
+                    ? isDark
+                      ? 'bg-slate-800 text-white'
+                      : 'bg-slate-100 text-slate-900 font-semibold'
+                    : isDark
                       ? 'text-slate-400 hover:text-white hover:bg-slate-800/40'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <span>{link.name}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 opacity-50" />
@@ -222,9 +189,8 @@ export const Header: React.FC<HeaderProps> = ({ activeSection, onOpenCommandPale
               ))}
             </nav>
 
-            <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-mono ${
-              isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'
-            }`}>
+            <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-mono ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'
+              }`}>
               <span className="min-w-0 truncate">{personalInfo.email}</span>
               <span className="text-emerald-500 font-medium shrink-0">Available</span>
             </div>

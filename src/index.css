@@ -205,6 +205,14 @@
   100% { transform: translateX(300%); }
 }
 
+/* Active edge traffic — dashes march from source to destination */
+@keyframes lab-edge-flow {
+  to { stroke-dashoffset: -22; }
+}
+.lab-edge-flow {
+  animation: lab-edge-flow 0.55s linear infinite;
+}
+
 /* How I Build tunnel */
 @keyframes tunnel-grid {
   from { background-position-y: 0; }

@@ -4,7 +4,6 @@ import { HeroMobile } from './HeroMobile';
 
 interface HeroProps {
   onOpenCaseStudy: (slug: string) => void;
-  onOpenCommandPalette?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -13,7 +12,7 @@ export const Hero: React.FC<HeroProps> = ({
   return (
     <section
       id="hero"
-      className="relative min-h-[85vh] lg:min-h-[92vh] flex items-center justify-center pt-6 sm:pt-10 pb-10 sm:pb-16 overflow-hidden"
+      className="relative min-h-[70vh] lg:min-h-[80vh] flex items-center justify-center pt-4 sm:pt-6 pb-6 sm:pb-10 overflow-hidden"
     >
       {/* Desktop Composition (lg+) */}
       <HeroDesktop onOpenCaseStudy={onOpenCaseStudy} />

@@ -59,6 +59,8 @@ export interface GeneratedSystem {
   id: string;
   scenarioId: string;
   title: string;
+  /** Domain classification used for evidence + production journey mapping. */
+  domain: string;
   /** Restatement of the visitor's idea as a crisp problem statement. */
   problem: string;
   actors: string[];
@@ -210,7 +212,7 @@ export interface ProjectEvidence {
   name: string;
   /** What specifically transfers from the generated system to the real one. */
   relevance: string;
-  tag: 'BUILT' | 'ACTIVE' | 'PROTOTYPE' | 'SIMULATION';
+  tag: 'BUILT' | 'ACTIVE' | 'PROTOTYPE' | 'SIMULATION' | 'RELEVANT' | 'CONCEPT';
   url?: string;
 }
 
