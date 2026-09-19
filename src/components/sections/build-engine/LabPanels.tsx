@@ -81,7 +81,7 @@ const panel = (isDark: boolean) =>
   }`;
 
 const panelTitle = (isDark: boolean) =>
-  `text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-slate-400'}`;
+  `text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-slate-500'}`;
 
 /* ------------------------------------------------------------------ */
 /* Idea input (IDLE)                                                   */
@@ -228,7 +228,7 @@ export const LensSwitcher: React.FC<{
       role="tablist"
       aria-label="System lens"
     >
-      <Eye className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+      <Eye className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-slate-500' : 'text-slate-500'}`} />
       {lenses.map((l) => (
         <button
           key={l.id}
@@ -293,11 +293,11 @@ export const EventTicker: React.FC<{
           ))}
         </span>
         <span className={`${panelTitle(isDark)} flex-1`}>Terminal — system events</span>
-        <span className={`font-mono text-[10px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+        <span className={`font-mono text-[10px] ${isDark ? 'text-slate-600' : 'text-slate-500'}`}>
           {events.length} events
         </span>
         <ChevronDown
-          className={`w-3.5 h-3.5 ${isDark ? 'text-slate-500' : 'text-slate-400'} transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 ${isDark ? 'text-slate-500' : 'text-slate-500'} transition-transform ${expanded ? 'rotate-180' : ''}`}
         />
       </button>
       <div
@@ -318,11 +318,11 @@ export const EventTicker: React.FC<{
               animate={{ opacity: 1, x: 0 }}
               className={`text-xs leading-snug font-mono ${tone(e.kind)}`}
             >
-              <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>{prompt(e.kind)}</span> {e.text}
+              <span className={isDark ? 'text-slate-600' : 'text-slate-500'}>{prompt(e.kind)}</span> {e.text}
             </motion.div>
           ))}
           {events.length === 0 && (
-            <div className={`text-xs font-mono ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+            <div className={`text-xs font-mono ${isDark ? 'text-slate-600' : 'text-slate-500'}`}>
               <span>$</span> awaiting first event…
             </div>
           )}
@@ -350,7 +350,7 @@ export const NodeInspector: React.FC<{
         <div className={`${panelTitle(isDark)} mb-2 flex items-center gap-1.5`}>
           <GitBranch className="w-3 h-3" /> Inspector
         </div>
-        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
           Click any node to inspect its role. Some can be removed — watch what the system does.
         </p>
       </div>
@@ -370,7 +370,7 @@ export const NodeInspector: React.FC<{
         </div>
         <button
           onClick={onClose}
-          className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-400 hover:text-slate-800'}`}
+          className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`}
           aria-label="Close inspector"
         >
           <X className="w-3.5 h-3.5" />
@@ -392,7 +392,7 @@ export const NodeInspector: React.FC<{
       </div>
 
       {locked ? (
-        <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
           structural root — cannot be removed
         </div>
       ) : (
@@ -732,7 +732,7 @@ export const DecisionPanel: React.FC<{
           <Scale className="w-3 h-3" /> Decision mode
         </div>
         {decision && (
-          <button onClick={onClose} className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-400 hover:text-slate-800'}`} aria-label="Close decisions">
+          <button onClick={onClose} className={`p-1 rounded ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`} aria-label="Close decisions">
             <X className="w-3.5 h-3.5" />
           </button>
         )}
@@ -742,7 +742,7 @@ export const DecisionPanel: React.FC<{
         <>
           <div>
             <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{decision.question}</div>
-            <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{decision.dimension} · contextual — no wrong answer</div>
+            <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{decision.dimension} · contextual — no wrong answer</div>
           </div>
 
           <div className="space-y-2">
@@ -764,14 +764,14 @@ export const DecisionPanel: React.FC<{
                   </div>
                   <div className={`mt-1 text-[11px] leading-snug ${isDark ? 'text-emerald-400/90' : 'text-emerald-600'}`}>+ {opt.advantage}</div>
                   <div className={`text-[11px] leading-snug ${isDark ? 'text-amber-400/90' : 'text-amber-600'}`}>− {opt.tradeoff}</div>
-                  <div className={`mt-1 text-[11px] font-mono leading-snug ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{opt.consequence}</div>
+                  <div className={`mt-1 text-[11px] font-mono leading-snug ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{opt.consequence}</div>
                 </button>
               );
             })}
           </div>
 
           {highlights.size > 0 && (
-            <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
               canvas highlights the affected subsystem — compare the tradeoff spatially
             </div>
           )}
@@ -786,7 +786,7 @@ export const DecisionPanel: React.FC<{
           </button>
         </>
       ) : (
-        <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+        <div className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
           Choose an option — the system visibly changes with each tradeoff.
         </div>
       )}
@@ -834,7 +834,7 @@ export const ProductionJourney: React.FC<{ domain?: string }> = ({ domain }) => 
         ))}
       </div>
       <p className="mt-3 text-[11px]" style={{ color: isDark ? 'var(--text-4)' : 'var(--text-3)' }}>
-        {map ? `This class of system — ${map.human} — uses patterns I have actually shipped in ` : 'The patterns above are shaped and proven in '}
+        {map ? `This class of system — ${map.human} — uses patterns from ` : 'The patterns above are shaped and proven in '}
         <span className="tech-label" style={{ color: 'var(--accent)', textTransform: 'none', letterSpacing: 0 }}>{project}</span>.
       </p>
     </div>
@@ -902,7 +902,7 @@ export const EvidencePanel: React.FC<{ system: GeneratedSystem }> = ({ system })
               <span className={`text-xs font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{ev.name}</span>
               <span className="flex items-center gap-1">
                 <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
-                  ev.tag === 'BUILT'
+                  ev.tag === 'BUILT' || ev.tag === 'ACTIVE'
                     ? 'bg-emerald-500/15 text-emerald-500'
                     : ev.tag === 'PROTOTYPE'
                     ? 'bg-amber-500/15 text-amber-500'

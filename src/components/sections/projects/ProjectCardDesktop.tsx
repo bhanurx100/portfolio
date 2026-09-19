@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ArrowRight, Github, Mail } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from '../../../context/ThemeContext';
 import { personalInfo } from '../../../data/portfolio-data';
@@ -105,17 +105,6 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </button>
 
-          {project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5"
-              style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)' }}
-            >
-              <Github size={15} /> View code
-            </a>
-          )}
           {personalInfo.email && (
             <a
               href={personalInfo.emailMailto}
@@ -133,11 +122,11 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
               fontWeight: 800,
               letterSpacing: '0.06em',
               padding: '4px 11px',
-              color: 'var(--ok)',
-              background: 'color-mix(in srgb, var(--ok) 12%, transparent)',
+              color: 'var(--warn)',
+              background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
             }}
           >
-            BUILT — FULL APP
+            ACTIVE BUILD — IN PROGRESS
           </span>
         </div>
         <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12 }}>

@@ -210,7 +210,7 @@ export interface ProjectEvidence {
   name: string;
   /** What specifically transfers from the generated system to the real one. */
   relevance: string;
-  tag: 'BUILT' | 'PROTOTYPE' | 'SIMULATION';
+  tag: 'BUILT' | 'ACTIVE' | 'PROTOTYPE' | 'SIMULATION';
   url?: string;
 }
 

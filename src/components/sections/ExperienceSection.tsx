@@ -104,11 +104,11 @@ export const ExperienceSection: React.FC = () => {
                 <div className="flex sm:block items-baseline gap-3 justify-between sm:text-right sm:justify-start pt-0 sm:pt-1 mb-2 sm:mb-0">
                   <div
                     className="tech-label"
-                    style={{ color: exp.isCurrent ? 'var(--ok)' : 'var(--text-4)', lineHeight: 1.5 }}
+                    style={{ color: exp.isCurrent ? 'var(--ok)' : 'var(--text-3)', lineHeight: 1.5 }}
                   >
                     {exp.period}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-4)', marginTop: 4 }}>{exp.type}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>{exp.type}</div>
                 </div>
 
                 {/* Rail + content */}
@@ -133,7 +133,7 @@ export const ExperienceSection: React.FC = () => {
                     </h3>
                     <div style={{ fontSize: 13.5, lineHeight: 1.5, fontWeight: 600, color: 'var(--text-2)' }}>
                       {exp.company}
-                      <span style={{ color: 'var(--text-4)', fontWeight: 400 }}> · {exp.location}</span>
+                      <span style={{ color: 'var(--text-3)', fontWeight: 400 }}> · {exp.location}</span>
                     </div>
                     <ul className="space-y-2 pt-1">
                       {exp.bullets.map((b, i) => (

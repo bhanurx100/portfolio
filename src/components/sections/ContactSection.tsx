@@ -99,11 +99,11 @@ export const ContactSection: React.FC = () => {
     <section
       id="contact"
       aria-label="Contact and Communication"
-      className={`pt-10 sm:pt-20 pb-6 sm:pb-20 border-b transition-colors duration-500 relative overflow-hidden ${
+      className={`pt-8 sm:pt-14 pb-8 sm:pb-10 border-b transition-colors duration-500 relative overflow-hidden ${
         isDark ? 'bg-transparent text-white border-slate-800/80' : 'bg-transparent text-slate-900 border-slate-200'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         
         {/* SECTION HEADER */}
         <div className="max-w-3xl space-y-2.5 text-left">
@@ -119,7 +119,7 @@ export const ContactSection: React.FC = () => {
           </div>
 
           <h2
-            className={`text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight ${
+            className={`text-3xl sm:text-4xl font-bold tracking-tight ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}
           >
@@ -136,27 +136,27 @@ export const ContactSection: React.FC = () => {
         </div>
 
         {/* 2-COLUMN GRID (Direct Channels & Clean Message Form) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start text-left">
           
           {/* LEFT COLUMN: Verified Contact Channels (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-3">
             
             {/* Email Card with 1-Click Copy */}
             <div
-              className={`p-5 rounded-2xl border transition-all ${
+              className={`p-4 rounded-2xl border transition-all ${
                 isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 ${
                       isDark
                         ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                         : 'bg-blue-50 text-blue-600 border-blue-200'
                     }`}
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <span className={`text-[10px] font-mono font-semibold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -176,7 +176,7 @@ export const ContactSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCopyEmail}
-                  className={`p-2 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition active:scale-95 border shrink-0 ${
+                  className={`p-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition active:scale-95 border shrink-0 ${
                     isDark
                       ? 'bg-slate-900 hover:bg-slate-700 text-slate-200 border-slate-700'
                       : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs'
@@ -194,20 +194,20 @@ export const ContactSection: React.FC = () => {
 
             {/* Phone Card with 1-Click Copy */}
             <div
-              className={`p-5 rounded-2xl border transition-all ${
+              className={`p-4 rounded-2xl border transition-all ${
                 isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 ${
                       isDark
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         : 'bg-emerald-50 text-emerald-600 border-emerald-200'
                     }`}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Phone className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <span className={`text-[10px] font-mono font-semibold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -227,7 +227,7 @@ export const ContactSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCopyPhone}
-                  className={`p-2 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition active:scale-95 border shrink-0 ${
+                  className={`p-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition active:scale-95 border shrink-0 ${
                     isDark
                       ? 'bg-slate-900 hover:bg-slate-700 text-slate-200 border-slate-700'
                       : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs'
@@ -249,15 +249,15 @@ export const ContactSection: React.FC = () => {
                 href={personalInfo.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`p-3.5 rounded-2xl border transition flex items-center justify-between group ${
+                className={`p-2.5 rounded-xl border transition flex items-center justify-between group ${
                   isDark
                     ? 'bg-slate-800/90 border-slate-700 hover:border-slate-600'
                     : 'bg-white border-slate-300 hover:border-slate-400 shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Github className={`w-4 h-4 ${isDark ? 'text-white' : 'text-slate-900'}`} />
-                  <span className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Github className={`w-3.5 h-3.5 ${isDark ? 'text-white' : 'text-slate-900'}`} />
+                  <span className={`text-[11px] font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     GitHub
                   </span>
                 </div>
@@ -268,15 +268,15 @@ export const ContactSection: React.FC = () => {
                 href={personalInfo.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`p-3.5 rounded-2xl border transition flex items-center justify-between group ${
+                className={`p-2.5 rounded-xl border transition flex items-center justify-between group ${
                   isDark
                     ? 'bg-slate-800/90 border-slate-700 hover:border-blue-500/40'
                     : 'bg-white border-slate-300 hover:border-blue-300 shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Linkedin className="w-4 h-4 text-blue-500" />
-                  <span className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Linkedin className="w-3.5 h-3.5 text-blue-500" />
+                  <span className={`text-[11px] font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     LinkedIn
                   </span>
                 </div>
@@ -294,7 +294,7 @@ export const ContactSection: React.FC = () => {
                 <MapPin className="w-3.5 h-3.5 text-blue-500" />
                 <span>{personalInfo.location}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-emerald-500 font-semibold">
+              <div className={`flex items-center gap-1.5 font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span>Open to Engineering Roles</span>
               </div>
@@ -304,12 +304,12 @@ export const ContactSection: React.FC = () => {
 
           {/* RIGHT COLUMN: Clean Message Form (7 cols) */}
           <div
-            className={`lg:col-span-7 p-6 sm:p-8 rounded-3xl border transition-all ${
+            className={`lg:col-span-7 p-5 sm:p-6 rounded-3xl border transition-all ${
               isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-sm'
             }`}
           >
             {/* Form Card Header */}
-            <div className={`pb-5 mb-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+            <div className={`pb-4 mb-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
               isDark ? 'border-slate-700/80' : 'border-slate-200'
             }`}>
               <div>
@@ -330,7 +330,7 @@ export const ContactSection: React.FC = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-3" noValidate>
               
               {/* Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -416,14 +416,14 @@ export const ContactSection: React.FC = () => {
                   >
                     Message <span className="text-blue-500">*</span>
                   </label>
-                  <span className={`text-[10px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     Markdown supported
                   </span>
                 </div>
                 <Textarea
                   id="contact-message"
                   required
-                  rows={4}
+                  rows={3}
                   placeholder="Tell me about your tech stack, project goals, timelines, or engineering role..."
                   value={formData.message}
                   onChange={(e) => {

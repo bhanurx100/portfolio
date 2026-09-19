@@ -246,7 +246,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         </div>
                       </div>
                       <span className={`text-xs font-mono ${
-                        isDark ? 'text-slate-500 group-hover:text-slate-300' : 'text-slate-400 group-hover:text-slate-700'
+                        isDark ? 'text-slate-500 group-hover:text-slate-300' : 'text-slate-500 group-hover:text-slate-700'
                       }`}>
                         Jump ↵
                       </span>

@@ -7,15 +7,15 @@
  * grids, no dashboard. Device preview appears once, as the product itself.
  */
 
-import React, { useEffect, useState } from 'react';
-import { X, Github, Mail, ChevronRight } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { X, Mail, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ProjectData } from '../../types';
 import { personalInfo } from '../../data/portfolio-data';
 import { DeviceFrame } from './DeviceFrame';
 import { StayEaseScreen } from './AppScreens';
 import { SplitFinScreen } from './SplitFinScreen';
-import { useTheme } from '../../context/ThemeContext';
+import { ThemeContext } from '../../context/ThemeContext';
 
 interface CaseStudyModalProps {
   project: ProjectData | null;
@@ -90,8 +90,13 @@ const ARCHITECTURE: Record<string, ArchLayer[]> = {
 /* ------------------------------------------------------------------ */
 
 export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen, onClose, onSwitchProject }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  /* Case study renders as a light document in every site theme —
+     black on white, including the embedded device preview. */
+  const isDark = false;
+  const lightTheme = useMemo(
+    () => ({ theme: 'light' as const, toggleTheme: () => {}, setTheme: (_t: 'dark' | 'light') => {} }),
+    [],
+  );
   const [layer, setLayer] = useState<string | null>(null);
 
   useEffect(() => {
@@ -135,13 +140,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
             style={{ background: 'rgba(2, 6, 16, 0.72)' }}
           />
 
-          {/* Panel */}
+          {/* Panel — pinned light document */}
+          <ThemeContext.Provider value={lightTheme}>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="relative w-full sm:max-w-3xl sm:rounded-2xl overflow-hidden flex flex-col"
+            className="relative w-full sm:max-w-3xl sm:rounded-2xl overflow-hidden flex flex-col light-doc"
             style={{
               background: isDark ? 'var(--surface-1)' : '#fff',
               border: `1px solid var(--line${isDark ? '-dark' : ''})`,
@@ -307,28 +313,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                     className="rounded-full"
                     style={{
                       fontSize: 12, fontWeight: 800, padding: '5px 12px',
-                      color: 'var(--ok)', background: 'color-mix(in srgb, var(--ok) 12%, transparent)',
+                      color: 'var(--warn)', background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
                     }}
                   >
-                    BUILT — full codebase written by me
+                    IN ACTIVE DEVELOPMENT — full codebase written by me
                   </span>
                   <span style={{ fontSize: 13.5, color: 'var(--text-3)' }}>{project.type}</span>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-1">
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl"
-                      style={{
-                        height: 44, padding: '0 18px', fontSize: 14, fontWeight: 700,
-                        background: 'var(--text-1)', color: 'var(--canvas-bg)',
-                      }}
-                    >
-                      <Github size={16} /> View code
-                    </a>
-                  )}
                   {personalInfo.email && (
                     <a
                       href={personalInfo.emailMailto}
@@ -370,6 +362,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
               </div>
             )}
           </motion.div>
+          </ThemeContext.Provider>
         </div>
       )}
     </AnimatePresence>

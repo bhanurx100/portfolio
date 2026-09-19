@@ -15,11 +15,11 @@
   --surface-2-dark: #0E1626;
   --surface-3-dark: #16223A;
 
-  /* Text */
+  /* Text — light mode leans darker for legibility on #EEF2F6/#FFF */
   --text-1: #0F172A;
   --text-2: #334155;
-  --text-3: #64748B;
-  --text-4: #94A3B8;
+  --text-3: #475569;
+  --text-4: #64748B;
   --text-1-dark: #F8FAFC;
   --text-2-dark: #CBD5E1;
   --text-3-dark: #94A3B8;
@@ -29,7 +29,7 @@
   --accent: #2563EB;
   --accent-strong: #1D4ED8;
   --ok: #059669;
-  --warn: #D97706;
+  --warn: #B45309;
   --err: #DC2626;
 
   /* Lines */
@@ -154,6 +154,27 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3);
+}
+
+/* Light document scope — pins readable black-on-white tokens inside any
+   subtree, regardless of the site theme (used by the case-study modal). */
+.light-doc {
+  --canvas-bg: #FFFFFF;
+  --surface-1: #FFFFFF;
+  --surface-2: #F6F8FB;
+  --surface-3: #EDF1F6;
+  --text-1: #0F172A;
+  --text-2: #334155;
+  --text-3: #475569;
+  --text-4: #64748B;
+  --accent: #2563EB;
+  --accent-strong: #1D4ED8;
+  --ok: #059669;
+  --warn: #B45309;
+  --err: #DC2626;
+  --line: #D6DEE9;
+  --line-strong: #B9C4D4;
+  color-scheme: light;
 }
 
 /* Builder Lab canvas animations (fill-box keeps transforms centered) */

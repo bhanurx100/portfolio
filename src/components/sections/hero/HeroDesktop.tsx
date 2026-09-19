@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { ArrowRight, MoveRight, Repeat } from 'lucide-react';
+import { ArrowRight, MoveRight, Repeat, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useReducedMotion } from 'motion/react';
 import { personalInfo } from '../../../data/portfolio-data';
@@ -54,7 +54,7 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
             </h1>
             <p style={{ fontSize: 18, lineHeight: 1.65, color: 'var(--text-2)', maxWidth: 560 }}>
               Product engineer working across frontend, backend, mobile and applied AI.
-              Two shipped products below — and a lab where you can watch how I design the systems behind them.
+              Two products in active build below — and a lab where you can watch how I design the systems behind them.
             </p>
           </motion.div>
 
@@ -70,8 +70,8 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
               style={{
                 height: 48,
                 padding: '0 22px',
-                background: 'var(--text-1)',
-                color: 'var(--canvas-bg)',
+                background: isDark ? '#F1F5F9' : '#0F172A',
+                color: isDark ? '#0F172A' : '#F8FAFC',
                 fontSize: 15,
                 fontWeight: 700,
               }}
@@ -92,6 +92,24 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
               }}
             >
               See how I build <MoveRight size={17} />
+            </a>
+            <a
+              href={personalInfo.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl transition active:scale-[0.98]"
+              style={{
+                height: 48,
+                padding: '0 22px',
+                background: 'transparent',
+                border: `1.5px dashed var(--line${isDark ? '-strong-dark' : '-strong'})`,
+                color: 'var(--text-2)',
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+              title="Download resume (PDF, Google Drive)"
+            >
+              <Download size={17} /> Resume
             </a>
           </motion.div>
         </div>
@@ -177,8 +195,8 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
                   padding: '8px 18px',
                   fontSize: 13.5,
                   fontWeight: 700,
-                  color: front === p ? 'var(--canvas-bg)' : 'var(--text-3)',
-                  background: front === p ? 'var(--text-1)' : 'transparent',
+                  color: front === p ? (isDark ? '#0B1120' : '#F8FAFC') : 'var(--text-3)',
+                  background: front === p ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
                 }}
               >
                 {p === 'stayease' ? 'StayEase' : 'SplitFin'}

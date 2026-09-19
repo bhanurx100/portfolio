@@ -61,15 +61,13 @@ const EVIDENCE_BY_DOMAIN: GeneratedSystem['projectEvidence'] = [
     projectId: 'splitfin',
     name: 'SplitFin',
     relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — the same reliability pattern this system needs for safe writes.',
-    tag: 'BUILT',
-    url: 'https://github.com/bhanurx100/splitfin-expense-platform',
+    tag: 'ACTIVE',
   },
   {
     projectId: 'stayease',
     name: 'StayEase',
     relevance: 'Real-time availability via Supabase WebSockets and PostGIS spatial queries — the same event-driven backbone for live intake.',
-    tag: 'BUILT',
-    url: 'https://github.com/bhanurx100/stayease-hotel-booking-platform',
+    tag: 'ACTIVE',
   },
 ];
 

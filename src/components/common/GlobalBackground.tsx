@@ -58,8 +58,8 @@ export const GlobalBackground: React.FC = () => {
       <div
         className={`absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_80%_70%_at_50%_25%,#000_60%,transparent_100%)] ${
           isDark
-            ? 'bg-[linear-gradient(to_right,color-mix(in_srgb,var(--line-strong)_19%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_srgb,var(--line-strong)_19%,transparent)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]'
-            : 'bg-[linear-gradient(to_right,color-mix(in_srgb,var(--text-4)_15%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_srgb,var(--text-4)_15%,transparent)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]'
+            ? 'bg-[linear-gradient(to_right,#33415530_1px,transparent_1px),linear-gradient(to_bottom,#33415530_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]'
+            : 'bg-[linear-gradient(to_right,#94a3b825_1px,transparent_1px),linear-gradient(to_bottom,#94a3b825_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]'
         }`}
       />
 

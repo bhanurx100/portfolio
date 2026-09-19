@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useReducedMotion } from 'motion/react';
 import { personalInfo } from '../../../data/portfolio-data';
@@ -82,8 +82,8 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
                 padding: '10px 0',
                 fontSize: 13.5,
                 fontWeight: 700,
-                color: project === p ? 'var(--canvas-bg)' : 'var(--text-3)',
-                background: project === p ? 'var(--text-1)' : 'transparent',
+                color: project === p ? (isDark ? '#0B1120' : '#F8FAFC') : 'var(--text-3)',
+                background: project === p ? (isDark ? '#F1F5F9' : '#0F172A') : 'transparent',
               }}
             >
               {p === 'stayease' ? 'StayEase' : 'SplitFin'}
@@ -118,8 +118,8 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
           className="flex items-center justify-center gap-2 rounded-xl"
           style={{
             height: 50,
-            background: 'var(--text-1)',
-            color: 'var(--canvas-bg)',
+            background: isDark ? '#F1F5F9' : '#0F172A',
+            color: isDark ? '#0B1120' : '#F8FAFC',
             fontSize: 15.5,
             fontWeight: 700,
           }}
@@ -139,6 +139,23 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
           }}
         >
           Explore the work
+        </a>
+        <a
+          href={personalInfo.resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-xl"
+          style={{
+            height: 50,
+            background: 'transparent',
+            border: `1.5px dashed var(--line${isDark ? '-strong-dark' : '-strong'})`,
+            color: 'var(--text-2)',
+            fontSize: 15.5,
+            fontWeight: 600,
+          }}
+          title="Download resume (PDF, Google Drive)"
+        >
+          <Download size={17} /> Resume
         </a>
       </motion.div>
     </div>

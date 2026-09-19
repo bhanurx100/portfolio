@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Github,
-  Calendar,
-  Flame,
-  Trophy,
   ArrowLeft,
   ArrowRight,
   ExternalLink,
@@ -11,8 +8,7 @@ import {
   AlertCircle,
   Star,
   GitFork,
-  CheckCircle2,
-  FolderGit2
+  CheckCircle2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from '../../context/ThemeContext';
@@ -29,7 +25,6 @@ export const GitHubContributionGraph: React.FC = () => {
 
   const [data, setData] = useState<GitHubDataResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState<string>('all');
   
   // Tooltip state strictly restricted to date + actual count
   const [hoveredCell, setHoveredCell] = useState<{
@@ -76,12 +71,11 @@ export const GitHubContributionGraph: React.FC = () => {
     };
   }, []);
 
-  // Filter contributions by selected year or all
+  // All contributions — year filters removed, the full timeline is the story
   const filteredContributions = useMemo(() => {
     if (!data || !data.contributions || data.contributions.length === 0) return [];
-    if (selectedYear === 'all') return data.contributions;
-    return data.contributions.filter((c) => c.date.startsWith(selectedYear));
-  }, [data, selectedYear]);
+    return data.contributions;
+  }, [data]);
 
   // Organize into columns of weeks (7 days per column, Sunday to Saturday)
   const weeks = useMemo(() => {
@@ -124,6 +118,7 @@ export const GitHubContributionGraph: React.FC = () => {
 
     const labels: { label: string; weekIndex: number }[] = [];
     let lastKey = '';
+    const multiYear = new Set(filteredContributions.map((c) => c.date.slice(0, 4))).size > 1;
 
     weeks.forEach((week, wIndex) => {
       const day = week.find((d) => d !== null);
@@ -131,7 +126,7 @@ export const GitHubContributionGraph: React.FC = () => {
         const d = new Date(day.date);
         const monthName = d.toLocaleString('default', { month: 'short' });
         const yr = d.getFullYear().toString().slice(-2);
-        const key = selectedYear === 'all' ? `${monthName} '${yr}` : monthName;
+        const key = multiYear ? `${monthName} '${yr}` : monthName;
         if (key !== lastKey) {
           labels.push({ label: key, weekIndex: wIndex });
           lastKey = key;
@@ -140,7 +135,7 @@ export const GitHubContributionGraph: React.FC = () => {
     });
 
     return labels;
-  }, [weeks, selectedYear]);
+  }, [weeks, filteredContributions]);
 
   // Auto-scroll to the latest date (right side) on load and when year selection changes
   useEffect(() => {
@@ -199,11 +194,11 @@ export const GitHubContributionGraph: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 text-left">
+    <div className="space-y-4 text-left">
       
       {/* PRIMARY TELEMETRY CONTAINER (Glass Card) */}
       <div
-        className={`rounded-3xl border p-5 sm:p-7 transition-all duration-300 space-y-6 ${
+        className={`rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 space-y-4 ${
           isDark
             ? 'bg-slate-800/85 border-slate-700 backdrop-blur-xl shadow-2xl'
             : 'bg-white border-slate-300 shadow-xl shadow-slate-300/30'
@@ -211,46 +206,49 @@ export const GitHubContributionGraph: React.FC = () => {
       >
         
         {/* Real Profile Header Strip */}
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b ${
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
           isDark ? 'border-slate-700' : 'border-slate-200'
         }`}>
           <div className="flex items-center gap-4">
             <img
               src={data?.profile?.avatarUrl || `https://github.com/${personalInfo.githubUsername}.png`}
               alt={personalInfo.name}
-              className="w-12 h-12 rounded-2xl border border-slate-700/60 object-cover shadow-xs"
+              className="w-10 h-10 rounded-xl border border-slate-700/60 object-cover shadow-xs"
               referrerPolicy="no-referrer"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className={`text-base sm:text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className={`text-[15px] sm:text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {personalInfo.name}
                 </h3>
-                <span className="text-xs font-mono text-blue-500 font-semibold">
+                <a
+                  href={personalInfo.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-blue-500 font-semibold hover:underline"
+                >
                   @{personalInfo.githubUsername}
-                </span>
+                </a>
+                {data?.isAvailable && (
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-mono font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                    <span className="relative flex w-1.5 h-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
+                      <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-emerald-500" />
+                    </span>
+                    LIVE
+                  </span>
+                )}
               </div>
-              <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              <p className={`hidden sm:block text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {data?.profile?.bio || personalInfo.positioning}
               </p>
             </div>
           </div>
-
-          {/* Simple CTA */}
-          <a
-            href={personalInfo.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="self-start sm:self-auto px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-semibold flex items-center gap-1.5 shadow-sm transition active:scale-98 shrink-0"
-          >
-            <span>View GitHub</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
         </div>
 
         {/* LOADING STATE */}
         {isLoading && (
-          <div className="py-14 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="py-8 flex flex-col items-center justify-center gap-3 text-center">
             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             <p className={`text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               Retrieving live GitHub telemetry...
@@ -261,7 +259,7 @@ export const GitHubContributionGraph: React.FC = () => {
         {/* GRACEFUL UNAVAILABLE FALLBACK (Zero Fabrication) */}
         {!isLoading && (!data || !data.isAvailable || data.contributions.length === 0) && (
           <div
-            className={`py-10 px-6 rounded-2xl border text-center flex flex-col items-center justify-center gap-4 ${
+            className={`py-6 px-5 rounded-2xl border text-center flex flex-col items-center justify-center gap-3 ${
               isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-slate-50 border-slate-200'
             }`}
           >
@@ -288,120 +286,9 @@ export const GitHubContributionGraph: React.FC = () => {
         {/* REAL METRICS & CONTRIBUTION GRAPH */}
         {!isLoading && data && data.isAvailable && data.contributions.length > 0 && (
           <>
-            {/* Real Metrics Row (Only showing metrics derived from real data) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              
-              {/* Total Contributions */}
-              <div
-                className={`p-3.5 rounded-2xl border ${
-                  isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-2xs'
-                }`}
-              >
-                <div className={`text-[10px] font-mono uppercase font-bold flex items-center gap-1.5 ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
-                }`}>
-                  <Calendar className="w-3 h-3 text-blue-500" />
-                  <span>Total Commits</span>
-                </div>
-                <div className={`text-xl font-bold font-mono mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {data.totalContributions.toLocaleString()}
-                </div>
-              </div>
-
-              {/* Public Repos (from real profile) */}
-              {data.profile && typeof data.profile.publicRepos === 'number' && (
-                <div
-                  className={`p-3.5 rounded-2xl border ${
-                    isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-2xs'
-                  }`}
-                >
-                  <div className={`text-[10px] font-mono uppercase font-bold flex items-center gap-1.5 ${
-                    isDark ? 'text-slate-400' : 'text-slate-600'
-                  }`}>
-                    <FolderGit2 className="w-3 h-3 text-emerald-500" />
-                    <span>Public Repos</span>
-                  </div>
-                  <div className={`text-xl font-bold font-mono mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    {data.profile.publicRepos}
-                  </div>
-                </div>
-              )}
-
-              {/* Current Streak */}
-              <div
-                className={`p-3.5 rounded-2xl border ${
-                  isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-2xs'
-                }`}
-              >
-                <div className={`text-[10px] font-mono uppercase font-bold flex items-center gap-1.5 ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
-                }`}>
-                  <Flame className="w-3 h-3 text-amber-500" />
-                  <span>Current Streak</span>
-                </div>
-                <div className="text-xl font-bold font-mono mt-1 text-amber-500">
-                  {data.currentStreak} <span className="text-xs font-normal text-slate-400">days</span>
-                </div>
-              </div>
-
-              {/* Longest Streak */}
-              <div
-                className={`p-3.5 rounded-2xl border ${
-                  isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-2xs'
-                }`}
-              >
-                <div className={`text-[10px] font-mono uppercase font-bold flex items-center gap-1.5 ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
-                }`}>
-                  <Trophy className="w-3 h-3 text-purple-500" />
-                  <span>Longest Streak</span>
-                </div>
-                <div className="text-xl font-bold font-mono mt-1 text-purple-400">
-                  {data.longestStreak} <span className="text-xs font-normal text-slate-400">days</span>
-                </div>
-              </div>
-
-            </div>
-
             {/* CONTRIBUTION GRAPH CONTROLS & TIMELINE */}
-            <div className="space-y-3 pt-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                
-                {/* Year Selectors */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                  <button
-                    onClick={() => setSelectedYear('all')}
-                    className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition border ${
-                      selectedYear === 'all'
-                        ? isDark
-                          ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
-                          : 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                        : isDark
-                        ? 'bg-slate-900 text-slate-300 border-slate-700 hover:text-white'
-                        : 'bg-white text-slate-700 border-slate-300 hover:text-slate-900 shadow-2xs'
-                    }`}
-                  >
-                    All History
-                  </button>
-                  {data.availableYears.map((yr) => (
-                    <button
-                      key={yr}
-                      onClick={() => setSelectedYear(yr)}
-                      className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition border ${
-                        selectedYear === yr
-                          ? isDark
-                            ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
-                            : 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                          : isDark
-                          ? 'bg-slate-900 text-slate-300 border-slate-700 hover:text-white'
-                          : 'bg-white text-slate-700 border-slate-300 hover:text-slate-900 shadow-2xs'
-                      }`}
-                    >
-                      {yr}
-                    </button>
-                  ))}
-                </div>
-
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-end gap-1.5">
                 {/* Horizontal Scroll Arrows */}
                 <div className="flex items-center gap-1.5 self-end sm:self-auto">
                   <button
@@ -435,8 +322,8 @@ export const GitHubContributionGraph: React.FC = () => {
               {/* HORIZONTALLY SCROLLABLE GRAPH VIEWPORT (Ensuring only this region scrolls) */}
               <div
                 ref={scrollContainerRef}
-                className={`p-4 sm:p-5 rounded-2xl border overflow-x-auto scrollbar-thin relative select-none ${
-                  isDark ? 'bg-[var(--surface-2)] border-slate-700' : 'bg-slate-100/70 border-slate-300'
+                className={`p-3 sm:p-4 rounded-2xl border overflow-x-auto scrollbar-thin relative select-none ${
+                  isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100/70 border-slate-300'
                 }`}
                 style={{
                   WebkitOverflowScrolling: 'touch',
@@ -445,12 +332,12 @@ export const GitHubContributionGraph: React.FC = () => {
                 <div className="inline-block min-w-max pb-1">
                   
                   {/* Month / Year Header Row */}
-                  <div className="flex pl-7 mb-2 text-[10px] font-mono text-slate-400 relative h-4">
+                  <div className={`flex pl-6 mb-2 text-[10px] font-mono relative h-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     {monthLabels.map((lbl, idx) => (
                       <div
                         key={idx}
                         className="absolute whitespace-nowrap"
-                        style={{ left: `${lbl.weekIndex * 15 + 28}px` }}
+                        style={{ left: `${lbl.weekIndex * 13 + 24}px` }}
                       >
                         {lbl.label}
                       </div>
@@ -461,7 +348,7 @@ export const GitHubContributionGraph: React.FC = () => {
                   <div className="flex gap-1">
                     
                     {/* Day of Week Labels */}
-                    <div className="flex flex-col justify-between py-0.5 text-[9px] font-mono text-slate-500 pr-2 w-5 text-right">
+                    <div className="flex flex-col justify-between py-0.5 text-[8px] font-mono text-slate-500 pr-2 w-4 text-right">
                       <span>Sun</span>
                       <span>Tue</span>
                       <span>Thu</span>
@@ -477,7 +364,7 @@ export const GitHubContributionGraph: React.FC = () => {
                               return (
                                 <div
                                   key={dIdx}
-                                  className="w-[12px] h-[12px] rounded-[2px] opacity-0"
+                                  className="w-[10px] h-[10px] rounded-[2px] opacity-0"
                                 />
                               );
                             }
@@ -508,7 +395,7 @@ export const GitHubContributionGraph: React.FC = () => {
                                   });
                                 }}
                                 onBlur={() => setHoveredCell(null)}
-                                className={`w-[12px] h-[12px] rounded-[2.5px] border transition-all duration-150 cursor-pointer focus:outline-hidden ${
+                                className={`w-[10px] h-[10px] rounded-[2px] border transition-all duration-150 cursor-pointer focus:outline-hidden ${
                                   getCellColor(day.level, day.count)
                                 } ${
                                   isHovered
@@ -548,7 +435,7 @@ export const GitHubContributionGraph: React.FC = () => {
               </div>
 
               {/* Legend Strip */}
-              <div className="flex flex-wrap items-center justify-between text-xs font-mono pt-1 text-slate-400">
+              <div className={`flex flex-wrap items-center justify-between text-xs font-mono pt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span>Real Activity Timeline</span>
@@ -569,10 +456,10 @@ export const GitHubContributionGraph: React.FC = () => {
 
             {/* REAL LANGUAGES BREAKDOWN (Only rendered if actual repository data exists) */}
             {data.languages && data.languages.length > 0 && (
-              <div className="pt-4 border-t border-slate-800/60 dark:border-slate-800/60 border-slate-100 space-y-3">
+              <div className="pt-3 border-t border-slate-800/60 dark:border-slate-800/60 border-slate-100 space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className={`font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Repository Language Distribution (Real Data):
+                    Languages · live
                   </span>
                 </div>
 
@@ -592,7 +479,7 @@ export const GitHubContributionGraph: React.FC = () => {
                 </div>
 
                 {/* Language Badges */}
-                <div className="flex flex-wrap gap-3 text-xs font-mono">
+                <div className="flex flex-wrap gap-2 text-[11px] font-mono">
                   {data.languages.map((lang) => (
                     <div key={lang.name} className="flex items-center gap-1.5">
                       <span

@@ -16,7 +16,6 @@ export const showcaseProjects: ProjectShowcaseItem[] = [
     why: 'Booking apps are usually CRUD over a seeded database. StayEase is a native Expo/React Native product with real stay inventory on a PostGIS map, offline-ready searches, and genuinely distinct guest / owner / admin surfaces over one Supabase core.',
     whatIBuilt: 'The native app: Expo SDK 52 + React Native client, offline-first local state, Supabase realtime + PostGIS map embedding, Stripe checkout, a Maestro UI suite, and web admin surfaces where dashboards earn their place.',
     technologies: ['Expo SDK 52', 'React Native', 'TypeScript', 'Supabase · PostGIS', 'Realtime map', 'Stripe', 'Maestro'],
-    githubUrl: 'https://github.com/bhanurx100/stayease-hotel-booking-platform',
     liveUrl: 'https://stayease-hotel-booking-platform.vercel.app/',
     themeColor: 'blue',
   },
@@ -28,7 +27,6 @@ export const showcaseProjects: ProjectShowcaseItem[] = [
     why: 'Money is shared constantly, but tools split the job: banking apps for balances, spreadsheets for budgets, splitting apps for groups. SplitFin unifies all three in a native app that works offline and syncs live with your group.',
     whatIBuilt: 'The native app: Expo SDK 52 + React Native client, offline-first MMKV + SQLite storage, Supabase WebSockets for live group presence and settlement, typed ledger logic, and a Maestro UI test pass.',
     technologies: ['Expo SDK 52', 'React Native', 'MMKV + SQLite', 'Supabase · realtime', 'TypeScript', 'Maestro'],
-    githubUrl: 'https://github.com/bhanurx100/splitfin-expense-platform',
     liveUrl: 'https://splitfinai.vercel.app/',
     themeColor: 'emerald',
   },
@@ -50,11 +48,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenCaseStud
         <div className="max-w-2xl space-y-4 mb-6 sm:mb-10">
           <p className="tech-label" style={{ color: 'var(--accent)' }}>Selected work</p>
           <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
-            Two products, built end to end.
+            Two products, actively in build.
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
-            Both are real, shipped apps — designed, engineered and iterated by one person.
-            Open a case study to see how each system works, what it cost, and what I'd do differently.
+            Both are real products in active development — designed, engineered and iterated by one person.
+            Open a case study to see how each system is put together, what it costs, and what I'd change next.
           </p>
         </div>
 

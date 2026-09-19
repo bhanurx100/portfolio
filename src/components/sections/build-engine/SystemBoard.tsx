@@ -469,7 +469,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate" style={{ fontSize: 13.5, fontWeight: 800, color: isDark ? '#F1F5F9' : '#0B1220' }}>{ev.name}</span>
-                    <span className="font-mono rounded-full shrink-0" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', padding: '3px 8px', background: ev.tag === 'BUILT' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: ev.tag === 'BUILT' ? '#34D399' : '#FBBF24' }}>
+                    <span className="font-mono rounded-full shrink-0" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', padding: '3px 8px', background: ev.tag === 'BUILT' || ev.tag === 'ACTIVE' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: ev.tag === 'BUILT' || ev.tag === 'ACTIVE' ? '#34D399' : '#FBBF24' }}>
                       {ev.tag}
                     </span>
                   </div>

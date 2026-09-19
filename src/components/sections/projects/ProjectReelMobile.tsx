@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ArrowRight, Github, Mail } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ProjectShowcaseItem } from './ProjectCardDesktop';
 import { personalInfo } from '../../../data/portfolio-data';
@@ -49,11 +49,11 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                   fontWeight: 800,
                   letterSpacing: '0.06em',
                   padding: '3px 10px',
-                  color: 'var(--ok)',
-                  background: 'color-mix(in srgb, var(--ok) 12%, transparent)',
+                  color: 'var(--warn)',
+                  background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
                 }}
               >
-                BUILT
+                ACTIVE BUILD
               </span>
             </div>
 
@@ -90,30 +90,13 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                   fontSize: 15,
                   fontWeight: 700,
                   background: 'var(--text-1)',
-                  color: 'var(--surface-0)',
+                  color: 'var(--canvas-bg)',
                 }}
               >
                 Case study
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
               </button>
 
-              {project.githubUrl && (
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`${project.name} source on GitHub`}
-                  className="inline-flex items-center justify-center rounded-xl"
-                  style={{
-                    height: 48,
-                    width: 48,
-                    border: '1.5px solid var(--line-strong)',
-                    color: 'var(--text-2)',
-                  }}
-                >
-                  <Github size={18} />
-                </a>
-              )}
               {personalInfo.email && (
                 <a
                   href={personalInfo.emailMailto}

@@ -189,8 +189,10 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — the same pattern this system needs for reliable CRM writes.', tag: 'BUILT', url: 'https://github.com/bhanurx100/splitfin-expense-platform' },
-      { projectId: 'stayease', name: 'StayEase', relevance: 'Real-time availability via Supabase WebSockets — same event-driven backbone for live conversation intake.', tag: 'BUILT', url: 'https://github.com/bhanurx100/stayease-hotel-booking-platform' },
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — the same pattern this system needs for reliable CRM writes.', tag: 'ACTIVE'
+      },
+      { projectId: 'stayease', name: 'StayEase', relevance: 'Real-time availability via Supabase WebSockets — same event-driven backbone for live conversation intake.', tag: 'ACTIVE'
+      },
     ],
   }),
 
@@ -291,8 +293,10 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'MMKV-backed offline ledger with background sync — the same reliability model for queue-then-book finance writes.', tag: 'BUILT', url: 'https://github.com/bhanurx100/splitfin-expense-platform' },
-      { projectId: 'stayease', name: 'StayEase', relevance: 'Payment-sheet → booking state machine — mirrors the invoice → ledger state transitions.', tag: 'BUILT', url: 'https://github.com/bhanurx100/stayease-hotel-booking-platform' },
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'MMKV-backed offline ledger with background sync — the same reliability model for queue-then-book finance writes.', tag: 'ACTIVE'
+      },
+      { projectId: 'stayease', name: 'StayEase', relevance: 'Payment-sheet → booking state machine — mirrors the invoice → ledger state transitions.', tag: 'ACTIVE'
+      },
     ],
   }),
 
@@ -391,8 +395,10 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'stayease', name: 'StayEase', relevance: 'This is the closest real system: PostGIS spatial queries, offline MMKV passes, native booking flow.', tag: 'BUILT', url: 'https://github.com/bhanurx100/stayease-hotel-booking-platform' },
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'DAG debt-minimization — the same algorithmic core if this platform settles payouts between parties.', tag: 'BUILT', url: 'https://github.com/bhanurx100/splitfin-expense-platform' },
+      { projectId: 'stayease', name: 'StayEase', relevance: 'This is the closest real system: PostGIS spatial queries, offline MMKV passes, native booking flow.', tag: 'ACTIVE'
+      },
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'DAG debt-minimization — the same algorithmic core if this platform settles payouts between parties.', tag: 'ACTIVE'
+      },
     ],
   }),
 };

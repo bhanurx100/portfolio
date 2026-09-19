@@ -343,7 +343,7 @@ export const BuilderLabSection: React.FC = () => {
               Ready to build the real version of this?
             </div>
             <p className="text-xs" style={{ color: 'var(--text-2)' }}>
-              {state.idea ? `Idea: “${state.idea}”` : 'Every system above maps to patterns I have shipped.'} — interested in{' '}
+              {state.idea ? `Idea: “${state.idea}”` : 'Every system above maps to patterns I build with.'} — interested in{' '}
               {state.system?.domain ?? 'this class of system'}? Let's talk.
             </p>
             <a
