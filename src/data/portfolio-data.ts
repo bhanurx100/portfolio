@@ -13,217 +13,248 @@ export const personalInfo = {
   github: 'https://github.com/bhanurx100',
   githubUsername: 'bhanurx100',
   location: 'Bengaluru, India',
-  positioning: 'Software Engineer with 2+ years building native mobile products with applied AI — React Native + Expo clients, Supabase/Postgres data layers, realtime sync, and AI features that earn their place in the flow.',
-  headline: 'Designing and shipping native mobile products with applied AI.',
-  supporting: 'Product-minded full-stack engineering: mobile-first UX, typed data layers, realtime collaboration, and AI features integrated where they measurably help — not bolted on.',
+  positioning: 'Full-Stack Software Engineer building web and mobile products with React, Next.js, TypeScript, React Native, Node.js, PostgreSQL, and MongoDB.',
+  headline: 'Building practical full-stack products across web and mobile.',
+  supporting: 'Product-focused engineering across responsive interfaces, reusable components, API-driven workflows, authentication, data flows, integrations, and maintainable application architecture.',
   availability: 'Available for Full-Stack & Frontend Engineering Roles',
-  resumeUrl: 'https://drive.google.com/uc?export=download&id=1xLuLnV4ctqlz68ap07AdM1SY2CDc_yY6',
+  resumeUrl: 'https://drive.google.com/file/d/1_QJEOlaYzMeEGXA5AjewHac8izzQW0tA/view?usp=sharing',
 };
 
 export const projectsData: Record<string, ProjectData> = {
   splitfin: {
     id: 'splitfin',
     slug: 'splitfin',
-    name: 'SplitFin – Personal Finance & Expense Sharing',
-    category: 'Native-first Finance & Expense (Expo SDK 52 · React Native)',
-    type: 'Expo SDK 52, React Native, TypeScript, MMKV, SQLite, Supabase (realtime), PostgreSQL, PostGIS, Maestro',
+    name: 'SplitFin – Personal Finance & Investment Platform',
+    category: 'Personal Finance & Investment',
+    type: 'React Native, Expo, Expo Router, TypeScript, PostgreSQL, Prisma, TanStack Query, Zod, Recharts',
     period: '2025',
     role: 'Product Engineer',
-    tagline: 'Personal accounts, category intelligence and group expense settlement in one native, offline-first app.',
-    description: 'A native personal finance app that unifies what most tools split apart: a dashboard across bank/card/wallet/cash accounts, category-level spending analysis, and per-group expense settlement with a "who owes whom" view. Offline-first — the ledger works with no signal and reconciles through Supabase WebSockets when you reconnect, so groups stay in sync live.',
+    tagline: 'A mobile-first finance platform for managing money, budgets, investments, and financial insights in one experience.',
+    description: 'A personal finance and investment platform that brings accounts, transactions, categories, budgets, recurring expenses, cash flow, portfolio tracking, investment information, and analytics into a unified product experience. The product is designed around structured financial data and clear flows for tracking day-to-day money as well as investments.',
     highlightStat: {
-      value: 'SplitPay',
-      label: 'Group ledgers with a simplified who-owes-whom settlement view'
+      value: 'Unified finance',
+      label: 'Accounts, transactions, budgets, investments and analytics in one product'
     },
     coreMetrics: [],
     benchmarks: [],
     capabilities: [
-      'Built the native app around an offline-first ledger: MMKV + SQLite local store for balances, transactions and pending splits, with an idempotent sync queue that reconciles against Supabase when connectivity returns.',
-      'Implemented SplitPay group settlement: per-group ledgers with SplitGroup/SplitMember models tracking you-owe / you-are-owed / settled states, deliberately decoupled from the debt-simplification math so the solver can evolve without UI changes.',
-      'Engineered live group sync with Supabase WebSockets — new splits, paid markers and settlement pushes appear on every member device in real time, without drifting client-side tallies.',
-      'Built the transaction timeline as an auditable ledger: month grouping, income/expense/transfer/refund filters, and date-range resolution with sane 30-day defaults.',
-      'Designed category intelligence views — an orbital spend-share visualization with an SVG donut fallback and client-side needs/wants/lifestyle grouping that avoids redundant network round-trips.',
-      'Covered the search, split, settle and reconcile flows with a Maestro UI test pass on iOS and Android simulators.'
+      'Built the mobile-first product experience using React Native, Expo, Expo Router, and TypeScript, with product flows designed around mobile navigation and interaction patterns.',
+      'Implemented financial workflows for accounts, transactions, categories, budgets, recurring expenses, and cash-flow views using structured application data.',
+      'Built investment and portfolio workflows covering holdings, transaction history, market information, and investment-related views.',
+      'Integrated financial-data capabilities for market information and investment workflows, including explicit handling for delayed, unavailable, and changing data states.',
+      'Built interactive financial visualizations and analytics using Recharts for allocation, historical views, cash flow, and other product insights.',
+      'Used PostgreSQL with Prisma for structured application data and TanStack Query for API-driven server state, mutations, caching, and synchronization.',
+      'Used Zod for validation across structured application inputs and financial workflows.'
     ],
     techStack: [
-      'Expo SDK 52',
       'React Native',
+      'Expo',
+      'Expo Router',
       'TypeScript',
-      'MMKV',
-      'SQLite',
-      'Supabase (realtime)',
       'PostgreSQL',
-      'PostGIS',
-      'Maestro'
+      'Prisma',
+      'TanStack Query',
+      'Zod',
+      'Recharts'
     ],
-    githubUrl: 'https://github.com/bhanurx100/splitfin-expense-platform',
-    liveUrl: 'https://splitfinai.vercel.app/',
+    githubUrl: '',
+    liveUrl: '',
     themeColor: '#10b981',
     accentColor: '#34d399',
-    problem: 'Money is shared constantly — rent with roommates, trips with friends, dinners with colleagues — but existing tools force you to bounce between a banking app, a spreadsheet and a separate bill-splitting app to reconcile all of it. Personal-finance apps assume money is a solitary problem, and most assume a constant connection.',
-    solution: 'Collapsed the three surfaces into one native product: a unified account dashboard, category-level spending narrative, and per-group settlement. The ledger is offline-first for a phone that spends its life between networks, and live group sync over Supabase WebSockets keeps split decisions consistent across every member device.',
+    problem: 'Personal finance involves multiple types of information — accounts, transactions, budgets, recurring expenses, investments, and market information — that are often presented as disconnected experiences. SplitFin brings these workflows together so users can understand everyday spending and longer-term financial activity in one place.',
+    solution: 'Built a unified finance experience around structured financial data, connecting account and transaction workflows with budgets, cash flow, portfolio tracking, investment information, and interactive analytics.',
     architecture: {
-      title: 'Native App over a Realtime Core (Expo → Supabase → Postgres)',
-      description: 'Every feature follows the same path: native client → local store → realtime sync → Postgres, with a typed ledger service at the boundary.',
+      title: 'Mobile Client → API Workflows → PostgreSQL',
+      description: 'The application separates mobile presentation, API-driven server state, validation, and persistent financial data so individual product workflows remain maintainable.',
       components: [
-        'Client: Expo SDK 52 + React Native + TypeScript; one codebase for iOS and Android; offline-first local store for the ledger and pending splits.',
-        'Local store: MMKV for hot reads and SQLite for the ledger, with an idempotent sync queue that reconciles against the server.',
-        'Realtime: Supabase WebSockets push split and settlement events to every group member device.',
-        'Ledger service: typed TypeScript service owns split rules, category intelligence and who-owes-whom.',
-        'Database: PostgreSQL with PostGIS, storing groups, members, transactions and settlement states.'
+        'Client: React Native + Expo + Expo Router + TypeScript for the mobile-first application experience.',
+        'Server state: TanStack Query manages API data, mutations, caching, invalidation, loading states, and synchronization across screens.',
+        'Validation: Zod provides structured validation for application inputs and data workflows.',
+        'Data layer: PostgreSQL stores the core financial data, with Prisma providing the application data-access layer.',
+        'Analytics: Recharts powers interactive financial charts and portfolio-oriented visualizations.'
       ]
     },
     keyDecisions: [
       {
-        decision: 'Offline-first ledger with an idempotent sync queue',
-        rationale: 'A finance app must never block on the network or double-post a split. Local writes are queued and reconciled against Supabase, so a flutter on mobile data cannot corrupt a ledger.'
+        decision: 'Model finance workflows around structured data',
+        rationale: 'Accounts, transactions, budgets, recurring expenses, and investments have relationships that need to remain consistent across multiple screens, so the product is built around a structured persistence model rather than isolated UI state.'
       },
       {
-        decision: 'Single source of truth for every headline number',
-        rationale: 'Dashboard totals, cash-flow and category views all read from the ledger and the same aggregate path — consistent numbers across screens instead of drifting independent calculations.'
+        decision: 'Use server-state management for API-driven screens',
+        rationale: 'TanStack Query keeps fetching, mutations, caching, invalidation, and loading/error states consistent across connected product workflows.'
       },
       {
-        decision: 'Settlement UI decoupled from debt-simplification math',
-        rationale: 'SimplifiedDebt is a typed contract, not a hard-wired algorithm — the current greedy solver can be replaced with a minimum-transaction-count solver without touching components.'
+        decision: 'Keep financial validation explicit',
+        rationale: 'Financial inputs need predictable validation and clear failure states, so Zod is used to validate structured application data at the boundary.'
       },
       {
-        decision: 'Realtime as additive to the offline queue',
-        rationale: 'Presence and settlement pushes never overwrite pending local edits — the sync layer merges remote events against optimistic local state.'
+        decision: 'Treat financial-data availability as part of the UI',
+        rationale: 'Market and investment information can be delayed or unavailable, so the interface distinguishes available, delayed, empty, and unavailable states rather than presenting every value as guaranteed.'
       }
     ],
     challenges: [
       {
-        title: 'Offline edits meeting live, conflicting group state',
-        challenge: 'A member schedules a split offline and another settles the same bill online — both must resolve without losing money or trust.',
-        solution: 'Every local op is idempotent and versioned; on reconnect the sync queue replays against the realtime state and surfaces only genuine conflicts for manual resolution.'
+        title: 'Connecting different financial workflows',
+        challenge: 'Accounts, transactions, budgets, recurring expenses, and investments all represent different parts of a user’s financial picture.',
+        solution: 'Organized the product around shared financial data and reusable application flows so related views can present consistent information without duplicating business logic.'
       },
       {
-        title: 'Consistent numbers across every screen',
-        challenge: 'Dashboard totals, charts and donut breakdowns computed independently always drift apart — the fastest way to lose trust in a finance product.',
-        solution: 'One ledger and one aggregation path feed every headline view, compared against an equal-length prior period for the cash-flow narrative.'
+        title: 'Presenting changing financial information clearly',
+        challenge: 'Market and investment information can change independently of the rest of the user’s financial data.',
+        solution: 'Designed the investment views to distinguish current, delayed, unavailable, and historical information so users can understand the state of the data being shown.'
       }
     ]
   },
+
   stayease: {
     id: 'stayease',
     slug: 'stayease',
-    name: 'StayEase – Hotel Booking App',
-    category: 'Native-first Hospitality (Expo SDK 52 · React Native)',
-    type: 'Expo SDK 52, React Native, TypeScript, Supabase (Postgres · PostGIS), Stripe, Maestro',
+    name: 'StayEase – Hotel Booking Platform',
+    category: 'Hospitality & Hotel Booking',
+    type: 'React, TypeScript, Node.js, Express.js, MongoDB, JWT, Stripe, Cloudinary, REST APIs',
     period: '2025',
     role: 'Product Engineer',
-    tagline: 'Native stay booking — search hotels, villas, apartments, homestays and PGs, browse inventory live on a PostGIS map, and book offline.',
-    description: 'A native stay-booking app that treats inventory as a living map: search across accommodation types, browse stays rendered live from PostGIS, save and draft bookings offline, and check out with Stripe. StayEase keeps guests, hosts and owners on one Supabase core, so live availability and role-based surfaces never disagree.',
+    tagline: 'A full-stack hotel discovery and booking platform covering search, properties, rooms, reservations, payments, and media.',
+    description: 'A full-stack hospitality platform covering hotel discovery, property and room information, customer accounts, reservations, reviews, payments, and media management. The application combines a React frontend with Node.js and Express.js APIs, MongoDB persistence, JWT-based authentication, Stripe payments, and Cloudinary media workflows.',
     highlightStat: {
-      value: 'Live map + offline drafts',
-      label: 'PostGIS-backed inventory rendered live, with offline-first search and draft bookings'
+      value: 'Full-stack booking',
+      label: 'Discovery, property details, reservations, payments and media workflows'
     },
     coreMetrics: [],
     benchmarks: [],
     capabilities: [
-      'Built the native Expo/React Native app with a PostGIS-backed stay map — search, filters and property cards stay in sync with live inventory streamed from Supabase.',
-      'Implemented offline-first search and booking drafts: MMKV + SQLite local state keeps saved stays and draft bookings usable with no signal, then reconciles against live availability before confirmation.',
-      'Built role-based surfaces with distinct UIs — guest (booking history, upcoming stays), host (property management, per-hotel revenue stats), owner (platform-wide analytics) over the same Supabase core.',
-      'Integrated Stripe checkout for the reservation flow, plus a currency layer that keeps local pricing and display conversion explicit per property.',
-      'Built an AI stay assistant with a rule-based intent extractor (destination, price, stay dates, guest count) that runs a parallel map + list search and merges results into one view.',
-      'Covered search, booking and reconciliation flows with a Maestro UI test pass across iOS and Android simulators.'
+      'Built responsive hotel discovery and booking flows using React and TypeScript, including multi-field search and filtering, property views, room information, image galleries, and location-based exploration.',
+      'Built REST APIs with Node.js and Express.js for hotels, rooms, bookings, users, reviews, and related application resources.',
+      'Used MongoDB for application persistence and structured backend workflows across property, booking, user, and review data.',
+      'Implemented JWT-based authentication and role-based authorization for customers, property owners, and administrators, including protected backend operations and resource-ownership checks.',
+      'Integrated Stripe into the reservation workflow for payment processing and handled successful, failed, and incomplete payment states.',
+      'Integrated Cloudinary for property and room image management and connected media workflows to the application.',
+      'Built a hotel discovery chatbot using custom NLP intent handling and short session context to interpret common search preferences and guide users through hotel discovery.',
+      'Implemented map and location features as part of the property discovery experience.'
     ],
     techStack: [
-      'Expo SDK 52',
-      'React Native',
+      'React',
       'TypeScript',
-      'Supabase',
-      'PostgreSQL',
-      'PostGIS',
+      'Node.js',
+      'Express.js',
+      'MongoDB',
+      'JWT',
       'Stripe',
-      'Maestro'
+      'Cloudinary',
+      'REST APIs'
     ],
-    githubUrl: 'https://github.com/bhanurx100/stayease-hotel-booking-platform',
-    liveUrl: 'https://stayease-hotel-booking-platform.vercel.app/',
+    githubUrl: '',
+    liveUrl: '',
     themeColor: '#3b82f6',
     accentColor: '#60a5fa',
-    problem: 'Stay-booking demos are usually CRUD over a seeded database — a fixed list of properties, no real inventory, no geography, and an owner/host story bolted on. A product comparable to industry stay apps needs live inventory on a map, search that works on a bad connection, and three different users with three different surfaces.',
-    solution: 'Made the map the product: stay inventory lives in PostGIS and streams to the app in real time, guests can search and draft bookings offline, Stripe powers checkout, and guest / host / owner surfaces are genuinely distinct products over one Supabase core.',
+    problem: 'Hotel booking involves more than displaying a list of properties. Users need to discover stays, compare property and room information, understand locations, move through reservations, and complete payments without losing context between these steps.',
+    solution: 'Built the product as a connected discovery-to-booking experience, combining property and room views, search and filtering, location features, reservation workflows, authentication, payment processing, reviews, media management, and a lightweight conversational search experience.',
     architecture: {
-      title: 'Native Client → Supabase realtime/PostGIS → Postgres',
-      description: 'The native app reads and writes through one realtime core, with offline reconciliation at the edge.',
+      title: 'React Client → Express APIs → MongoDB',
+      description: 'The application separates the React product experience from REST API workflows and MongoDB persistence, with authentication and external services integrated through the backend.',
       components: [
-        'Client: Expo SDK 52 + React Native + TypeScript; native map + list browse, offline-first search and booking drafts; one codebase for iOS and Android.',
-        'Local store: MMKV for hot reads, SQLite for saved stays and draft bookings, with a sync queue that checks live availability before confirmation.',
-        'Realtime + maps: Supabase WebSockets stream inventory; PostGIS powers viewport queries so the map and the list never disagree.',
-        'Edge services: Supabase Edge Functions orchestrate booking, checkout sessions and host/owner admin flows.',
-        'Database: PostgreSQL with PostGIS — stays, users, bookings, availability and reviews.'
+        'Client: React + TypeScript for responsive discovery, property, room, booking, account, and conversational search experiences.',
+        'Backend: Node.js + Express.js REST APIs for hotels, rooms, bookings, users, reviews, and related resources.',
+        'Authentication: JWT-based authentication with role-based authorization and server-side permission checks.',
+        'Database: MongoDB for users, properties, rooms, bookings, reviews, and application data.',
+        'External services: Stripe for payments and Cloudinary for property and room media.'
       ]
     },
     keyDecisions: [
       {
-        decision: 'The map is the interface, not a feature',
-        rationale: 'Stays are inherently geographic. PostGIS viewport queries mean the list and the map render the same live inventory from the same query, instead of two views that drift.'
+        decision: 'Keep booking workflows behind backend APIs',
+        rationale: 'Reservations and payment-related operations need server-side validation and authorization rather than relying on client-side state alone.'
       },
       {
-        decision: 'Offline drafts with hard availability checks',
-        rationale: 'Searching on a bad connection should work, but confirming a booking must never. Drafts are local; confirmation re-checks realtime availability against bookings.'
+        decision: 'Separate authentication from UI access',
+        rationale: 'Role-based UI behavior is backed by server-side authorization and resource-ownership checks so protected operations are enforced by the API.'
       },
       {
-        decision: 'Role-based surfaces as separate products',
-        rationale: 'Guest, host and owner have genuinely different jobs — finding and booking stays, managing inventory and revenue, platform oversight — so each gets its own surface rather than role-gated widgets on one screen.'
+        decision: 'Use a unified property discovery flow',
+        rationale: 'Search, filtering, property details, room information, images, and location features are connected so users can move from discovery to reservation without switching between disconnected product surfaces.'
       },
       {
-        decision: 'AI assistant as a parallel search path',
-        rationale: 'Natural-language stays search is an intent extractor feeding the same map + list query engine, so the assistant never gets a different answer than the map does.'
+        decision: 'Keep chatbot logic focused on hotel discovery',
+        rationale: 'The conversational flow uses custom intent handling and short session context to assist discovery without replacing the core search and booking workflows.'
       }
     ],
     challenges: [
       {
-        title: 'One inventory, two live surfaces',
-        challenge: 'The map viewport and the result list are different queries — a stay filtered out of the list could still be sitting in the map frame.',
-        solution: 'Both surfaces read from the same PostGIS viewport/service, and realtime subscriptions apply the same row-level filters, so the map and list cannot disagree.'
+        title: 'Connecting discovery with booking',
+        challenge: 'Hotel discovery, property details, rooms, and reservations are separate workflows but need to feel like one continuous experience.',
+        solution: 'Connected the React flows through shared API-driven data and consistent navigation from search results through property and room details into the reservation flow.'
       },
       {
-        title: 'Offline drafts meeting live availability',
-        challenge: 'A guest drafts a 4-night booking offline, and three nights get taken before they reconnect.',
-        solution: 'Confirmation is never local: on reconnect the draft is re-checked against live availability, and the guest is offered a clean alternative before any charge is created.'
+        title: 'Protecting role-specific operations',
+        challenge: 'Customers, property owners, and administrators have different permissions and access to application resources.',
+        solution: 'Implemented JWT authentication with role-based authorization and backend resource checks for protected operations.'
+      },
+      {
+        title: 'Handling external payment and media services',
+        challenge: 'Booking workflows depend on external services whose operations can succeed, fail, or remain incomplete.',
+        solution: 'Integrated Stripe and Cloudinary through dedicated application workflows and represented their outcomes explicitly in the product flow.'
       }
     ]
   }
 };
-
-
 
 export const experienceData: ExperienceItem[] = [
   {
     id: 'cynosure',
     role: 'Software Engineer',
     company: 'Cynosure Software Solutions Pvt Ltd',
-    location: 'Bengaluru, India (Remote)',
+    location: 'Bengaluru, India',
     period: 'Dec 2023 – Present',
     isCurrent: true,
     type: 'Full-time • Remote',
-    summary: 'Remote Full-Stack Software Engineer building modern web applications, scalable frontend architectures, REST APIs, and database-driven features.',
+    summary: 'Full-Stack Software Engineer working across React, Next.js, TypeScript, Node.js, REST APIs, application data flows, and responsive product experiences.',
     points: [
-      'Built and shipped product features using React.js, Next.js, TypeScript, and API-driven workflows — developed shared UI components and reusable integration patterns across multiple product surfaces, cutting repeated implementation work and easing onboarding onto new features.',
-      'Managed client/server data flows with TanStack Query and REST APIs, implementing request deduplication, mutation handling, targeted cache invalidation, and refresh behavior so dashboard views remain synchronized after create, update, and delete operations.',
-      'Improved application behavior with code splitting, lazy loading, targeted memoization, and more deliberate request handling, reducing unnecessary rendering and network work on data-heavy views without relying on unsupported performance percentages or benchmark claims.',
-      'Fixed recurring production bugs across frontend and API integration flows — async race conditions, stale React closures, REST endpoint mismatches, and inconsistent error handling — improving stability and making failures easier to trace across affected product workflows.',
-      'Contributed to REST API workflows for application features with Node.js and Express.js where required, using request validation, authentication checks, and predictable response structures to support frontend integration and reduce ambiguity between client and server behavior.'
+      'Build and evolve product features using React, Next.js, and TypeScript, translating product requirements and redesigned experiences into reusable components, responsive interfaces, and maintainable application flows.',
+      'Design reusable frontend patterns for complex product workflows, maintaining consistent component structures, typed data flows, responsive layouts, navigation, and predictable state management across interconnected screens.',
+      'Implement API-driven workflows with TanStack Query and REST services, managing server state, mutations, caching, invalidation, loading states, error handling, and synchronization across product surfaces.',
+      'Work across frontend and backend boundaries using Node.js and Express.js, implementing request validation, authentication, API integrations, and application business workflows.',
+      'Develop and redesign responsive product experiences by turning product requirements and interaction designs into functional interfaces with consistent layouts, forms, navigation, and reusable UI patterns.',
+      'Build web and mobile experiences using React and React Native with Expo and Expo Router, adapting product workflows to platform-specific navigation, interaction patterns, and API-driven application state.',
+      'Integrate external services and APIs into product workflows, including payment, media, and financial-data integrations, while maintaining structured data and error-handling flows.',
+      'Work with PostgreSQL and MongoDB-backed applications and connect persistence layers with frontend and backend workflows through Prisma and REST APIs.',
+      'Contribute to application architecture and technical decisions by breaking larger product requirements into reusable modules, API contracts, data flows, and incremental features.'
     ],
-    technologies: ['React.js', 'Next.js', 'TypeScript', 'TanStack Query', 'Node.js', 'Express.js', 'PostgreSQL', 'Tailwind CSS', 'Git']
+    technologies: [
+      'React',
+      'Next.js',
+      'TypeScript',
+      'TanStack Query',
+      'Node.js',
+      'Express.js',
+      'REST APIs',
+      'PostgreSQL',
+      'MongoDB',
+      'Prisma',
+      'React Native',
+      'Expo',
+      'Expo Router'
+    ]
   },
   {
     id: 'webbers',
     role: 'Web Development Intern',
-    company: 'Webbers',
+    company: 'Webbers Labs Technologies',
     location: 'Hyderabad, India',
     period: 'May 2023 – Nov 2023',
     isCurrent: false,
     type: 'Internship',
-    summary: 'Frontend & Web Development Intern contributing to responsive UI engineering, cross-browser compatibility, REST API integration, and component modularity.',
+    summary: 'Web development internship focused on frontend implementation and building practical web interfaces.',
     points: [
-      'Built responsive, accessible web interfaces and reusable UI modules using React.js, JavaScript (ES6+), HTML5, and Tailwind CSS, translating Figma wireframes into pixel-perfect components.',
-      'Integrated frontend client views with backend RESTful APIs, handling dynamic data rendering, form state validation, asynchronous error handling, and client-side routing.',
-      'Assisted in optimizing web assets, image loading strategies, and client bundle size to enhance core web vitals, page load speeds, and cross-device performance.',
-      'Collaborated with engineering leads in agile sprints to troubleshoot cross-browser layout inconsistencies and refactor legacy components into clean, modular React code.'
+      'Contributed to web development tasks and frontend implementation as part of an engineering team.',
+      'Worked on responsive interfaces and translated product requirements into functional web experiences.',
+      'Worked with frontend application flows and integrated application data into user-facing screens.',
+      'Collaborated on debugging, UI improvements, and incremental changes across web product workflows.'
     ],
-    technologies: ['React.js', 'JavaScript (ES6+)', 'HTML5', 'Tailwind CSS', 'REST APIs', 'Git', 'Figma']
+    technologies: [
+      'React',
+      'JavaScript',
+      'HTML',
+      'CSS'
+    ]
   }
 ];
