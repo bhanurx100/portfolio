@@ -1,12 +1,12 @@
 /**
- * Device palette — high-contrast ink for app screens rendered inside
+ * Device palette — native iOS aesthetic for app screens rendered inside
  * DeviceFrame.
  *
- * Site tokens (`--text-3/4`) are tuned for full-size page prose; at the
- * ~0.64 device scale they read dull (light) or vanish (dark). Screens use
- * this palette instead: brighter secondary text, vivid semantics in dark
- * mode, deeper ink in light mode. Derived from the demo.png reference —
- * near-black canvas, blue/cyan neon accents.
+ * Follows Apple's Human Interface Guidelines: system Blue for actions,
+ * system Green/Red/Orange for semantics, grouped backgrounds with white
+ * (light) / elevated (dark) cells, hairline separators, and the San
+ * Francisco stack (see `.ios-screen`). One accent, quiet surfaces —
+ * no neon, no glow.
  */
 
 export interface DevicePalette {
@@ -28,33 +28,33 @@ export interface DevicePalette {
 export function devicePalette(isDark: boolean): DevicePalette {
   return isDark
     ? {
-        ink: '#F1F5F9',
-        sub: '#C6D2E2',
-        faint: '#8EA0B8',
-        card: '#101A2C',
-        cardBorder: '#223148',
-        chip: '#16223A',
-        brand: '#3B82F6',
+        ink: '#F2F2F7',
+        sub: '#A7AEBB',
+        faint: '#70788C',
+        card: '#232D49',
+        cardBorder: '#34415F',
+        chip: '#1B2440',
+        brand: '#0A84FF',
         brandInk: '#FFFFFF',
-        green: '#34D399',
-        red: '#F87171',
-        amber: '#FBBF24',
-        track: '#223148',
-        tabBg: '#0E1626',
+        green: '#30D158',
+        red: '#FF453A',
+        amber: '#FF9F0A',
+        track: '#2E3B58',
+        tabBg: 'rgba(29, 39, 64, 0.85)',
       }
     : {
-        ink: '#0B1220',
-        sub: '#3D4A61',
-        faint: '#68778F',
+        ink: '#101014',
+        sub: '#515156',
+        faint: '#8E8E93',
         card: '#FFFFFF',
-        cardBorder: '#D8E0EC',
-        chip: '#EDF1F7',
-        brand: '#1D4ED8',
+        cardBorder: '#D1D1D6',
+        chip: '#F2F2F7',
+        brand: '#007AFF',
         brandInk: '#FFFFFF',
-        green: '#047857',
-        red: '#DC2626',
-        amber: '#B45309',
-        track: '#E2E8F2',
-        tabBg: '#FFFFFF',
+        green: '#34C759',
+        red: '#FF3B30',
+        amber: '#FF9500',
+        track: '#E5E5EA',
+        tabBg: 'rgba(249, 249, 249, 0.88)',
       };
 }

@@ -49,17 +49,17 @@ const CAT_ICON: Record<CatId, React.ComponentType<{ size?: number | string; colo
 };
 
 const SEGMENTS: Record<CatId, { dark: string; light: string }> = {
-  stay: { dark: '#A78BFA', light: '#7C3AED' },
-  travel: { dark: '#22D3EE', light: '#0891B2' },
-  food: { dark: '#FB923C', light: '#EA580C' },
-  shop: { dark: '#F472B6', light: '#DB2777' },
-  other: { dark: '#94A3B8', light: '#64748B' },
+  stay: { dark: '#0A84FF', light: '#007AFF' },
+  travel: { dark: '#5AC8FA', light: '#0091FF' },
+  food: { dark: '#FF9F0A', light: '#FF9500' },
+  shop: { dark: '#BF5AF2', light: '#AF52DE' },
+  other: { dark: '#8E8E93', light: '#8E8E93' },
 };
 
 const ORBIT = [
-  { id: 'a', name: 'Aditi', color: '#3B82F6', delta: 2400 },
-  { id: 'b', name: 'Ravi', color: '#22D3EE', delta: 2800 },
-  { id: 'c', name: 'Meera', color: '#A78BFA', delta: -1200 },
+  { id: 'a', name: 'Aditi', color: '#0A84FF', delta: 2400 },
+  { id: 'b', name: 'Ravi', color: '#5AC8FA', delta: 2800 },
+  { id: 'c', name: 'Meera', color: '#8E8E93', delta: -1200 },
 ] as const;
 
 const OWED = ORBIT.reduce((s, m) => s + Math.max(m.delta, 0), 0);
@@ -105,11 +105,11 @@ interface Bill {
 }
 
 const BILLS: Bill[] = [
-  { id: 'b1', name: 'Rent · Goa crew', amount: 12000, due: 'May 1 · paid', icon: Home, color: '#A78BFA' },
-  { id: 'b2', name: 'Electricity', amount: 2340, due: 'May 14', icon: Zap, color: '#FBBF24', auto: true },
-  { id: 'b3', name: 'Internet', amount: 1199, due: 'May 16', icon: Wifi, color: '#22D3EE', auto: true },
-  { id: 'b4', name: 'Netflix', amount: 649, due: 'May 18', icon: Smartphone, color: '#F87171' },
-  { id: 'b5', name: 'Gym', amount: 2500, due: 'May 28', icon: Dumbbell, color: '#34D399' },
+  { id: 'b1', name: 'Rent · Goa crew', amount: 12000, due: 'May 1 · paid', icon: Home, color: '#0A84FF' },
+  { id: 'b2', name: 'Electricity', amount: 2340, due: 'May 14', icon: Zap, color: '#FF9F0A', auto: true },
+  { id: 'b3', name: 'Internet', amount: 1199, due: 'May 16', icon: Wifi, color: '#5AC8FA', auto: true },
+  { id: 'b4', name: 'Netflix', amount: 649, due: 'May 18', icon: Smartphone, color: '#FF453A' },
+  { id: 'b5', name: 'Gym', amount: 2500, due: 'May 28', icon: Dumbbell, color: '#30D158' },
 ];
 
 const BUDGETS: { id: CatId; cap: number }[] = [
@@ -141,22 +141,31 @@ const TabBar: React.FC<{
   active: string;
   onChange: (id: string) => void;
 }> = ({ pal, tabs, active, onChange }) => (
-  <div className="shrink-0 flex items-stretch" style={{ height: 62, borderTop: `1px solid ${pal.cardBorder}`, background: pal.tabBg }}>
+  <div
+    className="shrink-0 flex items-stretch"
+    style={{
+      height: 58,
+      borderTop: `1px solid ${pal.cardBorder}`,
+      background: pal.tabBg,
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+    }}
+  >
     {tabs.map((t) => {
       const Icon = t.icon;
       const isActive = active === t.id;
-      const color = isActive ? 'var(--accent)' : 'var(--text-3)';
+      const color = isActive ? pal.brand : pal.faint;
       return (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
           style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            gap: 3, fontSize: 11.5, fontWeight: isActive ? 700 : 500, color,
+            gap: 2, fontSize: 10, fontWeight: isActive ? 600 : 500, color,
             background: 'none', border: 'none', cursor: 'pointer',
           }}
         >
-          <Icon size={22} color={color} />
+          <Icon size={24} color={color} />
           {t.label}
         </button>
       );
@@ -169,8 +178,8 @@ const Box: React.FC<React.PropsWithChildren<{ pal: DevicePalette; pad?: number; 
 }) => (
   <div
     style={{
-      background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 20,
-      padding: pad, boxShadow: `0 10px 30px -18px ${soft(pal.brand, 0.35)}`, ...style,
+      background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 12,
+      padding: pad, ...style,
     }}
   >
     {children}
@@ -225,9 +234,8 @@ const BalanceHero: React.FC<{ pal: DevicePalette; isDark: boolean }> = ({ pal, i
   return (
     <div
       style={{
-        borderRadius: 22, padding: 18,
+        borderRadius: 12, padding: 16,
         background: pal.card, border: `1px solid ${pal.cardBorder}`,
-        boxShadow: '0 12px 28px -18px rgba(15,23,42,.25)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1092,7 +1100,7 @@ export const SplitFinScreen: React.FC = () => {
   const go = (t: string) => setTab(t);
 
   return (
-    <div className="relative flex-1 min-h-0 flex flex-col">
+    <div className="relative flex-1 min-h-0 flex flex-col ios-screen">
       {/* Header */}
       <div className="shrink-0 px-4 pb-1" style={{ paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>

@@ -30,7 +30,7 @@ function useSurface() {
     card: {
       background: pal.card,
       border: `1px solid ${pal.cardBorder}`,
-      borderRadius: 18,
+      borderRadius: 12,
     } as React.CSSProperties,
     sheet: {
       position: 'absolute' as const,
@@ -39,8 +39,8 @@ function useSurface() {
       bottom: 0,
       zIndex: 40,
       padding: 16,
-      borderTopLeftRadius: 22,
-      borderTopRightRadius: 22,
+      borderTopLeftRadius: 14,
+      borderTopRightRadius: 14,
       background: pal.card,
       border: `1px solid ${pal.cardBorder}`,
       boxShadow: isDark ? 'var(--shadow-3-dark)' : 'var(--shadow-3)',
@@ -72,11 +72,17 @@ const TabBar: React.FC<{
   active: string;
   onChange: (id: string) => void;
 }> = ({ tabs, active, onChange }) => {
-  const { pal, line } = useSurface();
+  const { pal, line, isDark } = useSurface();
   return (
     <div
       className="shrink-0 flex items-stretch"
-      style={{ height: 62, borderTop: line, background: pal.tabBg }}
+      style={{
+        height: 58,
+        borderTop: line,
+        background: pal.tabBg,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
     >
       {tabs.map((t) => {
         const Icon = t.icon;
@@ -92,16 +98,16 @@ const TabBar: React.FC<{
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 3,
-              fontSize: 11,
-              fontWeight: isActive ? 700 : 500,
+              gap: 2,
+              fontSize: 10,
+              fontWeight: isActive ? 600 : 500,
               color,
               background: 'none',
               border: 'none',
               cursor: 'pointer',
             }}
           >
-            <Icon size={22} color={color} />
+            <Icon size={24} color={color} />
             {t.label}
           </button>
         );
@@ -111,7 +117,7 @@ const TabBar: React.FC<{
 };
 
 const Screen: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="relative flex-1 min-h-0 flex flex-col">{children}</div>
+  <div className="relative flex-1 min-h-0 flex flex-col ios-screen">{children}</div>
 );
 
 const STAYS = [
@@ -169,10 +175,10 @@ export const StayEaseScreen: React.FC = () => {
           {/* Search */}
           <div
             style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              height: 46, padding: '0 14px',
-              borderRadius: 14, border: line,
-              background: pal.card,
+              display: 'flex', alignItems: 'center', gap: 8,
+              height: 38, padding: '0 12px',
+              borderRadius: 10,
+              background: pal.track,
               marginBottom: 10,
             }}
           >
@@ -214,7 +220,7 @@ export const StayEaseScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {STAYS.filter((s) => matchesQuery(s, query) && (typeFilter === 'All' || s.tag === typeFilter)).map((s) => (
               <div key={s.id} style={card}>
-                <div style={{ height: 120, background: '#0f1626', position: 'relative' }}>
+                <div style={{ height: 120, background: pal.track, position: 'relative' }}>
                   <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                   <span
                     style={{
@@ -245,9 +251,9 @@ export const StayEaseScreen: React.FC = () => {
                     <button
                       onClick={() => setSheetStay(s)}
                       style={{
-                        height: 38, padding: '0 16px', borderRadius: 12,
+                        height: 36, padding: '0 16px', borderRadius: 10,
                         background: 'var(--accent)', color: '#fff',
-                        fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
+                        fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
                       }}
                     >
                       Reserve

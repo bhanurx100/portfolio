@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({ activeSection }) => {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${isScrolled
           ? isDark
-            ? 'py-3 bg-[#0E1626]/90 backdrop-blur-md border-b border-slate-800 shadow-sm'
+            ? 'py-3 bg-[#161E33]/90 backdrop-blur-md border-b border-slate-800 shadow-sm'
             : 'py-3 bg-white/90 backdrop-blur-md border-b border-slate-300/80 shadow-xs'
           : 'py-4 sm:py-5 bg-transparent border-b border-transparent'
           }`}
@@ -164,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({ activeSection }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className={`fixed inset-x-0 top-[56px] z-30 border-b backdrop-blur-xl p-5 md:hidden space-y-3 shadow-lg ${isDark
-              ? 'bg-[#0E1626]/98 border-slate-800'
+              ? 'bg-[#161E33]/98 border-slate-800'
               : 'bg-white/98 border-slate-300 text-slate-900'
               }`}
           >

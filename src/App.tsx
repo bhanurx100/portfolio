@@ -88,7 +88,7 @@ function PortfolioMain() {
   const currentProject = selectedCaseStudySlug ? projectsData[selectedCaseStudySlug] : null;
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-blue-600 selection:text-white flex flex-col relative transition-colors duration-300 ${isDark ? 'bg-[#0E1626] text-slate-200' : 'bg-[#EEF2F6] text-slate-900'
+    <div className={`min-h-screen font-sans selection:bg-blue-600 selection:text-white flex flex-col relative transition-colors duration-300 ${isDark ? 'bg-[#161E33] text-slate-200' : 'bg-[#EEF2F6] text-slate-900'
       }`}>
       {/* Restrained Quiet Ambient Background */}
       <GlobalBackground />

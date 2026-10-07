@@ -57,7 +57,7 @@ export const GlobalBackground: React.FC = () => {
       {/* Base Canvas */}
       <div
         className={`absolute inset-0 transition-colors duration-300 ${
-          isDark ? 'bg-[#0E1626]' : 'bg-[#EEF2F6]'
+          isDark ? 'bg-[#161E33]' : 'bg-[#EEF2F6]'
         }`}
       />
 
