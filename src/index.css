@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Tailwind v4 defaults `dark:` to the OS color scheme. The site theme is
+   driven by the `.dark` class on <html> (see ThemeContext), so every `dark:`
+   utility must follow that class instead — otherwise `dark:` sections and
+   `isDark` sections disagree whenever OS and site themes differ. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ==================================================================== */
 /* DESIGN TOKENS — one system, applied everywhere                        */
 /* ==================================================================== */

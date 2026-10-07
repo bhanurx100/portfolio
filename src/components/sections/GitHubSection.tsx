@@ -11,8 +11,8 @@ export const GitHubSection: React.FC = () => {
     <section
       id="github"
       aria-label="GitHub Open Source & Verified Activity"
-      className={`py-8 sm:py-12 border-b transition-colors duration-500 relative overflow-hidden ${isDark ? 'bg-transparent text-white border-slate-800/80' : 'bg-transparent text-slate-900 border-slate-200'
-        }`}
+      className="py-12 sm:py-16 border-b transition-colors duration-500 relative overflow-hidden"
+      style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)' }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 relative z-10">
 

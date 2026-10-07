@@ -98,38 +98,22 @@ export const ContactSection: React.FC = () => {
     <section
       id="contact"
       aria-label="Contact and Communication"
-      className={`pt-8 sm:pt-14 pb-8 sm:pb-10 border-b transition-colors duration-500 relative overflow-hidden ${
-        isDark ? 'bg-transparent text-white border-slate-800/80' : 'bg-transparent text-slate-900 border-slate-200'
-      }`}
+      className="py-12 sm:py-16 border-b transition-colors duration-500 relative overflow-hidden"
+      style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)' }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         
-        {/* SECTION HEADER */}
-        <div className="max-w-3xl space-y-2.5 text-left">
-          <div
-            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold border ${
-              isDark
-                ? 'bg-slate-900/80 border-slate-800 text-slate-300'
-                : 'bg-white border-slate-200 text-slate-700 shadow-2xs'
-            }`}
-          >
-            <Mail className="w-3.5 h-3.5 text-blue-500" />
-            <span>Contact</span>
-          </div>
+        {/* SECTION HEADER — same editorial pattern as every other section */}
+        <div className="max-w-2xl space-y-3 text-left">
+          <p className="tech-label" style={{ color: 'var(--accent)' }}>Contact</p>
 
           <h2
-            className={`text-3xl sm:text-4xl font-bold tracking-tight ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}
+            style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}
           >
             Let&apos;s build something useful.
           </h2>
 
-          <p
-            className={`text-base sm:text-lg leading-relaxed ${
-              isDark ? 'text-slate-400' : 'text-slate-600'
-            }`}
-          >
+          <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--text-2)' }}>
             Reach out directly for software engineering roles, project discussions, or architecture inquiries.
           </p>
         </div>
@@ -142,9 +126,12 @@ export const ContactSection: React.FC = () => {
             
             {/* Email Card with 1-Click Copy */}
             <div
-              className={`p-4 rounded-2xl border transition-all ${
-                isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
-              }`}
+              className="p-4 rounded-2xl border transition-all"
+              style={{
+                background: 'var(--surface-1)',
+                borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+                boxShadow: isDark ? 'var(--shadow-1-dark)' : 'var(--shadow-1)',
+              }}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -193,9 +180,12 @@ export const ContactSection: React.FC = () => {
 
             {/* Phone Card with 1-Click Copy */}
             <div
-              className={`p-4 rounded-2xl border transition-all ${
-                isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
-              }`}
+              className="p-4 rounded-2xl border transition-all"
+              style={{
+                background: 'var(--surface-1)',
+                borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+                boxShadow: isDark ? 'var(--shadow-1-dark)' : 'var(--shadow-1)',
+              }}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -303,19 +293,23 @@ export const ContactSection: React.FC = () => {
 
           {/* RIGHT COLUMN: Clean Message Form (7 cols) */}
           <div
-            className={`lg:col-span-7 p-5 sm:p-6 rounded-3xl border transition-all ${
-              isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-slate-300 shadow-sm'
-            }`}
+            className="lg:col-span-7 p-5 sm:p-6 rounded-3xl border transition-all"
+            style={{
+              background: 'var(--surface-1)',
+              borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+              boxShadow: isDark ? 'var(--shadow-2-dark)' : 'var(--shadow-2)',
+            }}
           >
             {/* Form Card Header */}
-            <div className={`pb-4 mb-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-              isDark ? 'border-slate-700/80' : 'border-slate-200'
-            }`}>
+            <div
+              className="pb-4 mb-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+              style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)' }}
+            >
               <div>
-                <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className="font-display" style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-1)' }}>
                   Direct Message
                 </h3>
-                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <p style={{ fontSize: 12.5, color: 'var(--text-3)' }}>
                   Send a note directly to my inbox
                 </p>
               </div>
@@ -336,9 +330,8 @@ export const ContactSection: React.FC = () => {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="contact-name"
-                    className={`block text-xs font-mono font-medium ${
-                      isDark ? 'text-slate-300' : 'text-slate-700'
-                    }`}
+                    className="tech-label"
+                    style={{ color: 'var(--text-2)' }}
                   >
                     Your Name <span className="text-blue-500">*</span>
                   </label>
@@ -359,9 +352,8 @@ export const ContactSection: React.FC = () => {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="contact-email"
-                    className={`block text-xs font-mono font-medium ${
-                      isDark ? 'text-slate-300' : 'text-slate-700'
-                    }`}
+                    className="tech-label"
+                    style={{ color: 'var(--text-2)' }}
                   >
                     Your Email <span className="text-blue-500">*</span>
                   </label>
@@ -384,9 +376,8 @@ export const ContactSection: React.FC = () => {
               <div className="space-y-1.5">
                 <label
                   htmlFor="contact-subject"
-                  className={`block text-xs font-mono font-medium ${
-                    isDark ? 'text-slate-300' : 'text-slate-700'
-                  }`}
+                  className="tech-label"
+                  style={{ color: 'var(--text-2)' }}
                 >
                   Subject <span className="text-blue-500">*</span>
                 </label>
@@ -409,13 +400,12 @@ export const ContactSection: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="contact-message"
-                    className={`block text-xs font-mono font-medium ${
-                      isDark ? 'text-slate-300' : 'text-slate-700'
-                    }`}
+                    className="tech-label"
+                    style={{ color: 'var(--text-2)' }}
                   >
                     Message <span className="text-blue-500">*</span>
                   </label>
-                  <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <span className="tech-label" style={{ color: 'var(--text-3)', textTransform: 'none', letterSpacing: 0 }}>
                     plain-text draft
                   </span>
                 </div>
@@ -448,7 +438,7 @@ export const ContactSection: React.FC = () => {
                 <span>Compose in email app</span>
                 <Send className="w-3.5 h-3.5" />
               </Button>
-              <p className={`text-[10.5px] font-mono leading-relaxed ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+              <p className="tech-label" style={{ color: 'var(--text-3)', textTransform: 'none', letterSpacing: 0, lineHeight: 1.6 }}>
                 Opens a pre-filled draft to my inbox — nothing is sent until you hit send in your mail client. For faster replies, email or WhatsApp me directly.
               </p>
 

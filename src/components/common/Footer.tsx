@@ -14,77 +14,81 @@ export const Footer: React.FC = () => {
   return (
     <footer
       aria-label="Portfolio Footer"
-      className={`py-6 sm:py-12 border-t transition-colors duration-500 ${
-        isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-600 border-slate-300'
-      }`}
+      className="py-6 sm:py-12 border-t transition-colors duration-500"
+      style={{
+        background: 'var(--surface-1)',
+        borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+        color: 'var(--text-3)',
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
         
         {/* Main Footer Row */}
-        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b ${
-          isDark ? 'border-slate-800' : 'border-slate-300'
-        }`}>
+        <div
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b"
+          style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)' }}
+        >
           
           {/* Identity & Short Portfolio Note */}
           <div className="space-y-1 text-left">
             <div className="flex items-center gap-2">
-              <span className={`font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text-1)' }}>
                 {personalInfo.name}
               </span>
-              <span className="text-xs font-mono text-slate-500">/</span>
-              <span className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                Full-Stack Software Engineer
+              <span className="text-xs font-mono" style={{ color: 'var(--text-3)' }}>/</span>
+              <span className="text-xs font-mono" style={{ color: 'var(--text-2)' }}>
+                {personalInfo.title}
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs" style={{ color: 'var(--text-3)' }}>
               Designed & built with TypeScript, React 19, and Tailwind CSS.
             </p>
           </div>
 
           {/* Navigation Links & Social Channels */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono" style={{ color: 'var(--text-3)' }}>
             <a
               href="#work"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
+              className="transition hover:underline"
             >
               Work
             </a>
             <a
               href="#experience"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
+              className="transition hover:underline"
             >
               Experience
             </a>
             <a
               href="#github"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
+              className="transition hover:underline"
             >
               GitHub
             </a>
             <a
               href="#builder-lab"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
+              className="transition hover:underline"
             >
               Builder Lab
             </a>
             <a
               href="#contact"
-              className={isDark ? 'hover:text-white transition' : 'hover:text-blue-600 transition'}
+              className="transition hover:underline"
             >
               Contact
             </a>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-700/50 dark:border-slate-800 border-slate-300">
+            <div
+              className="flex items-center gap-2 pl-2 border-l"
+              style={{ borderColor: isDark ? 'var(--line-dark)' : 'var(--line)' }}
+            >
               <a
                 href={personalInfo.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`p-1.5 rounded-lg transition border ${
-                  isDark
-                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
-                    : 'bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 border-slate-300 shadow-2xs'
-                }`}
+                className="p-1.5 rounded-lg transition"
+                style={{ background: 'var(--surface-2)', border: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}`, color: 'var(--text-2)' }}
                 aria-label="GitHub Profile"
               >
                 <Github className="w-3.5 h-3.5" />
@@ -94,11 +98,8 @@ export const Footer: React.FC = () => {
                 href={personalInfo.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`p-1.5 rounded-lg transition border ${
-                  isDark
-                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
-                    : 'bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 border-slate-300 shadow-2xs'
-                }`}
+                className="p-1.5 rounded-lg transition"
+                style={{ background: 'var(--surface-2)', border: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}`, color: 'var(--text-2)' }}
                 aria-label="LinkedIn Profile"
               >
                 <Linkedin className="w-3.5 h-3.5" />
@@ -106,11 +107,8 @@ export const Footer: React.FC = () => {
 
               <a
                 href={`mailto:${personalInfo.email}`}
-                className={`p-1.5 rounded-lg transition border ${
-                  isDark
-                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
-                    : 'bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 border-slate-300 shadow-2xs'
-                }`}
+                className="p-1.5 rounded-lg transition"
+                style={{ background: 'var(--surface-2)', border: `1px solid ${isDark ? 'var(--line-dark)' : 'var(--line)'}`, color: 'var(--text-2)' }}
                 aria-label="Send Email"
               >
                 <Mail className="w-3.5 h-3.5" />
@@ -121,17 +119,14 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Micro Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono text-slate-500">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono" style={{ color: 'var(--text-3)' }}>
           <p>© {new Date().getFullYear()} Bhanuprasad L. All rights reserved.</p>
 
           <button
             type="button"
             onClick={scrollToTop}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition border cursor-pointer ${
-              isDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
-                : 'bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-950 border-slate-300 shadow-2xs'
-            }`}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition border cursor-pointer"
+            style={{ background: 'var(--surface-2)', borderColor: isDark ? 'var(--line-dark)' : 'var(--line)', color: 'var(--text-2)' }}
           >
             <span>Back to top</span>
             <ArrowUp className="w-3 h-3" />

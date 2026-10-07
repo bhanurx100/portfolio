@@ -209,14 +209,9 @@ export const experienceData: ExperienceItem[] = [
     summary: 'Full-Stack Software Engineer working across React, Next.js, TypeScript, Node.js, REST APIs, application data flows, and responsive product experiences.',
     points: [
       'Build and evolve product features using React, Next.js, and TypeScript, translating product requirements and redesigned experiences into reusable components, responsive interfaces, and maintainable application flows.',
-      'Design reusable frontend patterns for complex product workflows, maintaining consistent component structures, typed data flows, responsive layouts, navigation, and predictable state management across interconnected screens.',
       'Implement API-driven workflows with TanStack Query and REST services, managing server state, mutations, caching, invalidation, loading states, error handling, and synchronization across product surfaces.',
-      'Work across frontend and backend boundaries using Node.js and Express.js, implementing request validation, authentication, API integrations, and application business workflows.',
-      'Develop and redesign responsive product experiences by turning product requirements and interaction designs into functional interfaces with consistent layouts, forms, navigation, and reusable UI patterns.',
       'Build web and mobile experiences using React and React Native with Expo and Expo Router, adapting product workflows to platform-specific navigation, interaction patterns, and API-driven application state.',
-      'Integrate external services and APIs into product workflows, including payment, media, and financial-data integrations, while maintaining structured data and error-handling flows.',
-      'Work with PostgreSQL and MongoDB-backed applications and connect persistence layers with frontend and backend workflows through Prisma and REST APIs.',
-      'Contribute to application architecture and technical decisions by breaking larger product requirements into reusable modules, API contracts, data flows, and incremental features.'
+      'Work with PostgreSQL and MongoDB-backed applications and connect persistence layers with frontend and backend workflows through Prisma and REST APIs.'
     ],
     technologies: [
       'React',

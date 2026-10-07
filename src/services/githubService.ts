@@ -269,7 +269,9 @@ export async function fetchGitHubTelemetry(
         .sort((a, b) => b.count - a.count)
     : [];
 
-  // Filter contributions strictly to valid historical dates <= today (local day)
+  // Filter contributions strictly to valid historical dates <= today (local day).
+  // Levels are recomputed globally so colors stay consistent across years —
+  // the mirror's levels are year-relative quartiles and disagree with each other.
   const byDate = new Map<string, GitHubDayContribution>();
   if (Array.isArray(contribResult) && contribResult.length > 0) {
     for (const c of contribResult) {
@@ -279,7 +281,7 @@ export async function fetchGitHubTelemetry(
         byDate.set(c.date, {
           date: c.date,
           count: c.count,
-          level: typeof c.level === 'number' ? c.level : levelForCount(c.count),
+          level: levelForCount(c.count),
         });
       }
     }

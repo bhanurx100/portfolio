@@ -100,11 +100,30 @@ export const GitHubContributionGraph: React.FC = () => {
       })
     : null;
 
-  // All contributions — year filters removed, the full timeline is the story
+  // Trailing 12-month window — exactly what github.com shows: the last
+  // 365 days ending today. The service backfills through the current date,
+  // so the right edge is always today, never the last push date.
   const filteredContributions = useMemo(() => {
     if (!data || !data.contributions || data.contributions.length === 0) return [];
-    return data.contributions;
+    return data.contributions.slice(-365);
   }, [data]);
+
+  // Real counters for the visible window (same convention as GitHub)
+  const yearStats = useMemo(() => {
+    let total = 0;
+    let active = 0;
+    for (const d of filteredContributions) {
+      total += d.count;
+      if (d.count > 0) active++;
+    }
+    return { total, active };
+  }, [filteredContributions]);
+
+  /** Timezone-safe local date — new Date('YYYY-MM-DD') parses as UTC midnight. */
+  const parseLocalDate = (dateStr: string): Date => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
 
   // Organize into columns of weeks (7 days per column, Sunday to Saturday)
   const weeks = useMemo(() => {
@@ -113,7 +132,7 @@ export const GitHubContributionGraph: React.FC = () => {
     const sorted = [...filteredContributions].sort((a, b) => a.date.localeCompare(b.date));
     const weeksArr: (GitHubDayContribution | null)[][] = [];
 
-    const firstDate = new Date(sorted[0].date);
+    const firstDate = parseLocalDate(sorted[0].date);
     const startDayOfWeek = firstDate.getDay(); // 0 = Sun
 
     let currentWeek: (GitHubDayContribution | null)[] = [];
@@ -152,7 +171,7 @@ export const GitHubContributionGraph: React.FC = () => {
     weeks.forEach((week, wIndex) => {
       const day = week.find((d) => d !== null);
       if (day) {
-        const d = new Date(day.date);
+        const d = parseLocalDate(day.date);
         const monthName = d.toLocaleString('default', { month: 'short' });
         const yr = d.getFullYear().toString().slice(-2);
         const key = multiYear ? `${monthName} '${yr}` : monthName;
@@ -227,11 +246,12 @@ export const GitHubContributionGraph: React.FC = () => {
       
       {/* PRIMARY TELEMETRY CONTAINER (Glass Card) */}
       <div
-        className={`rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 space-y-4 ${
-          isDark
-            ? 'bg-slate-800/85 border-slate-700 backdrop-blur-xl shadow-2xl'
-            : 'bg-white border-slate-300 shadow-xl shadow-slate-300/30'
-        }`}
+        className="rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 space-y-4"
+        style={{
+          background: 'var(--surface-1)',
+          borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
+          boxShadow: isDark ? 'var(--shadow-2-dark)' : 'var(--shadow-2)',
+        }}
       >
         
         {/* Real Profile Header Strip */}
@@ -341,7 +361,15 @@ export const GitHubContributionGraph: React.FC = () => {
           <>
             {/* CONTRIBUTION GRAPH CONTROLS & TIMELINE */}
             <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-end gap-1.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                {/* Real window counters — same convention as github.com */}
+                <p className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <span className="font-bold">{yearStats.total.toLocaleString()} contributions</span>
+                  <span className={isDark ? 'text-slate-500' : 'text-slate-500'}> in the last 12 months · {yearStats.active} active days</span>
+                  {data && data.currentStreak > 1 && (
+                    <span className={`font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}> · 🔥 {data.currentStreak}-day streak</span>
+                  )}
+                </p>
                 {/* Horizontal Scroll Arrows */}
                 <div className="flex items-center gap-1.5 self-end sm:self-auto">
                   <button
@@ -375,10 +403,10 @@ export const GitHubContributionGraph: React.FC = () => {
               {/* HORIZONTALLY SCROLLABLE GRAPH VIEWPORT (Ensuring only this region scrolls) */}
               <div
                 ref={scrollContainerRef}
-                className={`p-3 sm:p-4 rounded-2xl border overflow-x-auto scrollbar-thin relative select-none ${
-                  isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100/70 border-slate-300'
-                }`}
+                className="p-3 sm:p-4 rounded-2xl border overflow-x-auto scrollbar-thin relative select-none"
                 style={{
+                  background: 'var(--surface-2)',
+                  borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
                   WebkitOverflowScrolling: 'touch',
                 }}
               >
@@ -468,18 +496,21 @@ export const GitHubContributionGraph: React.FC = () => {
                 {/* EXACT SPEC TOOLTIP: Showing date & actual contribution count ONLY */}
                 {hoveredCell && (
                   <div
-                    className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 px-3 py-1.5 rounded-xl text-xs font-mono shadow-xl border backdrop-blur-md transition-all duration-100 bg-slate-950 text-white border-slate-700"
+                    className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 px-3 py-1.5 rounded-xl text-xs font-mono shadow-xl border backdrop-blur-md transition-all duration-100"
                     style={{
                       left: `${hoveredCell.x}px`,
                       top: `${hoveredCell.y - 8}px`,
+                      background: 'var(--surface-1)',
+                      color: 'var(--text-1)',
+                      borderColor: isDark ? 'var(--line-dark)' : 'var(--line)',
                     }}
                   >
-                    <div className="font-bold text-emerald-400">
+                    <div className="font-bold" style={{ color: 'var(--ok)' }}>
                       {hoveredCell.count === 0
                         ? '0 contributions'
                         : `${hoveredCell.count} contribution${hoveredCell.count > 1 ? 's' : ''}`}
                     </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">
+                    <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-3)' }}>
                       {formatDisplayDate(hoveredCell.date)}
                     </div>
                   </div>
