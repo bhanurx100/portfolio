@@ -190,9 +190,9 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — the same pattern this system needs for reliable CRM writes.', tag: 'ACTIVE'
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Structured application data with explicit validation — the same discipline this system needs for reliable CRM writes.', tag: 'ACTIVE'
       },
-      { projectId: 'stayease', name: 'StayEase', relevance: 'Real-time availability via Supabase WebSockets — same event-driven backbone for live conversation intake.', tag: 'ACTIVE'
+      { projectId: 'stayease', name: 'StayEase', relevance: 'API-driven booking workflows — same event-driven backbone for live conversation intake.', tag: 'ACTIVE'
       },
     ],
   }),
@@ -295,9 +295,9 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'MMKV-backed offline ledger with background sync — the same reliability model for queue-then-book finance writes.', tag: 'ACTIVE'
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Structured financial workflows with explicit validation — the same reliability model for queue-then-book finance writes.', tag: 'ACTIVE'
       },
-      { projectId: 'stayease', name: 'StayEase', relevance: 'Payment-sheet → booking state machine — mirrors the invoice → ledger state transitions.', tag: 'ACTIVE'
+      { projectId: 'stayease', name: 'StayEase', relevance: 'Reservation → payment workflow with explicit success and failure states — mirrors the invoice → ledger state transitions.', tag: 'ACTIVE'
       },
     ],
   }),
@@ -398,9 +398,9 @@ export const generatedSystems: Record<string, GeneratedSystem> = {
       },
     ],
     projectEvidence: [
-      { projectId: 'stayease', name: 'StayEase', relevance: 'This is the closest real system: PostGIS spatial queries, offline MMKV passes, native booking flow.', tag: 'ACTIVE'
+      { projectId: 'stayease', name: 'StayEase', relevance: 'The closest real system: React + Express + MongoDB booking workflows with role-based access.', tag: 'ACTIVE'
       },
-      { projectId: 'splitfin', name: 'SplitFin', relevance: 'DAG debt-minimization — the same algorithmic core if this platform settles payouts between parties.', tag: 'ACTIVE'
+      { projectId: 'splitfin', name: 'SplitFin', relevance: 'Structured mobile-first product workflows — the same care if this platform settles payouts between parties.', tag: 'ACTIVE'
       },
     ],
   }),

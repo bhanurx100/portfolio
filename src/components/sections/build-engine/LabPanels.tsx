@@ -35,6 +35,7 @@ import type {
   SimulationStep,
   SimulationTraceEntry,
   SystemLens,
+  TraceHop,
 } from '../../../data/build-engine/types';
 
 /* ------------------------------------------------------------------ */
@@ -108,8 +109,8 @@ export const IdeaInput: React.FC<{
         style={{ boxShadow: isDark ? 'var(--shadow-2-dark), 0 0 44px color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--shadow-2)' }}
       >
         <div className={`mb-2.5 flex items-center justify-between font-mono uppercase tracking-wider ${deck ? 'text-[11.5px]' : 'text-[10.5px]'} ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-          <span style={{ color: 'var(--accent)' }}>What should this system do?</span>
-          <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>engine: deterministic · optional AI</span>
+          <span style={{ color: 'var(--accent)' }}>What are you designing?</span>
+          <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>idea → architecture → trace</span>
         </div>
         <div
           className={`flex items-center gap-3 rounded-xl border ${deck ? 'px-5 py-4' : 'px-4 py-3.5'}`}
@@ -126,10 +127,10 @@ export const IdeaInput: React.FC<{
             onKeyDown={(e) => {
               if (e.key === 'Enter' && value.trim()) onSubmit(value.trim());
             }}
-            placeholder="Describe a problem — what should we build?"
+            placeholder="Describe a system — e.g. hotel booking with payments"
             className="flex-1 bg-transparent outline-none"
             style={{ fontSize: deck ? 19 : 16, color: isDark ? '#F1F5F9' : '#0F172A' }}
-            aria-label="Describe the system to build"
+            aria-label="Describe the system to design"
           />
           <button
             onClick={() => value.trim() && onSubmit(value.trim())}
@@ -142,11 +143,11 @@ export const IdeaInput: React.FC<{
               padding: deck ? '12px 22px' : '8px 16px',
             }}
           >
-            Form system <Play size={deck ? 16 : 14} />
+            Design system <Play size={deck ? 16 : 14} />
           </button>
         </div>
         <p className={`mt-2.5 ${deck ? 'text-xs' : 'text-[11px]'} ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Runs in your browser — every system is composed from typed patterns, no account or API key required. Or try a starter:
+          Runs in your browser — every architecture is composed from typed patterns, no account or API key required. Or try a starter:
         </p>
       </motion.div>
 
@@ -338,9 +339,11 @@ export const EventTicker: React.FC<{
 
 export const NodeInspector: React.FC<{
   node: PositionedNode | null;
+  system: GeneratedSystem | null;
+  traceHop?: TraceHop | null;
   onClose: () => void;
   onRemove: (id: string) => void;
-}> = ({ node, onClose, onRemove }) => {
+}> = ({ node, system, traceHop, onClose, onRemove }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -358,6 +361,10 @@ export const NodeInspector: React.FC<{
   }
 
   const locked = node.locked;
+  const labelOf = new Map((system?.nodes ?? []).map((n) => [n.id, n.label]));
+  const inEdges = (system?.edges ?? []).filter((e) => e.to === node.id);
+  const outEdges = (system?.edges ?? []).filter((e) => e.from === node.id);
+  const onTrace = traceHop != null && traceHop.nodeId === node.id;
 
   return (
     <div className={`${panel(isDark)} p-3 space-y-2`}>
@@ -390,6 +397,41 @@ export const NodeInspector: React.FC<{
           {node.layer}
         </span>
       </div>
+
+      {onTrace && traceHop && (
+        <div className="rounded-lg border px-2 py-1.5" style={{ borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)', background: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}>
+          <div className="font-mono" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--accent)' }}>
+            TRACE STEP {traceHop.index + 1}
+          </div>
+          <div className="text-[11.5px] leading-snug" style={{ color: 'var(--text-1)' }}>{traceHop.label}</div>
+          {traceHop.invocation && (
+            <div className="font-mono text-[10px]" style={{ color: 'var(--accent)' }}>{traceHop.invocation}</div>
+          )}
+          {traceHop.payload && (
+            <div className="font-mono text-[10px] leading-snug" style={{ color: 'var(--text-3)' }}>→ {traceHop.payload}</div>
+          )}
+        </div>
+      )}
+
+      {(inEdges.length > 0 || outEdges.length > 0) && (
+        <div className="space-y-1">
+          <div className={`${panelTitle(isDark)}`}>Connected</div>
+          {inEdges.map((e) => (
+            <div key={e.id} className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--text-2)' }}>
+              <span className="font-mono shrink-0" style={{ color: 'var(--text-3)' }}>←</span>
+              <span className="truncate">{labelOf.get(e.from) ?? e.from}</span>
+              <span className="font-mono shrink-0" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>{e.flow}{e.label ? ` · ${e.label}` : ''}</span>
+            </div>
+          ))}
+          {outEdges.map((e) => (
+            <div key={e.id} className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--text-2)' }}>
+              <span className="font-mono shrink-0" style={{ color: 'var(--text-3)' }}>→</span>
+              <span className="truncate">{labelOf.get(e.to) ?? e.to}</span>
+              <span className="font-mono shrink-0" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>{e.flow}{e.label ? ` · ${e.label}` : ''}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {locked ? (
         <div className={`text-[11px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
@@ -448,7 +490,7 @@ export const RunDock: React.FC<{
           className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl text-xs sm:text-sm font-bold transition active:scale-[0.98]"
           style={{
             height: 36,
-            background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
+            background: 'linear-gradient(135deg, var(--accent), var(--accent-strong))',
             color: '#fff',
             boxShadow: isDark ? '0 10px 28px -10px color-mix(in srgb, var(--accent) 70%, transparent)' : '0 10px 24px -12px rgba(37,99,235,0.5)',
           }}
@@ -579,6 +621,80 @@ export const TraceTimeline: React.FC<{ trace: SimulationTraceEntry[] }> = ({ tra
           })}
         </div>
       </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Trace a request — the simulation's main line as numbered hops       */
+/* ------------------------------------------------------------------ */
+
+export const TracePanel: React.FC<{
+  system: GeneratedSystem;
+  hops: TraceHop[];
+  activeStep: number | null;
+  onStep: (index: number | null) => void;
+}> = ({ system, hops, activeStep, onStep }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const labelOf = React.useMemo(() => new Map(system.nodes.map((n) => [n.id, n.label])), [system]);
+  if (hops.length === 0) return null;
+  const request = hops[0]?.label ?? system.title;
+
+  const hopTone = (h: TraceHop) =>
+    h.gate === 'failure'
+      ? (isDark ? '#FB7185' : '#E11D48')
+      : h.gate === 'interrupt'
+      ? (isDark ? '#FBBF24' : '#B45309')
+      : 'var(--accent)';
+
+  return (
+    <div className={`col-span-2 ${panel(isDark)} p-3`}>
+      <div className={`${panelTitle(isDark)} flex items-center gap-1.5`}>
+        <GitBranch className="w-3 h-3" /> Trace a request
+        <span className="flex-1" />
+        <span className="font-mono" style={{ fontSize: 10, color: 'var(--text-3)' }}>{hops.length} hops</span>
+      </div>
+      <p className="mt-1.5 text-[11.5px] leading-snug" style={{ color: 'var(--text-2)' }}>{request}</p>
+      <div className="mt-2 space-y-1 overflow-y-auto scrollbar-thin" style={{ maxHeight: 248 }}>
+        {hops.map((h) => {
+          const on = activeStep === h.index;
+          return (
+            <button
+              key={h.index}
+              onClick={() => onStep(on ? null : h.index)}
+              aria-pressed={on}
+              className="w-full text-left rounded-lg border px-2 py-1.5 transition"
+              style={{
+                borderColor: on ? 'var(--accent)' : isDark ? 'var(--line-dark)' : 'var(--line)',
+                background: on ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'transparent',
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="font-mono shrink-0 flex items-center justify-center rounded-full"
+                  style={{ width: 16, height: 16, fontSize: 9, fontWeight: 800, background: on ? 'var(--accent)' : isDark ? '#1B2740' : '#E2E8F0', color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85' }}
+                >
+                  {h.index + 1}
+                </span>
+                <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--text-1)' }}>{labelOf.get(h.nodeId) ?? h.nodeId}</span>
+                {h.gate && (
+                  <span className="font-mono shrink-0" style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: '0.06em', color: hopTone(h) }}>
+                    {h.gate === 'failure' ? '✕ FAILS' : '◆ GATE'}
+                  </span>
+                )}
+              </div>
+              <div className="mt-0.5 text-[10.5px] leading-snug truncate" style={{ color: 'var(--text-3)' }}>{h.label}</div>
+              {h.invocation && (
+                <div className="font-mono text-[10px] truncate" style={{ color: hopTone(h) }}>{h.invocation}</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[10.5px] font-mono" style={{ color: 'var(--text-3)' }}>
+        {activeStep != null ? 'path highlighted — click the hop again to clear' : 'click a hop — the canvas highlights its path and the inspector opens'}
+      </p>
     </div>
   );
 };
@@ -839,30 +955,30 @@ const JOURNEY_STEPS: { n: string; label: string; detail: string; witness: string
   },
   {
     n: '02',
-    label: 'Native core',
-    detail: 'Expo SDK 52 · React Native · TS · SQLite + MMKV',
-    witness: 'witnessed in the SplitFin case study — one codebase, both stores',
+    label: 'Mobile + web clients',
+    detail: 'React Native · Expo · Expo Router · React · TypeScript',
+    witness: 'witnessed in the SplitFin and StayEase case studies — mobile-first and responsive web flows',
     url: '#work',
   },
   {
     n: '03',
-    label: 'Realtime data',
-    detail: 'Supabase · Postgres · PostGIS, offline-first sync',
-    witness: 'witnessed in the StayEase case study — PostGIS-geocoded stays, offline-first',
+    label: 'API-driven data',
+    detail: 'TanStack Query · REST APIs · PostgreSQL + Prisma · MongoDB',
+    witness: 'witnessed in both case studies — server state, persistence, and sync across screens',
     url: '#work',
   },
   {
     n: '04',
     label: 'Payments',
-    detail: 'Stripe — settlement that survives double-entry',
-    witness: 'witnessed in the SplitFin case study — payout ledger, Stripe events',
+    detail: 'Stripe — reservations with explicit success and failure states',
+    witness: 'witnessed in the StayEase case study — payment-aware booking workflow',
     url: '#work',
   },
   {
     n: '05',
-    label: 'E2E quality',
-    detail: 'Maestro on iOS + Android simulators',
-    witness: 'witnessed in both repos — scripted, repeatable flows',
+    label: 'Validation & auth',
+    detail: 'Zod validation · JWT role-based authorization',
+    witness: 'witnessed in both case studies — structured inputs and protected operations',
   },
 ];
 
@@ -1014,7 +1130,7 @@ export const EvidencePanel: React.FC<{ system: GeneratedSystem }> = ({ system })
                     : ev.tag === 'RELEVANT'
                     ? 'bg-blue-500/15 text-blue-500'
                     : ev.tag === 'CONCEPT'
-                    ? 'bg-violet-500/15 text-violet-500'
+                    ? 'bg-sky-500/15 text-sky-500'
                     : 'bg-slate-500/15 text-slate-400'
                 }`}>
                   {ev.tag}

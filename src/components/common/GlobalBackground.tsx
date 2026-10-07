@@ -13,13 +13,28 @@ export const GlobalBackground: React.FC = () => {
 
   useEffect(() => {
     let timeoutId: number;
+    let rafId = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let scheduled = false;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY, visible: true });
+    const flush = () => {
+      scheduled = false;
+      setMousePos({ x: lastX, y: lastY, visible: true });
       window.clearTimeout(timeoutId);
       timeoutId = window.setTimeout(() => {
         setMousePos((prev) => ({ ...prev, visible: false }));
       }, 3000);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      // Coalesce rapid mousemove events into one state update per frame.
+      if (!scheduled) {
+        scheduled = true;
+        rafId = window.requestAnimationFrame(flush);
+      }
     };
 
     const handleMouseLeave = () => {
@@ -33,6 +48,7 @@ export const GlobalBackground: React.FC = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       window.clearTimeout(timeoutId);
+      window.cancelAnimationFrame(rafId);
     };
   }, []);
 

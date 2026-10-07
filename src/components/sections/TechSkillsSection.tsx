@@ -6,56 +6,44 @@ interface Tech {
 }
 
 const TECH_STACK: Tech[] = [
-  // Core
+  // Languages
   { name: 'TypeScript', category: 'Core' },
   { name: 'JavaScript', category: 'Core' },
+  { name: 'HTML', category: 'Core' },
+  { name: 'CSS', category: 'Core' },
 
   // Frontend
   { name: 'React', category: 'Frontend' },
   { name: 'Next.js', category: 'Frontend' },
-  { name: 'React Router', category: 'Frontend' },
-  { name: 'Vite', category: 'Frontend' },
+  { name: 'Tailwind CSS', category: 'Frontend' },
 
   // Mobile
   { name: 'React Native', category: 'Mobile' },
   { name: 'Expo', category: 'Mobile' },
+  { name: 'Expo Router', category: 'Mobile' },
 
-  // UI
-  { name: 'Tailwind CSS', category: 'UI' },
-  { name: 'shadcn/ui', category: 'UI' },
-  { name: 'Material UI', category: 'UI' },
-  { name: 'Chakra UI', category: 'UI' },
-  { name: 'CSS Modules', category: 'UI' },
-  { name: 'Styled Components', category: 'UI' },
-
-  // State / Data
-  { name: 'Context API', category: 'State' },
-  { name: 'Redux Toolkit', category: 'State' },
-  { name: 'Zustand', category: 'State' },
+  // Data / State / Validation
   { name: 'TanStack Query', category: 'Data' },
-  { name: 'React Hook Form', category: 'Forms' },
   { name: 'Zod', category: 'Validation' },
+  { name: 'Recharts', category: 'Data' },
 
   // Backend
   { name: 'Node.js', category: 'Backend' },
-  { name: 'Express', category: 'Backend' },
+  { name: 'Express.js', category: 'Backend' },
   { name: 'REST APIs', category: 'Backend' },
   { name: 'JWT', category: 'Backend' },
-  { name: 'Middleware', category: 'Backend' },
 
   // Database
   { name: 'PostgreSQL', category: 'Database' },
+  { name: 'Prisma', category: 'Database' },
   { name: 'MongoDB', category: 'Database' },
-  { name: 'Mongoose', category: 'Database' },
-  { name: 'Redis', category: 'Database' },
+
+  // Integrations
+  { name: 'Stripe', category: 'Integrations' },
+  { name: 'Cloudinary', category: 'Integrations' },
 
   // Engineering
   { name: 'Git', category: 'Engineering' },
-  { name: 'Docker', category: 'Engineering' },
-  { name: 'AWS', category: 'Cloud' },
-  { name: 'CI/CD', category: 'Engineering' },
-  { name: 'Testing', category: 'Quality' },
-  { name: 'Figma', category: 'Design' },
 ];
 
 /**

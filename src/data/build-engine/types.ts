@@ -155,6 +155,23 @@ export interface SimulationTraceEntry {
 }
 
 /* ------------------------------------------------------------------ */
+/* Trace a request — the simulation's main line as an inspectable path */
+/* ------------------------------------------------------------------ */
+
+/** One hop of the design-time trace: a simulation step pinned to its node. */
+export interface TraceHop {
+  index: number;
+  nodeId: string;
+  label: string;
+  kind: SimulationStepKind;
+  /** e.g. `CRM.searchLead` — the "request" of this hop. */
+  invocation?: string;
+  /** Payload/result summary — the "response" of this hop. */
+  payload?: string;
+  gate?: 'interrupt' | 'failure';
+}
+
+/* ------------------------------------------------------------------ */
 /* Decision mode — tradeoffs, never scores                             */
 /* ------------------------------------------------------------------ */
 

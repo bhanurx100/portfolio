@@ -41,46 +41,46 @@ interface ArchLayer {
 const ARCHITECTURE: Record<string, ArchLayer[]> = {
   splitfin: [
     {
-      id: 'ui', name: 'Client (Expo SDK 52)', purpose: 'Dashboard, transactions, categories, SplitPay settlement',
-      dataIn: 'User intent', dataOut: 'Typed queries', tech: 'Expo SDK 52 · React Native · TypeScript', tradeoff: 'A native app is a product bet, not a responsive afterthought — one RN codebase for iOS and Android',
+      id: 'ui', name: 'Client (React Native + Expo)', purpose: 'Mobile-first finance experience: accounts, transactions, budgets, investments and analytics',
+      dataIn: 'User intent', dataOut: 'Typed queries', tech: 'React Native · Expo · Expo Router · TypeScript', tradeoff: 'Mobile-first navigation and interaction patterns instead of a desktop layout shrunk to a phone',
     },
     {
-      id: 'offline', name: 'Local store (offline-first)', purpose: 'Ledger, drafts and splits work with no connection; sync reconciles later',
-      dataIn: 'Local writes', dataOut: 'Idempotent ops', tech: 'MMKV · SQLite', tradeoff: 'Offline-first adds reconciliation rules; the payoff is a ledger that never blocks on the network',
+      id: 'state', name: 'Server state (TanStack Query)', purpose: 'API data, mutations, caching, invalidation and loading states across connected screens',
+      dataIn: 'API responses', dataOut: 'Synced screens', tech: 'TanStack Query', tradeoff: 'Centralized server-state handling keeps connected finance workflows consistent instead of per-screen fetching',
     },
     {
-      id: 'realtime', name: 'Realtime layer (Supabase)', purpose: 'Live group presence, settlement pushes, multi-device sync',
-      dataIn: 'Subscription', dataOut: 'Live events', tech: 'Supabase WebSockets', tradeoff: 'Realtime is additive to the offline queue, so presence updates never fight pending local edits',
+      id: 'validation', name: 'Validation (Zod)', purpose: 'Structured validation for application inputs and financial workflows',
+      dataIn: 'Raw inputs', dataOut: 'Validated data', tech: 'Zod', tradeoff: 'Explicit validation boundaries give predictable failure states for financial inputs',
     },
     {
-      id: 'logic', name: 'Ledger service', purpose: 'Split rules, category intelligence, who-owes-whom',
-      dataIn: 'Validated ops', dataOut: 'Ledger updates', tech: 'Typed TypeScript service', tradeoff: 'Settlement UI is decoupled from the debt-simplification math so the solver can evolve without UI churn',
+      id: 'data', name: 'Data layer (PostgreSQL + Prisma)', purpose: 'Structured persistence for accounts, transactions, budgets, investments and related records',
+      dataIn: 'Validated writes', dataOut: 'Durable records', tech: 'PostgreSQL · Prisma', tradeoff: 'A structured persistence model keeps related finance workflows consistent across screens',
     },
     {
-      id: 'db', name: 'Database', purpose: 'Groups, members, transactions, settlement states',
-      dataIn: 'SQL writes', dataOut: 'Durable records', tech: 'PostgreSQL · PostGIS', tradeoff: 'Typed schemas shift errors to compile time at the cost of migrations',
+      id: 'analytics', name: 'Analytics (Recharts)', purpose: 'Allocation, historical views, cash flow and portfolio-oriented visualizations',
+      dataIn: 'Financial data', dataOut: 'Interactive charts', tech: 'Recharts', tradeoff: 'Financial-data availability is part of the UI: available, delayed, empty and unavailable states are distinct',
     },
   ],
   stayease: [
     {
-      id: 'ui', name: 'Client (Expo SDK 52)', purpose: 'Search, map, property detail, booking, role surfaces',
-      dataIn: 'User intent', dataOut: 'API calls', tech: 'Expo SDK 52 · React Native · TypeScript', tradeoff: 'Native map + list surfaces need careful image and gesture performance work',
+      id: 'ui', name: 'Client (React + TypeScript)', purpose: 'Responsive discovery, property, room, booking, account and conversational search experiences',
+      dataIn: 'User intent', dataOut: 'API calls', tech: 'React · TypeScript', tradeoff: 'Search, filtering, property details, rooms, images and location stay connected from discovery to reservation',
     },
     {
-      id: 'offline', name: 'Local stays (offline-first)', purpose: 'Saved stays, search history and draft bookings with no connectivity',
-      dataIn: 'Local writes', dataOut: 'Sync queue', tech: 'MMKV · SQLite', tradeoff: 'Offline drafts must reconcile against live availability before confirmation',
+      id: 'api', name: 'Backend (Node.js + Express)', purpose: 'REST APIs for hotels, rooms, bookings, users, reviews and related resources',
+      dataIn: 'App calls', dataOut: 'Validated responses', tech: 'Node.js · Express.js · REST APIs', tradeoff: 'Reservations and payment-related operations stay behind server-side validation and authorization',
     },
     {
-      id: 'map', name: 'Realtime map (Supabase)', purpose: 'Stay inventory rendered live from PostGIS; live availability',
-      dataIn: 'Map viewport', dataOut: 'Live stays', tech: 'Supabase realtime · PostGIS', tradeoff: 'Streaming the map viewport is cheap; reconciling against bookings is the careful part',
+      id: 'auth', name: 'Auth (JWT + role-based access)', purpose: 'Customer, property-owner and administrator access with resource-ownership checks',
+      dataIn: 'Credentials', dataOut: 'Authorized operations', tech: 'JWT', tradeoff: 'Role-based UI behavior is backed by server-side authorization, not client-side checks alone',
     },
     {
-      id: 'api', name: 'Edge services', purpose: 'Booking orchestration, checkout session, owner/admin flows',
-      dataIn: 'App calls', dataOut: 'Validated events', tech: 'Supabase Edge Functions', tradeoff: 'Small functions keep trust boundaries explicit but need disciplined test coverage',
+      id: 'db', name: 'Database (MongoDB)', purpose: 'Users, properties, rooms, bookings, reviews and application data',
+      dataIn: 'Service writes', dataOut: 'Durable records', tech: 'MongoDB', tradeoff: 'One persistence layer serves property, booking, user and review workflows',
     },
     {
-      id: 'db', name: 'Database', purpose: 'Stays, users, bookings, availability, reviews',
-      dataIn: 'Service writes', dataOut: 'Durable records', tech: 'PostgreSQL · PostGIS', tradeoff: 'PostGIS powers map queries; availability checks keep them consistent with bookings',
+      id: 'services', name: 'External services + discovery', purpose: 'Stripe payments, Cloudinary media, map/location features and a hotel-discovery chatbot',
+      dataIn: 'Booking + media ops', dataOut: 'Payments · images · guidance', tech: 'Stripe · Cloudinary · Custom NLP intent + session context', tradeoff: 'External outcomes (successful, failed, incomplete) are represented explicitly in the product flow',
     },
   ],
 };
@@ -184,13 +184,16 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
               <section className="space-y-3">
                 {chapter('02', 'The product')}
                 <p style={{ fontSize: 15.5, lineHeight: 1.7, color: 'var(--text-2)' }}>{project.description}</p>
+                <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-3)' }}>{project.solution}</p>
                 <div className="flex justify-center py-3">
                   <DeviceFrame width={244} ariaLabel={`${project.name} interactive preview`}>
                     {isSplitFin ? <SplitFinScreen /> : <StayEaseScreen />}
                   </DeviceFrame>
                 </div>
                 <p className="text-center tech-label" style={{ textTransform: 'none', letterSpacing: 0 }}>
-                  Interactive concept preview of the native app — code access available on request
+                  {isSplitFin
+                    ? 'Interactive concept preview of the mobile-first finance flows'
+                    : 'Interactive concept preview of the discovery and booking flows'}
                 </p>
               </section>
 
@@ -281,7 +284,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
               <section className="space-y-3">
                 {chapter('05', 'What I built')}
                 <ul className="space-y-2">
-                  {project.capabilities.slice(0, 4).map((c, i) => (
+                  {project.capabilities.map((c, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="shrink-0 rounded-full" style={{ width: 6, height: 6, marginTop: 8, background: accent }} />
                       <span style={{ fontSize: 14.5, lineHeight: 1.6, color: 'var(--text-2)' }}>{c}</span>
@@ -293,7 +296,10 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                     {project.challenges.map((ch) => (
                       <div key={ch.title} style={{ padding: 14, borderRadius: 14, background: 'var(--surface-2)' }}>
                         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>{ch.title}</div>
-                        <div style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text-3)', marginTop: 4 }}>{ch.solution}</div>
+                        <div style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--text-2)', marginTop: 4 }}>
+                          <span style={{ color: 'var(--text-3)' }}>{ch.challenge}</span>
+                          <span style={{ display: 'block', marginTop: 4 }}>{ch.solution}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -308,14 +314,42 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                     className="rounded-full"
                     style={{
                       fontSize: 12, fontWeight: 800, padding: '5px 12px',
-                      color: 'var(--warn)', background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
+                      color: 'var(--text-2)', background: 'color-mix(in srgb, var(--text-3) 12%, transparent)',
                     }}
                   >
-                    IN ACTIVE DEVELOPMENT — full codebase written by me
+                    {project.period} · {project.role}
                   </span>
                   <span style={{ fontSize: 13.5, color: 'var(--text-3)' }}>{project.type}</span>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-1">
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl"
+                      style={{
+                        height: 44, padding: '0 18px', fontSize: 14, fontWeight: 700,
+                        background: 'var(--text-1)', color: 'var(--canvas-bg)',
+                      }}
+                    >
+                      Live demo ↗
+                    </a>
+                  )}
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl"
+                      style={{
+                        height: 44, padding: '0 18px', fontSize: 14, fontWeight: 600,
+                        background: 'transparent', border: `1.5px solid var(--line${isDark ? '-strong-dark' : '-strong'})`, color: 'var(--text-1)',
+                      }}
+                    >
+                      GitHub ↗
+                    </a>
+                  )}
                   {personalInfo.email && (
                     <a
                       href={personalInfo.emailMailto}
@@ -329,11 +363,11 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, isOpen,
                     </a>
                   )}
                 </div>
-                {personalInfo.email && (
-                  <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12.5, paddingTop: 2 }}>
-                    Code access available on request — credentials and admin portals gated for teams.
-                  </p>
-                )}
+                <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12.5, paddingTop: 2 }}>
+                  {project.githubUrl
+                    ? 'Source and live demo linked above — stack and workflows as listed.'
+                    : 'Live demo linked above — stack and workflows as listed.'}
+                </p>
               </section>
             </div>
 

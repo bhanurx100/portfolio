@@ -48,13 +48,10 @@ export const HeroDesktop: React.FC<HeroDesktopProps> = ({ onOpenCaseStudy }) => 
                 color: 'var(--text-1)',
               }}
             >
-              I build software products —
-              <br />
-              <span style={{ color: 'var(--accent)' }}>from idea to interface to system.</span>
+              {personalInfo.headline}
             </h1>
             <p style={{ fontSize: 18, lineHeight: 1.65, color: 'var(--text-2)', maxWidth: 560 }}>
-              Product engineer working across frontend, backend, mobile and applied AI.
-              Two products in active build below — and a lab where you can watch how I design the systems behind them.
+              {personalInfo.positioning}
             </p>
           </motion.div>
 

@@ -1,5 +1,4 @@
 import { ProjectData, ExperienceItem } from '../types';
-
 export const personalInfo = {
   name: 'Bhanuprasad L',
   shortName: 'Bhanu',
@@ -58,7 +57,7 @@ export const projectsData: Record<string, ProjectData> = {
       'Recharts'
     ],
     githubUrl: '',
-    liveUrl: '',
+    liveUrl: 'https://splitfinai.vercel.app/',
     themeColor: '#10b981',
     accentColor: '#34d399',
     problem: 'Personal finance involves multiple types of information — accounts, transactions, budgets, recurring expenses, investments, and market information — that are often presented as disconnected experiences. SplitFin brings these workflows together so users can understand everyday spending and longer-term financial activity in one place.',

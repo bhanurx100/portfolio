@@ -9,49 +9,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTheme } from '../../context/ThemeContext';
-import { personalInfo } from '../../data/portfolio-data';
-
-export interface ConciseExperience {
-  id: string;
-  role: string;
-  company: string;
-  location: string;
-  period: string;
-  isCurrent: boolean;
-  type: string;
-  bullets: string[];
-}
-
-export const conciseExperienceList: ConciseExperience[] = [
-  {
-    id: 'cynosure',
-    role: 'Software Engineer',
-    company: 'Cynosure Software Solutions',
-    location: 'Hyderabad, India (Remote)',
-    period: 'Dec 2023 — Present',
-    isCurrent: true,
-    type: 'Full-time',
-    bullets: [
-      'Engineered product features and modular UI with React, Next.js and TypeScript across core application views.',
-      'Managed client–server data flows with TanStack Query and REST — mutation handling, deduplication, cache invalidation.',
-      'Built backend REST endpoints with Node.js and Express: request validation, auth checks, structured errors.',
-    ],
-  },
-  {
-    id: 'webbers',
-    role: 'Frontend Developer Intern',
-    company: 'Webbers Labs Technologies LLP',
-    location: 'Mysuru, India',
-    period: 'Mar 2023 — Jun 2023',
-    isCurrent: false,
-    type: 'Internship',
-    bullets: [
-      'Built responsive, accessible interfaces and reusable UI modules with React and Tailwind from design specs.',
-      'Integrated frontend views with REST APIs — form validation, dynamic rendering, error handling.',
-      'Resolved cross-browser layout issues; refactored legacy UI into modular components.',
-    ],
-  },
-];
+import { personalInfo, experienceData } from '../../data/portfolio-data';
 
 export const ExperienceSection: React.FC = () => {
   const { theme } = useTheme();
@@ -74,12 +32,10 @@ export const ExperienceSection: React.FC = () => {
           <aside className="lg:col-span-4 space-y-5">
             <div className="lg:sticky lg:top-28 space-y-5">
               <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--text-2)' }}>
-                I build products from first principles: clear data models, type-safe boundaries,
-                resilient state — then the interface that makes them usable.
+                {personalInfo.positioning}
               </p>
               <p style={{ fontSize: 14.5, lineHeight: 1.7, color: 'var(--text-3)' }}>
-                Web apps, fintech and SaaS tooling. Strong frontend craft, structured APIs,
-                dependable validation — and a bias for shipping.
+                {personalInfo.supporting}
               </p>
               <div className="space-y-1.5 pt-2" style={{ borderTop: `1px solid ${line}` }}>
                 <div style={{ fontSize: 13.5, color: 'var(--text-2)' }}>{personalInfo.location}</div>
@@ -90,7 +46,7 @@ export const ExperienceSection: React.FC = () => {
 
           {/* Timeline — open composition */}
           <div className="lg:col-span-8">
-            {conciseExperienceList.map((exp, idx) => (
+            {experienceData.map((exp, idx) => (
               <motion.div
                 key={exp.id}
                 initial={{ opacity: 0, y: 18 }}
@@ -98,7 +54,7 @@ export const ExperienceSection: React.FC = () => {
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: idx * 0.08 }}
                 className="block sm:grid sm:grid-cols-[120px_1fr] gap-5 sm:gap-8"
-                style={{ paddingBottom: idx < conciseExperienceList.length - 1 ? 44 : 0 }}
+                style={{ paddingBottom: idx < experienceData.length - 1 ? 44 : 0 }}
               >
                 {/* Date column — inline on mobile, right column on sm+ */}
                 <div className="flex sm:block items-baseline gap-3 justify-between sm:text-right sm:justify-start pt-0 sm:pt-1 mb-2 sm:mb-0">
@@ -135,14 +91,18 @@ export const ExperienceSection: React.FC = () => {
                       {exp.company}
                       <span style={{ color: 'var(--text-3)', fontWeight: 400 }}> · {exp.location}</span>
                     </div>
+                    <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--text-3)' }}>{exp.summary}</p>
                     <ul className="space-y-2 pt-1">
-                      {exp.bullets.map((b, i) => (
+                      {exp.points.map((b, i) => (
                         <li key={i} className="flex items-start gap-2.5">
                           <span className="shrink-0 rounded-full" style={{ width: 5, height: 5, marginTop: 8, background: 'var(--text-4)' }} aria-hidden />
                           <span style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-2)' }}>{b}</span>
                         </li>
                       ))}
                     </ul>
+                    <p style={{ fontSize: 12.5, lineHeight: 1.6, color: 'var(--text-3)', paddingTop: 4 }}>
+                      {exp.technologies.join('  ·  ')}
+                    </p>
                   </div>
                 </div>
               </motion.div>

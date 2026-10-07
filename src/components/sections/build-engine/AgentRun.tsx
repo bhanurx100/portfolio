@@ -162,7 +162,7 @@ export const AgentRun: React.FC<AgentRunProps> = ({
   const btnPrimary: React.CSSProperties = {
     height: 46,
     minWidth: 44,
-    background: 'linear-gradient(135deg, var(--accent), #7C3AED)',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent-strong))',
     color: '#fff',
     fontWeight: 700,
     padding: '0 18px',
@@ -186,7 +186,7 @@ export const AgentRun: React.FC<AgentRunProps> = ({
           className="shrink-0 flex items-center justify-center rounded-xl"
           style={{
             width: 38, height: 38,
-            background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+            background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
             boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)',
           }}
         >

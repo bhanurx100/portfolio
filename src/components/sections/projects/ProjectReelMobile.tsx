@@ -7,10 +7,9 @@
  */
 
 import React from 'react';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ProjectShowcaseItem } from './ProjectCardDesktop';
-import { personalInfo } from '../../../data/portfolio-data';
 import { DeviceFrame } from '../../common/DeviceFrame';
 import { StayEaseScreen } from '../../common/AppScreens';
 import { SplitFinScreen } from '../../common/SplitFinScreen';
@@ -49,11 +48,11 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                   fontWeight: 800,
                   letterSpacing: '0.06em',
                   padding: '3px 10px',
-                  color: 'var(--warn)',
-                  background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
+                  color: 'var(--text-2)',
+                  background: 'color-mix(in srgb, var(--text-3) 12%, transparent)',
                 }}
               >
-                ACTIVE BUILD
+                2025
               </span>
             </div>
 
@@ -97,24 +96,30 @@ export const ProjectReelMobile: React.FC<ProjectReelMobileProps> = ({
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
               </button>
 
-              {personalInfo.email && (
+              {project.liveUrl && (
                 <a
-                  href={personalInfo.emailMailto}
-                  aria-label={`Contact me about ${project.name}`}
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Live demo of ${project.name}`}
                   className="inline-flex items-center justify-center rounded-xl"
                   style={{
                     height: 48,
-                    width: 48,
+                    padding: '0 16px',
+                    fontSize: 13,
+                    fontWeight: 700,
                     border: '1.5px solid var(--line-strong)',
-                    color: 'var(--text-2)',
+                    color: 'var(--accent)',
                   }}
                 >
-                  <Mail size={18} />
+                  Live ↗
                 </a>
               )}
             </div>
             <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12, marginTop: 8 }}>
-              Code access available on request — credentials and admin portals gated for teams.
+              {project.githubUrl
+                ? 'Source and live demo linked — case study covers architecture and decisions.'
+                : 'Live demo linked — case study covers architecture and decisions.'}
             </p>
           </motion.article>
         );

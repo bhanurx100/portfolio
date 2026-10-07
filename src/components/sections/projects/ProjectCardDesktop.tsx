@@ -7,10 +7,8 @@
  */
 
 import React from 'react';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTheme } from '../../../context/ThemeContext';
-import { personalInfo } from '../../../data/portfolio-data';
 import { DeviceFrame } from '../../common/DeviceFrame';
 import { StayEaseScreen } from '../../common/AppScreens';
 import { SplitFinScreen } from '../../common/SplitFinScreen';
@@ -39,8 +37,6 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
   index,
   onOpenCaseStudy,
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
   const isEven = index % 2 === 0;
   const accent = project.id === 'stayease' ? 'var(--accent)' : 'var(--ok)';
 
@@ -105,13 +101,27 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </button>
 
-          {personalInfo.email && (
+          {project.liveUrl && (
             <a
-              href={personalInfo.emailMailto}
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5"
+              style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent)' }}
+            >
+              Live demo ↗
+            </a>
+          )}
+
+          {project.githubUrl && (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5"
               style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)' }}
             >
-              <Mail size={15} /> Contact me
+              GitHub ↗
             </a>
           )}
 
@@ -122,15 +132,17 @@ export const ProjectCardDesktop: React.FC<ProjectCardDesktopProps> = ({
               fontWeight: 800,
               letterSpacing: '0.06em',
               padding: '4px 11px',
-              color: 'var(--warn)',
-              background: 'color-mix(in srgb, var(--warn) 12%, transparent)',
+              color: 'var(--text-2)',
+              background: 'color-mix(in srgb, var(--text-3) 12%, transparent)',
             }}
           >
-            ACTIVE BUILD — IN PROGRESS
+            2025 · PRODUCT ENGINEER
           </span>
         </div>
         <p className="tech-label" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12 }}>
-          Code access available on request — credentials and admin portals gated for teams.
+          {project.githubUrl
+            ? 'Source and live demo linked above — open the case study for architecture and decisions.'
+            : 'Live demo linked above — open the case study for architecture and decisions.'}
         </p>
       </div>
 

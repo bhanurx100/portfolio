@@ -19,6 +19,7 @@ import type {
   PositionedNode,
   RemoveEffect,
   SystemNode,
+  TraceHop,
 } from './types';
 
 /* ------------------------------------------------------------------ */
@@ -259,4 +260,27 @@ export function applyAddOnToGraph(
   ];
   const nextNodes = nodes.some((n) => n.id === addOn.node.id) ? nodes : [...nodes, addOn.node];
   return { nodes: nextNodes, edges: nextEdges };
+}
+
+/* ------------------------------------------------------------------ */
+/* Trace a request — the simulation's main line as inspectable hops    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Derive the design-time trace from the system's own simulation script:
+ * every script step becomes one hop pinned to its executing node, in
+ * order. No new data is invented — request/response come from the
+ * step's invocation and payload. The canvas highlights these hops; the
+ * panel lists them; clicking a hop inspects its node.
+ */
+export function deriveTrace(system: GeneratedSystem): TraceHop[] {
+  return system.simulation.steps.map((s, i) => ({
+    index: i,
+    nodeId: s.nodeId,
+    label: s.label,
+    kind: s.kind,
+    invocation: s.invocation,
+    payload: s.payload,
+    gate: s.gate,
+  }));
 }

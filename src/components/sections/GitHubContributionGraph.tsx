@@ -8,7 +8,8 @@ import {
   AlertCircle,
   Star,
   GitFork,
-  CheckCircle2
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,6 +26,7 @@ export const GitHubContributionGraph: React.FC = () => {
 
   const [data, setData] = useState<GitHubDataResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Tooltip state strictly restricted to date + actual count
   const [hoveredCell, setHoveredCell] = useState<{
@@ -61,6 +63,7 @@ export const GitHubContributionGraph: React.FC = () => {
             activeDaysCount: 0,
             totalStars: 0,
             languages: [],
+            fetchedAt: Date.now(),
           });
           setIsLoading(false);
         }
@@ -70,6 +73,32 @@ export const GitHubContributionGraph: React.FC = () => {
       isMounted = false;
     };
   }, []);
+
+  // Manual refresh — bypasses the session cache and re-fetches live data,
+  // so today's pushes appear right after a refresh instead of stale cache.
+  const handleRefresh = () => {
+    if (isRefreshing) return;
+    const username = personalInfo.githubUsername || 'bhanurx100';
+    setIsRefreshing(true);
+    fetchGitHubTelemetry(username, { forceRefresh: true })
+      .then((result) => {
+        setData(result);
+        setIsRefreshing(false);
+      })
+      .catch(() => {
+        setIsRefreshing(false);
+      });
+  };
+
+  const lastSyncedLabel = data?.fetchedAt
+    ? new Date(data.fetchedAt).toLocaleString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : null;
 
   // All contributions — year filters removed, the full timeline is the story
   const filteredContributions = useMemo(() => {
@@ -215,6 +244,8 @@ export const GitHubContributionGraph: React.FC = () => {
               alt={personalInfo.name}
               className="w-10 h-10 rounded-xl border border-slate-700/60 object-cover shadow-xs"
               referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
             />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -243,6 +274,28 @@ export const GitHubContributionGraph: React.FC = () => {
                 {data?.profile?.bio || personalInfo.positioning}
               </p>
             </div>
+          </div>
+          {/* Live-sync controls: manual refresh + last-synced stamp */}
+          <div className="flex items-center gap-2 shrink-0">
+            {lastSyncedLabel && (
+              <span className={`text-[10px] font-mono ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                Synced {lastSyncedLabel}
+              </span>
+            )}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing || isLoading}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-mono font-semibold transition active:scale-95 disabled:opacity-60 disabled:cursor-wait ${
+                isDark
+                  ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-2xs'
+              }`}
+              title="Re-fetch live GitHub activity"
+              aria-label="Refresh GitHub activity"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Syncing…' : 'Refresh'}</span>
+            </button>
           </div>
         </div>
 

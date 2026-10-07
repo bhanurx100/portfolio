@@ -215,7 +215,7 @@ export const StayEaseScreen: React.FC = () => {
             {STAYS.filter((s) => matchesQuery(s, query) && (typeFilter === 'All' || s.tag === typeFilter)).map((s) => (
               <div key={s.id} style={card}>
                 <div style={{ height: 120, background: '#0f1626', position: 'relative' }}>
-                  <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" referrerPolicy="no-referrer" />
+                  <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                   <span
                     style={{
                       position: 'absolute', top: 10, left: 10,

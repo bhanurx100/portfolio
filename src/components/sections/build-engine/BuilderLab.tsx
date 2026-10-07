@@ -15,6 +15,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useLabMachine, selectCurrentGate } from '../../../hooks/useLabMachine';
 import { scenarioMeta, lensTransforms, systemLenses } from '../../../data/build-engine/scenarios';
 import { composedLensTransforms } from '../../../data/build-engine/composer';
+import { deriveTrace } from '../../../data/build-engine/engine';
 import { SystemBoard } from './SystemBoard';
 import { AgentRun } from './AgentRun';
 import {
@@ -25,12 +26,10 @@ import {
   NodeInspector,
   RunDock,
   TraceTimeline,
+  TracePanel,
   GateCard,
   AddOnStrip,
   DecisionPanel,
-  EvidencePanel,
-  ProductionJourney,
-  StatTile,
 } from './LabPanels';
 
 export const BuilderLabSection: React.FC = () => {
@@ -51,6 +50,19 @@ export const BuilderLabSection: React.FC = () => {
   const [view, setView] = useState<'system' | 'agent'>('system');
   const showAgentView = view === 'agent' && state.system != null;
 
+  /* Design-time request trace (the simulation's main line as hops). */
+  const hops = useMemo(() => (state.system ? deriveTrace(state.system) : []), [state.system]);
+  const [traceStep, setTraceStep] = useState<number | null>(null);
+  /* New system → back to the full view. */
+  React.useEffect(() => {
+    setTraceStep(null);
+  }, [state.system?.id]);
+  const handleTraceStep = (index: number | null) => {
+    setTraceStep(index);
+    if (index != null && hops[index]) actions.selectNode(hops[index].nodeId);
+  };
+  const traceHop = traceStep != null ? hops[traceStep] ?? null : null;
+
   /* New idea → land on the system view, not a stale agent run. */
   React.useEffect(() => {
     if (state.phase === 'understanding' || state.phase === 'forming') setView('system');
@@ -68,19 +80,18 @@ export const BuilderLabSection: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
         {/* Editorial header — same language as every other section */}
         <div className="max-w-2xl space-y-4">
-          <p className="tech-label" style={{ color: 'var(--accent)' }}>Builder Lab</p>
+          <p className="tech-label" style={{ color: 'var(--accent)' }}>System Design Studio</p>
           <h2 style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>
-            Describe a problem. Watch the system form.
+            Describe a system. Explore how it's designed.
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.65, color: 'var(--text-2)' }}>
-            The same loop as How I Build, made touchable: drop an idea, see a typed system
-            assemble itself, run it, break it, and read the shape of the software underneath —
-            the recovery behavior is the point.
-            <span className="font-mono" style={{ fontSize: 12.5, color: 'var(--text-4)' }}> · live · runs in your browser</span>
+            A product idea becomes an explorable architecture: layered services, request traces,
+            failure behavior and the tradeoffs underneath — all composed in your browser.
+            <span className="font-mono" style={{ fontSize: 12.5, color: 'var(--text-4)' }}> · deterministic · no account</span>
           </p>
           {!showWorkspace && (
             <div className="flex flex-wrap gap-2">
-              {['deterministic engine', 'optional AI interpretation', 'no account · no key'].map((b) => (
+              {['layered architecture', 'request traces', 'failure & recovery', 'no account · no key'].map((b) => (
                 <span key={b} className="font-mono rounded-full border" style={{ fontSize: 11, padding: '5px 12px', color: 'var(--text-2)', borderColor: hairline }}>
                   {b}
                 </span>
@@ -122,7 +133,7 @@ export const BuilderLabSection: React.FC = () => {
             >
               {/* Console header */}
               <div
-                className="flex items-center gap-3 font-mono"
+                className="flex items-center gap-2 sm:gap-3 font-mono flex-wrap"
                 style={{
                   padding: '9px 14px',
                   fontSize: 11,
@@ -136,7 +147,7 @@ export const BuilderLabSection: React.FC = () => {
                     <span key={c} style={{ width: 8, height: 8, borderRadius: 999, background: c, opacity: 0.85 }} />
                   ))}
                 </span>
-                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>SYSTEM CONSOLE</span>
+                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>SYSTEM DESIGN</span>
                 <span
                   className="rounded-full"
                   style={{
@@ -149,13 +160,7 @@ export const BuilderLabSection: React.FC = () => {
                 >
                   {state.simState === 'running' ? '● running' : state.simState === 'gate' ? '◆ decision' : state.simState === 'done' ? '■ complete' : state.phase}
                 </span>
-                <span className="hidden md:inline" style={{ color: 'var(--text-3)' }}>
-                  {state.nodes.length} nodes · {state.edges.length} edges
-                </span>
                 <span className="flex-1" />
-                <span className="hidden sm:inline" style={{ color: 'var(--text-3)' }}>
-                  lens · {state.activeLens}
-                </span>
                 {/* View toggle — System graph or Agent run */}
                 <div className="flex items-center gap-0.5 rounded-full border font-mono" style={{ borderColor: hairline, padding: 2 }} role="tablist" aria-label="Builder view">
                   {(['system', 'agent'] as const).map((v) => (
@@ -184,7 +189,7 @@ export const BuilderLabSection: React.FC = () => {
                   style={{ padding: '4px 11px', fontSize: 10.5, borderColor: hairline, color: 'var(--text-2)', background: 'transparent' }}
                   title="Start over with a new idea"
                 >
-                  <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">New idea</span>
+                  <RotateCcw className="w-3 h-3" /> <span>New idea</span>
                 </button>
               </div>
 
@@ -224,6 +229,8 @@ export const BuilderLabSection: React.FC = () => {
                       selectedNodeId={state.selectedNodeId}
                       starvedIds={state.starvedIds}
                       simState={state.simState}
+                      traceHops={hops}
+                      traceStep={traceStep}
                       onSelectNode={actions.selectNode}
                       onRemoveNode={actions.removeNode}
                     />
@@ -250,9 +257,9 @@ export const BuilderLabSection: React.FC = () => {
                   </div>
                 )}
 
-                {/* Trace timeline — bottom-left, above the dock */}
+                {/* Trace timeline — bottom-left of the stage */}
                 {!showAgentView && (
-                  <div className="absolute left-3 bottom-[78px] sm:bottom-3 z-20">
+                  <div className="absolute left-3 bottom-3 z-20">
                     <TraceTimeline trace={state.trace} />
                   </div>
                 )}
@@ -270,27 +277,14 @@ export const BuilderLabSection: React.FC = () => {
                     >
                       <NodeInspector
                         node={selectedNode}
+                        system={state.system}
+                        traceHop={traceHop}
                         onClose={() => actions.selectNode(null)}
                         onRemove={actions.removeNode}
                       />
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Run dock — bottom-center */}
-                {!showAgentView && (
-                  <div className="absolute z-20 bottom-3 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-24px)]">
-                    <RunDock
-                      simState={state.simState}
-                      steps={state.trace.length}
-                      onStart={actions.startSim}
-                      onBreak={actions.breakSim}
-                      onPause={actions.pauseSim}
-                      onResume={actions.resumeSim}
-                      onReset={actions.resetSim}
-                    />
-                  </div>
-                )}
 
                 {/* Gate spotlight — only in System view; the Agent view decides inline */}
                 <AnimatePresence>
@@ -325,14 +319,28 @@ export const BuilderLabSection: React.FC = () => {
                   )}
                 </AnimatePresence>
               </div>
+
+              {/* Run dock — in-flow below the stage, never overlapping the canvas */}
+              {!showAgentView && (
+                <div className="flex justify-center" style={{ padding: '10px 12px 12px' }}>
+                  <RunDock
+                    simState={state.simState}
+                    steps={state.trace.length}
+                    onStart={actions.startSim}
+                    onBreak={actions.breakSim}
+                    onPause={actions.pauseSim}
+                    onResume={actions.resumeSim}
+                    onReset={actions.resetSim}
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Live rail */}
+            {/* Trace rail — the request path beside the canvas */}
             <div className="lg:col-span-4 grid grid-cols-2 lg:grid-cols-2 gap-2">
-              <StatTile label="nodes" value={state.nodes.length} accent />
-              <StatTile label="edges" value={state.edges.length} />
-              <StatTile label="steps" value={state.trace.length} />
-              <StatTile label="events" value={state.events.length} />
+              {state.system && (
+                <TracePanel system={state.system} hops={hops} activeStep={traceStep} onStep={handleTraceStep} />
+              )}
               <div className="col-span-2 space-y-2">
                 {state.system && (
                   <AddOnStrip system={state.system} applied={state.appliedAddOns} onApply={actions.applyAddOn} />
@@ -360,13 +368,6 @@ export const BuilderLabSection: React.FC = () => {
           />
         )}
 
-        {/* Journey — only once a system has a shape (earned, like evidence) */}
-        {state.system && state.phase !== 'understanding' && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-            <ProductionJourney domain={state.system.domain} />
-          </motion.div>
-        )}
-
         {/* Decision panel (inline expansion, full width under workspace) */}
         {state.decisionIndex !== null && state.system && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
@@ -379,13 +380,6 @@ export const BuilderLabSection: React.FC = () => {
               onNext={actions.nextDecision}
               onClose={actions.closeDecisions}
             />
-          </motion.div>
-        )}
-
-        {/* Evidence — earned, not permanent */}
-        {(state.phase === 'result' || state.manipulationLog.length > 0) && state.system && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-            <EvidencePanel system={state.system} />
           </motion.div>
         )}
 

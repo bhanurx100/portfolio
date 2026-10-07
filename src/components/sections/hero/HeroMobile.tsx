@@ -45,11 +45,10 @@ export const HeroMobile: React.FC<HeroMobileProps> = ({ onOpenCaseStudy }) => {
             color: 'var(--text-1)',
           }}
         >
-          I build software products — from idea to{' '}
-          <span style={{ color: 'var(--accent)' }}>interface to system.</span>
+          {personalInfo.headline}
         </h1>
         <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'var(--text-2)' }}>
-          Product engineer across frontend, backend, mobile and applied AI.
+          {personalInfo.positioning}
         </p>
       </motion.div>
 

@@ -21,7 +21,11 @@ const GitHubSection = lazy(() =>
 const CaseStudyModal = lazy(() =>
   import('./components/common/CaseStudyModal').then((m) => ({ default: m.CaseStudyModal }))
 );
-import { ProjectsSection } from './components/sections/ProjectsSection';
+/* Work sits just below the hero — defer it so the first paint stays light.
+   Hero + header render immediately; everything else streams in. */
+const ProjectsSection = lazy(() =>
+  import('./components/sections/ProjectsSection').then((m) => ({ default: m.ProjectsSection }))
+);
 /* Meet the Builder + Tech Skills sit with Experience, below the fold too. */
 const MeetBuilderSection = lazy(() =>
   import('./components/sections/MeetBuilderSection').then((m) => ({ default: m.MeetBuilderSection }))
@@ -104,7 +108,9 @@ function PortfolioMain() {
         <HeroSection
           onOpenCaseStudy={handleOpenCaseStudy}
         />
-        <ProjectsSection onOpenCaseStudy={handleOpenCaseStudy} />
+        <Suspense fallback={<div id="work" style={{ minHeight: 480 }} aria-hidden />}>
+          <ProjectsSection onOpenCaseStudy={handleOpenCaseStudy} />
+        </Suspense>
         <Suspense fallback={<div id="builder-lab" style={{ minHeight: 420 }} aria-hidden />}>
           <BuilderLabSection />
         </Suspense>

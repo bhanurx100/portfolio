@@ -24,6 +24,7 @@ import type {
   PositionedNode,
   SystemEdge,
   SystemNodeKind,
+  TraceHop,
 } from '../../../data/build-engine/types';
 
 const KIND_ICON: Record<SystemNodeKind, React.ComponentType<{ size?: number | string; color?: string; className?: string }>> = {
@@ -39,7 +40,7 @@ const TONE_BASE: Record<string, string> = {
   emerald: '#10b981',
   amber: '#f59e0b',
   rose: '#f43f5e',
-  violet: '#8b5cf6',
+  violet: '#0ea5e9',
   slate: '#64748b',
 };
 
@@ -47,7 +48,7 @@ const KIND_TEXT: Record<SystemNodeKind, { dark: string; light: string }> = {
   actor: { dark: '#60a5fa', light: '#2563eb' },
   interface: { dark: '#60a5fa', light: '#2563eb' },
   automation: { dark: '#34d399', light: '#059669' },
-  data: { dark: '#a78bfa', light: '#7c3aed' },
+  data: { dark: '#38bdf8', light: '#0284c7' },
   integration: { dark: '#22d3ee', light: '#0891b2' },
 };
 
@@ -59,10 +60,27 @@ const KIND_LABEL: Record<SystemNodeKind, string> = {
   integration: 'Integration',
 };
 
+/* Design lanes — architecture reads top-down: clients call services,
+   services read and write data, anything may reach out to externals. */
+type DesignLane = 'clients' | 'services' | 'data' | 'external';
+const LANES: { id: DesignLane; label: string }[] = [
+  { id: 'clients', label: 'Clients' },
+  { id: 'services', label: 'Services' },
+  { id: 'data', label: 'Data' },
+  { id: 'external', label: 'External' },
+];
+const LANE_OF: Record<SystemNodeKind, DesignLane> = {
+  actor: 'clients',
+  interface: 'clients',
+  automation: 'services',
+  data: 'data',
+  integration: 'external',
+};
+
 /* Edge flow language — direction, dependency and data movement. */
 const FLOW_COLOR: Record<string, { dark: string; light: string }> = {
   signal: { dark: '#60A5FA', light: '#2563EB' },
-  data: { dark: '#A78BFA', light: '#6D28D9' },
+  data: { dark: '#38BDF8', light: '#0284C7' },
   action: { dark: '#34D399', light: '#047857' },
   approval: { dark: '#FBBF24', light: '#B45309' },
   escalation: { dark: '#FB7185', light: '#BE123C' },
@@ -70,9 +88,9 @@ const FLOW_COLOR: Record<string, { dark: string; light: string }> = {
 
 type BoardTab = 'flow' | 'product' | 'architecture' | 'evidence';
 const TABS: { id: BoardTab; label: string }[] = [
-  { id: 'flow', label: 'Flow' },
-  { id: 'product', label: 'Product' },
-  { id: 'architecture', label: 'Architecture' },
+  { id: 'flow', label: 'Architecture' },
+  { id: 'product', label: 'Context' },
+  { id: 'architecture', label: 'Composition' },
   { id: 'evidence', label: 'Evidence' },
 ];
 
@@ -90,6 +108,10 @@ interface SystemBoardProps {
   selectedNodeId: string | null;
   starvedIds: Set<string>;
   simState: 'idle' | 'running' | 'paused' | 'gate' | 'done';
+  /** Design-time request trace (derived from the simulation's main line). */
+  traceHops?: TraceHop[];
+  /** Active hop index — enables trace emphasis; null shows the full system. */
+  traceStep?: number | null;
   onSelectNode: (id: string | null) => void;
   onRemoveNode: (id: string) => void;
 }
@@ -106,6 +128,8 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
   selectedNodeId,
   starvedIds,
   simState,
+  traceHops,
+  traceStep,
   onSelectNode,
   onRemoveNode,
 }) => {
@@ -118,7 +142,6 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
       ? !window.matchMedia('(min-width: 640px)').matches
       : false;
   const [tab, setTab] = useState<BoardTab>('flow');
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
@@ -157,6 +180,9 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     [stages, starvedIds],
   );
 
+  /* Build-order number per node id (the badge on each node). */
+  const stageIndex = useMemo(() => new Map(stages.map((s, i) => [s.id, i])), [stages]);
+
   /* Caption focus: selected, else first live stage, else the intake. */
   const focus = useMemo(() => {
     const sel = stages.find((s) => s.id === selectedNodeId);
@@ -165,33 +191,78 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     return liveOne ?? stages[0] ?? null;
   }, [stages, selectedNodeId, activeNodeIds]);
 
-  const n = Math.max(stages.length, 1);
-  const pts = stages.map((s, i) => {
-    const a = ((-90 + (i * 360) / n) * Math.PI) / 180;
-    return { node: s, x: 50 + 38 * Math.cos(a), y: 46 + 31 * Math.sin(a) };
-  });
-  const ptMap = useMemo(() => new Map(pts.map((p) => [p.node.id, p])), [pts]);
+  /* Lanes group the present nodes by design layer; empty lanes collapse. */
+  const lanes = useMemo(() => {
+    const groups = new Map<DesignLane, PositionedNode[]>();
+    for (const l of LANES) groups.set(l.id, []);
+    for (const nd of nodes) groups.get(LANE_OF[nd.kind])?.push(nd);
+    return LANES.map((l) => ({ ...l, items: groups.get(l.id) ?? [] })).filter((l) => l.items.length > 0);
+  }, [nodes]);
+
+  /* Lane positions in the 100x100 stage space: left gutter holds the
+     lane labels, the bottom strip holds the focus caption. */
+  const lanePos = useMemo(() => {
+    const GUTTER = 15;
+    const TOP = 15;
+    const BOTTOM = 9;
+    const usable = 100 - TOP - BOTTOM;
+    const h = lanes.length > 0 ? usable / lanes.length : usable;
+    const m = new Map<string, { x: number; y: number; lane: DesignLane }>();
+    lanes.forEach((l, li) => {
+      const y = TOP + h * (li + 0.5);
+      l.items.forEach((nd, i) => {
+        const x = l.items.length === 1 ? (GUTTER + 100) / 2 : GUTTER + ((100 - GUTTER - 4) * i) / (l.items.length - 1);
+        m.set(nd.id, { x, y, lane: l.id });
+      });
+    });
+    return m;
+  }, [lanes]);
+
+  const laneCenterY = useMemo(() => {
+    const m = new Map<DesignLane, number>();
+    for (const l of lanes) {
+      const p = l.items.length > 0 ? lanePos.get(l.items[0].id) : undefined;
+      if (p) m.set(l.id, p.y);
+    }
+    return m;
+  }, [lanes, lanePos]);
 
   /* Edge geometry in the 100x100 stage space. */
   const edgeGeom = useMemo(
     () =>
       presentEdges
         .map((e) => {
-          const f = ptMap.get(e.from);
-          const t = ptMap.get(e.to);
+          const f = lanePos.get(e.from);
+          const t = lanePos.get(e.to);
           if (!f || !t) return null;
           const mx = (f.x + t.x) / 2;
           const my = (f.y + t.y) / 2;
           const active = activeEdgeIds.has(e.id);
-          const action = e.flow === 'action' || e.flow === 'escalation';
-          return { e, f, t, mx, my, active, action };
+          return { e, f, t, mx, my, active };
         })
         .filter((g): g is NonNullable<typeof g> => g !== null),
-    [presentEdges, ptMap, activeEdgeIds],
+    [presentEdges, lanePos, activeEdgeIds],
   );
 
+  /* Trace emphasis — derived from the design-time request trace. Only
+     on while a hop is stepped; otherwise the full system stays visible. */
+  const tracing = traceStep != null && (traceHops?.length ?? 0) > 0;
+  const traceNodeIds = useMemo(() => new Set((traceHops ?? []).map((hh) => hh.nodeId)), [traceHops]);
+  const traceStepNodeId = tracing && traceHops ? traceHops[traceStep ?? 0]?.nodeId ?? null : null;
+  const traceEdgeOrder = useMemo(() => {
+    const order = new Map<string, number>();
+    if (!traceHops) return order;
+    for (let i = 1; i < traceHops.length; i++) {
+      const from = traceHops[i - 1].nodeId;
+      const to = traceHops[i].nodeId;
+      if (from === to) continue;
+      const e = presentEdges.find((x) => x.from === from && x.to === to);
+      if (e && !order.has(e.id)) order.set(e.id, i);
+    }
+    return order;
+  }, [traceHops, presentEdges]);
+
   const running = simState === 'running' || simState === 'gate';
-  const live = !reduceMotion;
   const similar = system.projectEvidence[0];
 
   const status = starvedCount > 0
@@ -202,27 +273,13 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
     ? { label: `● LIVE · ${activeNodeIds.size}/${stages.length}`, color: '#60A5FA' }
     : { label: `${stages.length} STAGES`, color: isDark ? '#7C8DB0' : '#64748B' };
 
-  const ringPct = stages.length === 0 ? 0 : activeNodeIds.size / stages.length;
-  const R = 44;
-  const CIRC = 2 * Math.PI * R;
-
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (reduceMotion) return;
-    if (typeof window !== 'undefined' && window.matchMedia && !window.matchMedia('(pointer:fine)').matches) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    setTilt({
-      x: ((e.clientX - r.left) / r.width - 0.5) * 2,
-      y: ((e.clientY - r.top) / r.height - 0.5) * 2,
-    });
-  };
-
   return (
     <div>
       {/* Slim header */}
       <div className="flex items-center gap-3">
         <span
           className="shrink-0 flex items-center justify-center rounded-xl"
-          style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)', borderRadius: 10 }}
+          style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', boxShadow: '0 8px 22px -8px rgba(59,130,246,0.7)', borderRadius: 10 }}
         >
           <Sparkles size={17} color="#fff" />
         </span>
@@ -260,7 +317,7 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
               style={{
                 fontSize: 12.5, fontWeight: 700,
                 color: on ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
-                background: on ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : 'transparent',
+                background: on ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
                 border: 'none', cursor: 'pointer',
                 boxShadow: on ? '0 4px 14px -4px rgba(59,130,246,0.7)' : 'none',
               }}
@@ -292,30 +349,26 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
           style={{ marginTop: 10 }}
         >
           {tab === 'flow' && (
+            <div>
             <div
-              className="relative select-none h-[210px] sm:h-[300px]"
+              className="relative select-none h-[320px] sm:h-[380px]"
               style={{ touchAction: 'pan-y' }}
-              onMouseMove={onMove}
-              onMouseLeave={() => setTilt({ x: 0, y: 0 })}
             >
-              {/* Ring layer (drifts least) */}
-              <svg
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                className="absolute inset-0 w-full h-full"
-                aria-hidden
-                style={{ transform: live ? `translate(${tilt.x * -5}px, ${tilt.y * -4}px)` : undefined, transition: 'transform 0.3s ease-out' }}
-              >
-                <ellipse cx={50} cy={46} rx={38} ry={31} fill="none" stroke={isDark ? '#223148' : '#D8E0EC'} strokeWidth={1.4} vectorEffect="non-scaling-stroke" />
-                <ellipse
-                  cx={50} cy={46} rx={38} ry={31} fill="none" stroke="#3B82F6" strokeWidth={1.6}
-                  strokeDasharray="5 7" vectorEffect="non-scaling-stroke" opacity={running ? 0.9 : 0.3}
+              {/* Lane labels — the architecture's reading order */}
+              {lanes.map((l) => (
+                <span
+                  key={l.id}
+                  className="absolute font-mono"
+                  style={{
+                    left: 0, top: `${laneCenterY.get(l.id) ?? 50}%`, transform: 'translateY(-50%)',
+                    fontSize: 8, fontWeight: 800, letterSpacing: '0.1em',
+                    color: isDark ? '#7C8DB0' : '#64748B',
+                  }}
+                  aria-hidden
                 >
-                  {live && running && (
-                    <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.9s" repeatCount="indefinite" />
-                  )}
-                </ellipse>
-              </svg>
+                  {l.label.toUpperCase()}
+                </span>
+              ))}
 
               {/* Edge layer — real dependencies made visible */}
               <svg
@@ -323,82 +376,66 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                 preserveAspectRatio="none"
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 aria-hidden
-                style={{ transform: live ? `translate(${tilt.x * 4}px, ${tilt.y * 3}px)` : undefined, transition: 'transform 0.3s ease-out' }}
               >
-                {edgeGeom.map(({ e, f, t, mx, my, active, action }) => {
-                  const c = isDark ? FLOW_COLOR[e.flow].dark : FLOW_COLOR[e.flow].light;
-                  const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(e.from) && !lensEmphasis.has(e.to);
+                {/* Lane dividers */}
+                {lanes.slice(1).map((l) => {
+                  const y = (laneCenterY.get(l.id) ?? 0) - ((100 - 15 - 9) / Math.max(lanes.length, 1)) / 2;
                   return (
-                    <g key={e.id} opacity={active ? 1 : dimmed ? 0.22 : 0.5}>
+                    <line key={l.id} x1={14} y1={y} x2={100} y2={y} stroke={isDark ? '#1B2740' : '#E2E8F0'} strokeWidth={0.4} vectorEffect="non-scaling-stroke" strokeDasharray="1.5 1.5" />
+                  );
+                })}
+                {edgeGeom.map(({ e, f, t, mx, my, active }) => {
+                  const c = isDark ? FLOW_COLOR[e.flow].dark : FLOW_COLOR[e.flow].light;
+                  const traceHop = traceEdgeOrder.get(e.id);
+                  const onTrace = traceHop !== undefined;
+                  const lensDim = lensEmphasis.size > 0 && !lensEmphasis.has(e.from) && !lensEmphasis.has(e.to);
+                  const dimmed = tracing ? !onTrace && !active : lensDim;
+                  const stroke = onTrace ? '#3B82F6' : c;
+                  return (
+                    <g key={e.id} opacity={active ? 1 : dimmed ? 0.15 : 0.5}>
                       <line
                         x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-                        stroke={c}
-                        strokeWidth={active ? (isMobile ? 1.5 : 2) : isMobile ? 1 : 1.3}
+                        stroke={stroke}
+                        strokeWidth={active || onTrace ? (isMobile ? 1.4 : 1.8) : isMobile ? 0.9 : 1.1}
                         strokeDasharray={active ? '5 6' : undefined}
                         strokeLinecap="round"
                         vectorEffect="non-scaling-stroke"
-                        className={active && live && running && action ? 'lab-edge-flow' : undefined}
                       />
                       {active && (
-                        <>
-                          <circle cx={mx} cy={my} r={0.9} fill={c} opacity={0.95}>
-                            {live && running && <animate attributeName="r" values="0.6;1.4;0.6" dur="0.8s" repeatCount="indefinite" />}
-                          </circle>
-                          <text x={mx} y={my - 1.6} textAnchor="middle" fontSize={3} fontWeight={700} fill={c} letterSpacing="0.15" opacity={running ? 0.85 : 0.5}>
-                            {e.flow.toUpperCase()}
+                        <text x={mx} y={my - 1.6} textAnchor="middle" fontSize={2.8} fontWeight={700} fill={c} letterSpacing="0.15" opacity={running ? 0.85 : 0.5}>
+                          {e.flow.toUpperCase()}
+                        </text>
+                      )}
+                      {onTrace && (
+                        <g>
+                          <circle cx={mx} cy={my} r={2.1} fill="#3B82F6" stroke={isDark ? '#0A0F1B' : '#fff'} strokeWidth={0.5} />
+                          <text x={mx} y={my + 1.1} textAnchor="middle" fontSize={2.6} fontWeight={800} fill="#fff">
+                            {traceHop}
                           </text>
-                        </>
+                        </g>
                       )}
                     </g>
                   );
                 })}
               </svg>
 
-              {/* Hub (drifts most — foreground) */}
-              <div
-                className="absolute"
-                style={{
-                  left: '50%', top: '46%', transform: `translate(-50%,-50%) translate(${live ? tilt.x * 7 : 0}px, ${live ? tilt.y * 6 : 0}px)`,
-                  transition: 'transform 0.3s ease-out',
-                }}
-              >
-                <div className="relative flex items-center justify-center" style={{ width: 118, height: 118 }}>
-                  <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" aria-hidden>
-                    <circle cx={50} cy={50} r={R} fill="none" stroke={isDark ? '#223148' : '#E2E8F0'} strokeWidth={6} />
-                    <circle
-                      cx={50} cy={50} r={R} fill="none" stroke="#3B82F6" strokeWidth={6} strokeLinecap="round"
-                      strokeDasharray={`${Math.max(ringPct * CIRC - 2, 0.1)} ${CIRC}`}
-                      transform="rotate(-90 50 50)"
-                      style={{ filter: 'drop-shadow(0 0 6px #3B82F6)', transition: 'stroke-dasharray 0.5s ease' }}
-                    />
-                  </svg>
-                  <div className="text-center" style={{ maxWidth: 76 }}>
-                    <div className="font-mono" style={{ fontSize: 15, fontWeight: 800, color: status.color, fontVariantNumeric: 'tabular-nums' }}>
-                      {activeNodeIds.size}/{stages.length}
-                    </div>
-                    <div className="font-mono" style={{ fontSize: 8.5, letterSpacing: '0.1em', color: isDark ? '#7C8DB0' : '#68778F' }}>
-                      FLOWING
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Nodes (mid layer) */}
-              <div
-                className="absolute inset-0"
-                style={{ transform: live ? `translate(${tilt.x * 4}px, ${tilt.y * 3}px)` : undefined, transition: 'transform 0.3s ease-out' }}
-              >
-                {pts.map((p, i) => {
-                  const nitem = p.node;
+              {/* Nodes — one per design lane, labels always visible */}
+              <div className="absolute inset-0">
+                {lanes.flatMap((l) => l.items).map((nitem) => {
+                  const p = lanePos.get(nitem.id);
+                  if (!p) return null;
+                  const i = stageIndex.get(nitem.id) ?? 0;
                   const toneBase = TONE_BASE[nitem.tone] ?? '#64748b';
                   const kindColor = isDark ? KIND_TEXT[nitem.kind].dark : KIND_TEXT[nitem.kind].light;
                   const Icon = KIND_ICON[nitem.kind];
                   const isActive = activeNodeIds.has(nitem.id);
                   const isSelected = selectedNodeId === nitem.id;
+                  const isStepped = traceStepNodeId === nitem.id;
                   const isStarved = starvedIds.has(nitem.id) || nitem.starved;
                   const isDecision = decisionHighlights.has(nitem.id);
-                  const dimmed = lensEmphasis.size > 0 && !lensEmphasis.has(nitem.id);
-                  const labeled = isActive || isSelected;
+                  const dimmed = tracing ? !traceNodeIds.has(nitem.id) : lensEmphasis.size > 0 && !lensEmphasis.has(nitem.id);
+                  const ring = isStarved ? '#F59E0B' : isStepped ? '#3B82F6' : isSelected || isDecision ? toneBase : isDark ? '#2E3E5B' : '#CBD5E1';
+                  const glow = isActive || isSelected || isStepped;
                   return (
                     <button
                       key={nitem.id}
@@ -408,18 +445,18 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                       style={{
                         left: `${p.x}%`, top: `${p.y}%`, transform: 'translate(-50%,-50%)',
                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        opacity: dimmed ? 0.35 : 1, zIndex: labeled ? 5 : 1,
+                        opacity: dimmed ? 0.3 : 1, zIndex: glow ? 5 : 1,
                       }}
                     >
                       <span
                         className={`relative flex items-center justify-center rounded-full ${
-                          isActive ? 'w-[26px] h-[26px] sm:w-[50px] sm:h-[50px]' : 'w-[22px] h-[22px] sm:w-11 sm:h-11'
+                          glow ? 'w-[26px] h-[26px] sm:w-[46px] sm:h-[46px]' : 'w-[22px] h-[22px] sm:w-10 sm:h-10'
                         }`}
                         style={{
                           background: isDark ? 'rgba(16,26,44,0.95)' : '#fff',
-                          border: `${isMobile ? 1.5 : 2}px solid ${isStarved ? '#F59E0B' : isSelected || isDecision ? toneBase : isDark ? '#2E3E5B' : '#CBD5E1'}`,
-                          boxShadow: isActive || isSelected
-                            ? `0 0 0 2px color-mix(in srgb, ${toneBase} 45%, transparent), 0 0 18px ${toneBase}`
+                          border: `${isMobile ? 1.5 : 2}px solid ${ring}`,
+                          boxShadow: glow
+                            ? `0 0 0 2px color-mix(in srgb, ${isStepped ? '#3B82F6' : toneBase} 45%, transparent), 0 0 18px ${isStepped ? '#3B82F6' : toneBase}`
                             : isDark ? '0 8px 20px -8px rgba(0,0,0,0.8)' : '0 8px 18px -10px rgba(15,23,42,0.35)',
                           transition: 'width 0.25s, height 0.25s, box-shadow 0.25s',
                         }}
@@ -430,44 +467,35 @@ export const SystemBoard: React.FC<SystemBoardProps> = ({
                           style={{
                             top: -5, right: -5,
                             fontWeight: 800,
-                            background: isActive ? toneBase : isDark ? '#1B2740' : '#E2E8F0',
-                            color: isActive ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
+                            background: isActive ? toneBase : isStepped ? '#3B82F6' : isDark ? '#1B2740' : '#E2E8F0',
+                            color: isActive || isStepped ? '#fff' : isDark ? '#8EA0B8' : '#5B6B85',
                             border: `1px solid ${isDark ? '#0A0F1B' : '#fff'}`,
                           }}
                         >
                           {i + 1}
                         </span>
                       </span>
-                      {/* Label only on the focused node — ends all overlap */}
-                      <AnimatePresence>
-                        {labeled && (
-                          <motion.span
-                            key={`label-${nitem.id}`}
-                            initial={{ opacity: 0, y: -3 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -3 }}
-                            transition={{ duration: 0.18 }}
-                            className="font-mono text-center rounded-full text-[8px] sm:text-[10px] px-1.5 sm:px-[9px] py-0.5 mt-0.5 sm:mt-1 max-w-[70px] sm:max-w-[120px] whitespace-nowrap overflow-hidden"
-                            style={{
-                              textOverflow: 'ellipsis',
-                              fontWeight: 700,
-                              color: isDark ? '#F1F5F9' : '#0B1220',
-                              background: isDark ? 'rgba(10,15,27,0.92)' : 'rgba(255,255,255,0.95)',
-                              border: `1px solid ${toneBase}`,
-                              boxShadow: `0 0 12px color-mix(in srgb, ${toneBase} 50%, transparent)`,
-                            }}
-                          >
-                            {nitem.label}
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
+                      {/* Labels always visible — lanes keep them apart */}
+                      <span
+                        className="font-mono text-center rounded-full text-[7.5px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 mt-0.5 max-w-[76px] sm:max-w-[128px] whitespace-nowrap overflow-hidden"
+                        style={{
+                          textOverflow: 'ellipsis',
+                          fontWeight: 700,
+                          color: isDark ? '#F1F5F9' : '#0B1220',
+                          background: isDark ? 'rgba(10,15,27,0.92)' : 'rgba(255,255,255,0.95)',
+                          border: `1px solid ${glow ? ring : isDark ? '#223148' : '#E2E8F0'}`,
+                        }}
+                      >
+                        {nitem.label}
+                      </span>
                     </button>
                   );
                 })}
               </div>
+            </div>
 
-              {/* Focus caption + status — one line, never overlaps */}
-              <div className="absolute bottom-0 inset-x-0 flex items-center gap-2 font-mono text-[10.5px] sm:text-[11.5px]">
+              {/* Focus caption + status — in-flow below the canvas, never overlapping */}
+              <div className="flex items-center gap-2 font-mono text-[10.5px] sm:text-[11.5px]" style={{ marginTop: 8 }}>
                 {focus && (
                   <>
                     <span

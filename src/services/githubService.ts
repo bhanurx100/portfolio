@@ -1,8 +1,10 @@
 /**
  * Robust GitHub Data Service
- * 
+ *
  * Fetches real GitHub telemetry, profile, repositories, and historical contribution matrix.
  * Implements strict zero-fabrication rules: missing or unavailable data is never simulated.
+ * Every count shown comes from a live GitHub API response — either the contributions
+ * mirror or the official GitHub REST API (profile / repos / public events).
  * Includes client-side session caching to prevent rate-limiting.
  */
 
@@ -44,10 +46,12 @@ export interface GitHubDataResult {
   activeDaysCount: number;
   totalStars: number;
   languages: LanguageStat[];
+  /** Epoch ms of the successful network fetch backing this result. */
+  fetchedAt: number;
 }
 
-const CACHE_KEY_PREFIX = 'gh_data_cache_v3_';
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const CACHE_KEY_PREFIX = 'gh_data_cache_v4_';
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes — the graph must track the current day
 
 const LANGUAGE_COLORS: Record<string, string> = {
   TypeScript: '#3178c6',
@@ -64,23 +68,101 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Java: '#b07219',
 };
 
-export async function fetchGitHubTelemetry(username: string): Promise<GitHubDataResult> {
-  const cacheKey = `${CACHE_KEY_PREFIX}${username}`;
+/** Local (device-timezone) YYYY-MM-DD — UTC date is wrong for IST around midnight. */
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
-  // Check cache first
+function addDays(dateStr: string, n: number): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + n);
+  return localDateStr(dt);
+}
+
+function levelForCount(count: number): number {
+  if (count <= 0) return 0;
+  if (count <= 2) return 1;
+  if (count <= 4) return 2;
+  if (count <= 6) return 3;
+  return 4;
+}
+
+/**
+ * Recent public activity straight from the official GitHub REST API.
+ * Used ONLY to repair trailing / stale days (the contributions mirror can lag
+ * behind real pushes). Only contribution-type events are counted — stars,
+ * forks and follows never inflate the graph.
+ */
+async function fetchRecentEventCounts(username: string, todayStr: string): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
   try {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.data) {
-        return parsed.data;
+    const res = await fetch(`https://api.github.com/users/${username}/events/public?per_page=100`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return counts;
+    const events = await res.json();
+    if (!Array.isArray(events)) return counts;
+
+    const cutoff = addDays(todayStr, -14);
+    for (const ev of events) {
+      if (!ev || typeof ev.created_at !== 'string') continue;
+      const day = ev.created_at.slice(0, 10);
+      if (day < cutoff || day > todayStr) continue;
+
+      let n = 0;
+      switch (ev.type) {
+        case 'PushEvent':
+          n = typeof ev.payload?.size === 'number' && ev.payload.size > 0
+            ? ev.payload.size
+            : Array.isArray(ev.payload?.commits) ? ev.payload.commits.length : 1;
+          break;
+        case 'PullRequestEvent':
+        case 'PullRequestReviewEvent':
+        case 'PullRequestReviewCommentEvent':
+        case 'IssuesEvent':
+        case 'IssueCommentEvent':
+        case 'CommitCommentEvent':
+          n = 1;
+          break;
+        default:
+          continue; // WatchEvent, ForkEvent, CreateEvent, etc. are not contributions
       }
+      counts.set(day, (counts.get(day) ?? 0) + n);
     }
   } catch {
-    // SessionStorage may be restricted in some iframes
+    // Best effort — a failed patch must never break the whole telemetry load
+  }
+  return counts;
+}
+
+export async function fetchGitHubTelemetry(
+  username: string,
+  opts?: { forceRefresh?: boolean }
+): Promise<GitHubDataResult> {
+  const cacheKey = `${CACHE_KEY_PREFIX}${username}`;
+  const forceRefresh = opts?.forceRefresh === true;
+
+  // Check cache first (skipped on manual refresh so a refresh always hits the network)
+  if (!forceRefresh) {
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.data) {
+          return parsed.data;
+        }
+      }
+    } catch {
+      // SessionStorage may be restricted in some iframes
+    }
   }
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = localDateStr(new Date());
+  const bust = forceRefresh ? `&t=${Date.now()}` : '';
   let profile: GitHubUserProfile | undefined = undefined;
   let rawContributions: GitHubDayContribution[] = [];
   let totalStars = 0;
@@ -113,11 +195,13 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
     })
     .catch(() => []);
 
-  // 2. Fetch Contributions
+  // 2. Fetch Contributions (bypass HTTP cache so daily data is actually daily)
   const contributionsPromise = (async () => {
     try {
       // Primary: All years endpoint
-      const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=all`);
+      const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=all${bust}`, {
+        cache: 'no-store',
+      });
       if (res.ok) {
         const data = await res.json();
         if (data && Array.isArray(data.contributions) && data.contributions.length > 0) {
@@ -130,7 +214,9 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
 
     try {
       // Fallback: Last 1 year
-      const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last`);
+      const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last${bust}`, {
+        cache: 'no-store',
+      });
       if (res.ok) {
         const data = await res.json();
         if (data && Array.isArray(data.contributions) && data.contributions.length > 0) {
@@ -144,10 +230,14 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
     return [];
   })();
 
-  const [profileResult, reposResult, contribResult] = await Promise.all([
+  // 3. Recent public events — repairs trailing days when the mirror lags real pushes
+  const eventsPromise = fetchRecentEventCounts(username, todayStr);
+
+  const [profileResult, reposResult, contribResult, eventCounts] = await Promise.all([
     profilePromise,
     reposPromise,
     contributionsPromise,
+    eventsPromise,
   ]);
 
   if (profileResult) {
@@ -179,11 +269,55 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
         .sort((a, b) => b.count - a.count)
     : [];
 
-  // Filter contributions strictly to valid historical dates <= today
+  // Filter contributions strictly to valid historical dates <= today (local day)
+  const byDate = new Map<string, GitHubDayContribution>();
   if (Array.isArray(contribResult) && contribResult.length > 0) {
-    rawContributions = contribResult
-      .filter((c) => c && typeof c.date === 'string' && c.date <= todayStr && typeof c.count === 'number')
-      .sort((a, b) => a.date.localeCompare(b.date));
+    for (const c of contribResult) {
+      if (!c || typeof c.date !== 'string' || c.date > todayStr || typeof c.count !== 'number') continue;
+      const existing = byDate.get(c.date);
+      if (!existing || c.count > existing.count) {
+        byDate.set(c.date, {
+          date: c.date,
+          count: c.count,
+          level: typeof c.level === 'number' ? c.level : levelForCount(c.count),
+        });
+      }
+    }
+  }
+
+  // Patch recent days from live public events: the mirror can lag behind real
+  // pushes, leaving the graph stuck on an old date. Only contribution-type
+  // events are counted, only the last 14 days are eligible, and existing
+  // non-zero mirror counts are never reduced — the patch only fills gaps.
+  let upstreamMax = '';
+  byDate.forEach((_, d) => {
+    if (d > upstreamMax) upstreamMax = d;
+  });
+  eventCounts.forEach((count, day) => {
+    const existing = byDate.get(day);
+    if (!existing) {
+      byDate.set(day, { date: day, count, level: levelForCount(count) });
+    } else if (existing.count === 0 && day > addDays(todayStr, -14)) {
+      existing.count = count;
+      existing.level = levelForCount(count);
+    }
+  });
+
+  // Backfill the full continuous range through TODAY so the timeline always
+  // ends on the current date. Missing days are genuinely empty days (count 0),
+  // never invented activity.
+  if (byDate.size > 0) {
+    let start = todayStr;
+    byDate.forEach((_, d) => {
+      if (d < start) start = d;
+    });
+    for (let d = start; ; d = addDays(d, 1)) {
+      if (!byDate.has(d)) {
+        byDate.set(d, { date: d, count: 0, level: 0 });
+      }
+      if (d >= todayStr) break;
+    }
+    rawContributions = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
   }
 
   // If no contributions were returned, return graceful unavailable result without synthetic data
@@ -200,6 +334,7 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
       activeDaysCount: 0,
       totalStars,
       languages,
+      fetchedAt: Date.now(),
     };
     return result;
   }
@@ -259,6 +394,7 @@ export async function fetchGitHubTelemetry(username: string): Promise<GitHubData
     activeDaysCount,
     totalStars,
     languages,
+    fetchedAt: Date.now(),
   };
 
   // Cache valid result

@@ -60,13 +60,13 @@ const EVIDENCE_BY_DOMAIN: GeneratedSystem['projectEvidence'] = [
   {
     projectId: 'splitfin',
     name: 'SplitFin',
-    relevance: 'Idempotent offline-first sync queue with UUID idempotency keys — a relevant pattern, not the same system.',
+    relevance: 'Structured financial workflows with explicit validation — a relevant pattern, not the same system.',
     tag: 'RELEVANT',
   },
   {
     projectId: 'stayease',
     name: 'StayEase',
-    relevance: 'Real-time availability via Supabase WebSockets and PostGIS spatial queries — a relevant backbone, not the same system.',
+    relevance: 'Discovery-to-booking workflows over REST APIs — a relevant backbone, not the same system.',
     tag: 'RELEVANT',
   },
 ];

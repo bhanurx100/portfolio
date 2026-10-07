@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ activeSection }) => {
               </span>
               <span className={`text-[11px] mt-1 tracking-tight ${isDark ? 'text-slate-400' : 'text-slate-500'
                 }`}>
-                Product Engineer
+                {personalInfo.title}
               </span>
             </div>
           </a>
